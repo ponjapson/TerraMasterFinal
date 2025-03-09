@@ -25,6 +25,14 @@ import com.example.yourapp.Suggested
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ListenerRegistration
+import okhttp3.Call
+import okhttp3.Callback
+import okhttp3.OkHttpClient
+import okhttp3.Request
+import okhttp3.Response
+import org.json.JSONArray
+import java.io.IOException
+import java.net.URLEncoder
 
 class SearchFragment : Fragment() {
 
@@ -185,17 +193,20 @@ class SearchFragment : Fragment() {
 
         spinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(parent: AdapterView<*>, view: View?, position: Int, id: Long) {
+                val selectedSort = parent.getItemAtPosition(position).toString()
                 when (position) {
-                    0 -> fetchLandownerLocationAndRecommendSurveyors() // Sort by distance
-                    1 -> fetchLandownerLocationAndRecommendSurveyorsRatings()  // Sort by ratings
+                    0 -> fetchLandownerLocationAndRecommendSurveyors(selectedSort) // Sort by distance
+                    1 -> fetchLandownerLocationAndRecommendSurveyors(selectedSort)  // Sort by ratings
                 }
             }
 
             override fun onNothingSelected(parent: AdapterView<*>) {}
         }
+
+        fetchLandownerLocationAndRecommendSurveyors("Processor")
         return view
     }
-    private fun fetchLandownerLocationAndRecommendSurveyors() {
+    private fun fetchLandownerLocationAndRecommendSurveyors(selectedSort: String) {
         val currentUser = FirebaseAuth.getInstance().currentUser
         if (currentUser != null) {
             val currentUserId = currentUser.uid
@@ -207,7 +218,31 @@ class SearchFragment : Fragment() {
                     val landownerLon = document.getDouble("longitude") ?: 0.0
 
                     if (landownerLat != 0.0 && landownerLon != 0.0) {
-                        fetchNearestSurveyors(landownerLat, landownerLon)
+                        if(selectedSort == "Sort by Distance") {
+                            fetchNearestSurveyors(landownerLat, landownerLon)
+                        }else if(selectedSort == "Sort by Ratings"){
+                            fetchHighRatingsSurveyors(landownerLat, landownerLon)
+                        }else if(selectedSort == "Processor"){
+                            convertCoordinatesToAddress(landownerLat, landownerLon) { address ->
+                                Log.d("AddressDebug", "Extracted Address: $address") // Log the address here
+
+                                getMunicipality(address) { municipality ->
+                                    requireActivity().runOnUiThread {
+                                        if (municipality != null) {
+                                            fetchProcessorsByMunicipality(municipality)
+                                        } else {
+                                            Log.e("AddressDebug", "Failed to extract municipality from: $address") // Log failure
+                                            Toast.makeText(
+                                                requireContext(),
+                                                "Failed to extract municipality",
+                                                Toast.LENGTH_SHORT
+                                            ).show()
+                                        }
+                                    }
+                                }
+                            }
+
+                        }
                     } else {
                         Toast.makeText(requireContext(), "Landowner location not found", Toast.LENGTH_SHORT).show()
                     }
@@ -219,30 +254,153 @@ class SearchFragment : Fragment() {
             Toast.makeText(requireContext(), "Error", Toast.LENGTH_SHORT).show()
         }
     }
-    private fun fetchLandownerLocationAndRecommendSurveyorsRatings() {
-        val currentUser = FirebaseAuth.getInstance().currentUser
-        if (currentUser != null) {
-            val currentUserId = currentUser.uid
 
+    private fun fetchProcessorsByMunicipality(municipality: String) {
+        val municipalityLowerCase = municipality.trim().lowercase()
 
-            firestore.collection("users").document(currentUserId).get()
-                .addOnSuccessListener { document ->
-                    val landownerLat = document.getDouble("latitude") ?: 0.0
-                    val landownerLon = document.getDouble("longitude") ?: 0.0
+        firestore.collection("users")
+            .whereEqualTo("user_type", "Processor")
+            .get()
+            .addOnSuccessListener { documents ->
+                Log.d("Check", "Extracted Municipality: '$municipalityLowerCase' (Length: ${municipalityLowerCase.length})")
+                Log.d("Check", "Total documents retrieved: ${documents.size()}")
 
-                    if (landownerLat != 0.0 && landownerLon != 0.0) {
-                        fetchHighRatingsSurveyors(landownerLat, landownerLon)
-                    } else {
-                        Toast.makeText(requireContext(), "Landowner location not found", Toast.LENGTH_SHORT).show()
+                processorRecommendationList.clear()
+                val tempList = mutableListOf<Recommendation>()
+                var pendingRequests = 0  // Counter to track geocode requests
+
+                if (documents.isEmpty) {
+                    requireActivity().runOnUiThread {
+                        Toast.makeText(requireContext(), "No processors found in $municipality", Toast.LENGTH_SHORT).show()
+                    }
+                } else {
+                    for (doc in documents) {
+                        val dbCity = doc.getString("City")?.trim()?.lowercase() ?: ""
+
+                        Log.d("Check", "Checking: dbCity='$dbCity' vs municipality='$municipalityLowerCase'")
+
+                        if (dbCity.equals(municipalityLowerCase, ignoreCase = true)) {
+                            Log.d("Check", "Match found for ${doc.id}!")
+
+                            val firstName = doc.getString("first_name") ?: ""
+                            val lastName = doc.getString("last_name") ?: ""
+                            val profileUrl = doc.getString("profile_picture") ?: ""
+                            val userType = doc.getString("user_type") ?: ""
+                            val processorLat = doc.getDouble("latitude") ?: 0.0
+                            val processorLon = doc.getDouble("longitude") ?: 0.0
+                            val userId = doc.getString("uid") ?: ""
+                            val ratings = doc.getDouble("ratings") ?: 0.0
+
+                            pendingRequests++  // Increase counter for each geocode request
+
+                            convertCoordinatesToAddress(processorLat, processorLon) { address ->
+                                val processor = Recommendation(
+                                    firstName, lastName, userType, address, profileUrl, 0.0, processorLat, processorLon, userId, ratings
+                                )
+                                tempList.add(processor)
+
+                                pendingRequests--  // Decrease counter when request completes
+                                if (pendingRequests == 0) {
+                                    // Update UI only when all requests are done
+                                    requireActivity().runOnUiThread {
+                                        processorRecommendationList.clear()
+                                        processorRecommendationList.addAll(tempList.sortedBy { it.distance })
+                                        adapterProcessor.notifyDataSetChanged()
+                                        Log.d("Check", "UI Updated: ${processorRecommendationList.size} items added")
+                                    }
+                                }
+                            }
+                        } else {
+                            Log.e("Check", "Mismatch: dbCity='$dbCity' vs municipality='$municipalityLowerCase'")
+                        }
                     }
                 }
-                .addOnFailureListener {
-                    Toast.makeText(requireContext(), "Error fetching landowner data", Toast.LENGTH_SHORT).show()
+
+                if (pendingRequests == 0) {
+                    // If no requests were made, update UI immediately
+                    requireActivity().runOnUiThread {
+                        processorRecommendationList.clear()
+                        processorRecommendationList.addAll(tempList.sortedBy { it.distance })
+                        adapter.notifyDataSetChanged()
+                    }
                 }
-        } else {
-            Toast.makeText(requireContext(), "Error", Toast.LENGTH_SHORT).show()
-        }
+            }
+            .addOnFailureListener {
+                requireActivity().runOnUiThread {
+                    Toast.makeText(requireContext(), "Error fetching processors", Toast.LENGTH_SHORT).show()
+                }
+            }
     }
+    private fun getMunicipality(address: String, callback: (String?) -> Unit) {
+        val client = OkHttpClient()
+        val url = "https://nominatim.openstreetmap.org/search?q=${URLEncoder.encode(address, "UTF-8")}&format=json&addressdetails=1"
+
+        val request = Request.Builder().url(url).build()
+
+        client.newCall(request).enqueue(object : Callback {
+            override fun onFailure(call: Call, e: IOException) {
+                Log.e("GetMunicipality", "Failed to fetch municipality: ${e.message}", e)
+                requireActivity().runOnUiThread {
+                    Toast.makeText(requireContext(), "Failed to fetch municipality", Toast.LENGTH_SHORT).show()
+                }
+                callback(null) // Return null
+            }
+
+            override fun onResponse(call: Call, response: Response) {
+                response.use {
+                    val responseBody = it.body?.string()
+
+                    if (responseBody.isNullOrEmpty()) {
+                        Log.w("GetMunicipality", "No municipality found")
+                        requireActivity().runOnUiThread {
+                            Toast.makeText(requireContext(), "No municipality found", Toast.LENGTH_SHORT).show()
+                        }
+                        callback(null)
+                        return
+                    }
+
+                    try {
+                        val json = JSONArray(responseBody)
+                        if (json.length() > 0) {
+                            val firstResult = json.getJSONObject(0)
+                            val addressDetails = firstResult.optJSONObject("address")
+
+                            // Extract City → Town → County in order of priority
+                            val municipality = when {
+                                !addressDetails?.optString("city").isNullOrEmpty() -> addressDetails?.optString("city")
+                                !addressDetails?.optString("town").isNullOrEmpty() -> addressDetails?.optString("town")
+                                !addressDetails?.optString("county").isNullOrEmpty() -> addressDetails?.optString("county")
+                                else -> "Unknown Municipality"
+                            }
+
+                            // Log extracted values
+                            Log.i("GetMunicipality", "Extracted - City: ${addressDetails?.optString("city")}, Town: ${addressDetails?.optString("town")}, County: ${addressDetails?.optString("county")}")
+                            Log.i("GetMunicipality", "Final Municipality: $municipality")
+
+                            requireActivity().runOnUiThread {
+                                Toast.makeText(requireContext(), "Municipality: $municipality", Toast.LENGTH_SHORT).show()
+                            }
+
+                            callback(municipality)
+                        } else {
+                            Log.w("GetMunicipality", "Empty JSON response")
+                            requireActivity().runOnUiThread {
+                                Toast.makeText(requireContext(), "Empty response from server", Toast.LENGTH_SHORT).show()
+                            }
+                            callback(null)
+                        }
+                    } catch (e: Exception) {
+                        Log.e("GetMunicipality", "Error parsing response: ${e.message}", e)
+                        requireActivity().runOnUiThread {
+                            Toast.makeText(requireContext(), "Error parsing response", Toast.LENGTH_SHORT).show()
+                        }
+                        callback(null)
+                    }
+                }
+            }
+        })
+    }
+
 
     private fun fetchHighRatingsSurveyors(landownerLat: Double, landownerLon: Double) {
         firestore.collection("users")
