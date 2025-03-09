@@ -1,0 +1,72 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="16dp">
+
+    <ImageView
+        android:id="@+id/ivLogo"
+        android:layout_width="150dp"
+        android:layout_height="150dp"
+        android:src="@drawable/appicon"
+        android:contentDescription="App Logo"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="64dp" />
+
+    <EditText
+        android:id="@+id/etEmail"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Email"
+        android:inputType="textEmailAddress"
+        android:padding="12dp"
+        android:layout_below="@id/ivLogo"
+        android:layout_marginTop="50dp"
+        android:background="@drawable/custom_edit_text"
+        android:drawableStart="@drawable/email"
+        android:drawablePadding="15dp" />
+
+    <EditText
+        android:id="@+id/etPassword"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Password"
+        android:inputType="textPassword"
+        android:padding="12dp"
+        android:layout_below="@id/etEmail"
+        android:layout_marginTop="16dp"
+        android:background="@drawable/custom_edit_text"
+        android:drawableStart="@drawable/padlock"
+        android:drawablePadding="15dp" />
+
+    <Button
+        android:id="@+id/btnSignIn"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Sign In"
+        android:layout_below="@id/etPassword"
+        android:layout_marginTop="24dp"
+        android:padding="12dp"
+        android:backgroundTint="#713D22"
+        android:textColor="@android:color/white" />
+
+    <TextView
+        android:id="@+id/tvSignUp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Don't have an account? Sign Up"
+        android:layout_below="@id/btnSignIn"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="16dp"
+        android:textColor="@android:color/black"
+        android:clickable="true"
+        android:focusable="true" />
+
+    <!-- Centered ProgressBar -->
+    <ProgressBar
+        android:id="@+id/progressBar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:visibility="gone" />
+
+</RelativeLayout>

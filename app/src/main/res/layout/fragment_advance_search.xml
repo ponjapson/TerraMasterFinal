@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="12dp"
+    android:background="@color/white">
+
+    <!-- Search Bar -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:layout_marginBottom="10dp">
+
+        <EditText
+            android:id="@+id/searchView"
+            android:layout_width="0dp"
+            android:layout_height="55dp"
+            android:layout_weight="1"
+            android:hint="Search surveyor..."
+            android:textColor="@color/black"
+            android:textColorHint="@color/greyline"
+            android:paddingStart="15dp"
+            android:drawableStart="@drawable/searchicon"
+            android:background="@drawable/custom_edit_text"
+            android:drawablePadding="10dp" />
+
+        <ImageButton
+            android:id="@+id/search_button"
+            android:layout_width="55dp"
+            android:layout_height="55dp"
+            android:layout_marginStart="8dp"
+            android:background="@drawable/custom_edit_text"
+            android:scaleType="centerInside"
+            android:src="@drawable/glass"/>
+    </LinearLayout>
+
+    <!-- Location Input -->
+    <com.google.android.material.textfield.TextInputLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Enter land location"
+        app:boxStrokeColor="@color/main"
+        app:boxCornerRadiusTopStart="8dp"
+        app:boxCornerRadiusTopEnd="8dp"
+        app:boxCornerRadiusBottomStart="8dp"
+        app:boxCornerRadiusBottomEnd="8dp"
+        android:layout_marginBottom="10dp">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/location_input"
+            android:layout_width="match_parent"
+            android:layout_height="55dp"
+            android:inputType="text"
+            android:textColorHint="@color/greyline"
+            android:drawableStart="@drawable/placeholder"
+            android:drawablePadding="10dp"
+            android:background="@drawable/custom_edit_text"/>
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/suggestions_recycler_view"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:scrollbars="vertical"
+        android:padding="5dp" />
+</LinearLayout>

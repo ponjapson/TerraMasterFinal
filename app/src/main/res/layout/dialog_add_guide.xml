@@ -1,0 +1,177 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@color/white"
+    android:padding="16dp">
+
+    <!-- Toggle Mode -->
+    <com.google.android.material.button.MaterialButtonToggleGroup
+        android:id="@+id/toggleMode"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:singleSelection="true"
+        android:layout_marginBottom="12dp">
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnModeGuide"
+            android:text="Guide with Steps"
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"/>
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnModePdf"
+            android:text="Upload PDF"
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"/>
+    </com.google.android.material.button.MaterialButtonToggleGroup>
+
+    <!-- Guide Title -->
+    <androidx.cardview.widget.CardView
+        app:cardElevation="4dp"
+        app:cardCornerRadius="12dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="12dp">
+
+        <EditText
+            android:id="@+id/etGuideTitle"
+            android:hint="Enter Guide Title"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="14dp"
+            android:textSize="16sp"
+            android:textColor="@color/black"
+            android:textColorHint="@color/greyline"
+            android:background="@drawable/custom_edit_text"/>
+    </androidx.cardview.widget.CardView>
+
+    <!-- Guide Steps Section (Visible only in Guide mode) -->
+    <LinearLayout
+        android:id="@+id/guideSection"
+        android:visibility="visible"
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <!-- Step Title -->
+        <androidx.cardview.widget.CardView
+            app:cardElevation="4dp"
+            app:cardCornerRadius="12dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="12dp">
+
+            <EditText
+                android:id="@+id/etStepTitle"
+                android:hint="Enter Step Title"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:padding="14dp"
+                android:textSize="16sp"
+                android:background="@drawable/custom_edit_text"
+                android:textColor="@color/black"
+                android:textColorHint="@color/greyline"/>
+        </androidx.cardview.widget.CardView>
+
+        <!-- Step Description -->
+        <androidx.cardview.widget.CardView
+            app:cardElevation="4dp"
+            app:cardCornerRadius="12dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp">
+
+            <EditText
+                android:id="@+id/etStepDescription"
+                android:hint="Enter Step Description"
+                android:layout_width="match_parent"
+                android:layout_height="120dp"
+                android:padding="14dp"
+                android:textSize="14sp"
+                android:gravity="top"
+                android:background="@drawable/custom_edit_text"
+                android:textColor="@color/black"
+                android:textColorHint="@color/greyline"/>
+        </androidx.cardview.widget.CardView>
+
+        <!-- Add Step Button -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnAddStep"
+            android:text="➕ Add Step"
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="16sp"
+            android:backgroundTint="@color/main"
+            android:textColor="@color/white"
+            android:elevation="6dp"
+            android:layout_marginBottom="12dp"/>
+
+        <!-- List of Steps -->
+        <androidx.cardview.widget.CardView
+            app:cardElevation="4dp"
+            app:cardCornerRadius="12dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="#f5f5f5"
+            android:padding="8dp"
+            android:layout_marginBottom="12dp">
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rvSteps"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"/>
+        </androidx.cardview.widget.CardView>
+    </LinearLayout>
+
+    <!-- PDF Upload Section (Visible only in PDF mode) -->
+    <LinearLayout
+        android:id="@+id/pdfSection"
+        android:visibility="gone"
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <!-- Upload PDF Button -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnUploadPdf"
+            android:text="📄 Upload PDF"
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="16sp"
+            android:textColor="@color/black"
+            android:layout_marginBottom="12dp"/>
+
+        <!-- Selected PDF Name -->
+        <TextView
+            android:id="@+id/tvSelectedPdf"
+            android:text="No PDF selected"
+            android:textSize="14sp"
+            android:textColor="@color/black"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:padding="8dp"
+            android:background="@drawable/custom_edit_text"/>
+    </LinearLayout>
+
+    <!-- Save Guide Button -->
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnSaveGuide"
+        android:text="✅ Save Guide"
+        style="@style/Widget.MaterialComponents.Button"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textSize="16sp"
+        android:backgroundTint="@color/main"
+        android:textColor="@color/white"
+        android:elevation="6dp"/>
+
+</LinearLayout>

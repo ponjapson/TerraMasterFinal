@@ -1,0 +1,16 @@
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Empty Star -->
+    <item
+        android:id="@android:id/background"
+        android:drawable="@android:drawable/btn_star_big_off" /> <!-- Use a star outline here -->
+
+    <!-- Partially Filled Star (optional, depends on your needs) -->
+    <item
+        android:id="@android:id/secondaryProgress"
+        android:drawable="@android:drawable/btn_star_big_on" /> <!-- You can use the same star here -->
+
+    <!-- Fully Filled Star -->
+    <item
+        android:id="@android:id/progress"
+        android:drawable="@android:drawable/btn_star_big_on" /> <!-- Fully-filled star -->
+</layer-list>

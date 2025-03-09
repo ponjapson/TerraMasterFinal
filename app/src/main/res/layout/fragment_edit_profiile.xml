@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:padding="10dp">
+
+    <ImageButton
+        android:id="@+id/backButton"
+        android:layout_width="30dp"
+        android:layout_height="30dp"
+        android:src="@drawable/backbutton"
+        android:layout_marginTop="16dp"
+        android:layout_marginStart="16dp"
+        android:background="@android:color/transparent"/>
+
+    <RelativeLayout
+        android:id="@+id/profile_layout"
+        android:layout_width="150dp"
+        android:layout_height="150dp"
+        android:layout_centerHorizontal="true"
+        android:layout_below="@id/backButton"
+        android:layout_marginTop="30dp">
+
+        <de.hdodenhof.circleimageview.CircleImageView
+            android:id="@+id/profile_image"
+            android:layout_width="150dp"
+            android:layout_height="150dp"
+            android:layout_centerInParent="true"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginBottom="16dp"
+            android:background="@null"
+            android:scaleType="centerCrop"
+            android:src="@drawable/profile_pic"/>
+
+        <ImageButton
+            android:id="@+id/change_photo_icon"
+            android:layout_width="45dp"
+            android:layout_height="35dp"
+            android:layout_alignEnd="@+id/profile_image"
+            android:layout_alignBottom="@+id/profile_image"
+            android:src="@drawable/edit_icon"
+            android:background="@android:color/transparent"
+            android:contentDescription="Change Photo"
+            android:scaleType="centerCrop"
+            android:paddingEnd="10dp"/>
+    </RelativeLayout>
+    
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_below="@id/profile_layout"
+        android:layout_marginTop="32dp"
+        android:gravity="center_horizontal"
+        android:id="@+id/LL1">
+
+        <EditText
+            android:id="@+id/editTextFName"
+            android:layout_width="330dp"
+            android:layout_height="42dp"
+            android:layout_marginBottom="16dp"
+            android:hint="First Name"
+            android:textColor="@color/white"
+            android:textSize="16sp"
+            android:maxLines="5"
+            android:paddingRight="20dp"
+            android:paddingLeft="20dp"
+            android:textColorHint="@color/greyline"
+            android:fontFamily="@font/poppinsreg"
+            android:background="@drawable/edittext_background_selector"
+        android:padding="10dp" />
+
+        <EditText
+            android:id="@+id/editTextLName"
+            android:layout_width="330dp"
+            android:layout_height="42dp"
+            android:layout_marginBottom="16dp"
+            android:hint="Last Name"
+            android:textColor="@color/white"
+            android:textColorHint="@color/greyline"
+            android:textSize="16sp"
+            android:maxLines="5"
+            android:paddingRight="20dp"
+            android:paddingLeft="20dp"
+            android:fontFamily="@font/poppinsreg"
+            android:background="@drawable/edittext_background_selector"
+            android:padding="10dp" />
+
+        <ProgressBar
+            android:id="@+id/progressBar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:visibility="gone"/>
+    </LinearLayout>
+
+    <Button
+        android:id="@+id/buttonSaveChanges"
+        android:layout_width="330dp"
+        android:layout_height="38dp"
+        android:layout_below="@id/LL1"
+        android:layout_centerInParent="true"
+        android:layout_marginTop="55dp"
+        android:background="@drawable/rounded_gradient_button"
+        android:elevation="8dp"
+        android:fontFamily="@font/poppinsm"
+        android:gravity="center"
+        android:paddingStart="40dp"
+        android:paddingLeft="20dp"
+        android:paddingEnd="40dp"
+        android:paddingRight="20dp"
+        android:text="Save changes"
+        android:textAllCaps="false"
+        android:textColor="@color/white"
+        android:textSize="16sp" />
+
+
+</RelativeLayout>

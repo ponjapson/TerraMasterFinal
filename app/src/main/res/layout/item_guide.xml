@@ -1,0 +1,27 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:padding="12dp"
+    android:background="@drawable/border_item"
+    android:layout_marginBottom="10dp">
+
+    <!-- Guide Title -->
+    <TextView
+        android:id="@+id/tvGuideTitle"
+        android:layout_width="0dp"
+        android:layout_weight="1"
+        android:layout_height="wrap_content"
+        android:textStyle="bold"
+        android:textSize="20sp"
+        android:textColor="@color/black"/>
+
+    <!-- Arrow Icon -->
+    <ImageButton
+        android:id="@+id/arrowIcon"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:src="@drawable/rightarrow"
+        android:layout_gravity="center_vertical"
+        android:background="@null"/>
+</LinearLayout>

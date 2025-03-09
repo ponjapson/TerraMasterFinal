@@ -1,0 +1,25 @@
+# Build artifacts
+/build/
+/app/build/
+
+# IDE-specific files
+.idea/
+*.iml
+
+# Local configuration
+local.properties
+
+# Gradle-specific files
+.gradle/
+gradle-wrapper.jar
+
+# Temporary and system files
+.DS_Store
+Thumbs.db
+*.log
+*.tmp
+*.bak
+
+# Dependency files
+/captures/
+/.externalNativeBuild/

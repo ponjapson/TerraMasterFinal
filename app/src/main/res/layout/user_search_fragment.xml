@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <EditText
+            android:id="@+id/searchView"
+            android:layout_marginTop="15dp"
+            android:layout_marginLeft="15dp"
+            android:layout_marginRight="15dp"
+            android:layout_width="match_parent"
+            android:layout_height="42dp"
+            android:hint="Search"
+            android:textSize="16sp"
+            android:maxLines="1"
+            android:inputType="text"
+            android:textColorHint="@color/greyline"
+            android:fontFamily="@font/poppinsreg"
+            android:textColor="@color/white"
+            android:background="@drawable/edittext_background_selector"
+            android:drawablePadding="10dp"
+            android:paddingStart="10dp"
+            android:drawableLeft="@drawable/searchicon" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="360dp"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_margin="5dp"
+        android:layout_gravity="center">
+
+        <!-- Recent Search ListView and Heading TextView -->
+        <TextView
+            android:id="@+id/recentHeadingTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="6dp"
+            android:textColor="@color/white"
+            android:text="Recent"
+            android:textSize="14sp"
+            android:layout_marginLeft="20dp"
+            android:fontFamily="@font/poppinsreg"/>
+
+        <ListView
+            android:id="@+id/recentListView"
+            android:layout_width="match_parent"
+            android:layout_height="200dp"
+            android:layout_below="@id/searchView" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_margin="5dp">
+
+        <!-- Displayed Search ListView -->
+        <ListView
+            android:id="@+id/displayedListView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/recentListView"/>
+    </LinearLayout>
+
+</LinearLayout>

@@ -1,0 +1,58 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@color/white">
+
+    <!-- Guide Title -->
+    <EditText
+        android:id="@+id/etGuideTitle"
+        android:hint="Enter Guide Title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="12dp"
+        android:textSize="16sp"
+        android:background="@drawable/custom_edit_text"
+        android:textColor="@color/black"
+        android:textColorHint="@color/greyline"
+        android:layout_marginBottom="8dp"/>
+
+    <!-- Step Title -->
+    <EditText
+        android:id="@+id/etStepTitle"
+        android:hint="Enter Step Title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="12dp"
+        android:textSize="16sp"
+        android:background="@drawable/custom_edit_text"
+        android:textColor="@color/black"
+        android:textColorHint="@color/greyline"
+        android:layout_marginBottom="8dp"/>
+
+    <!-- Step Description -->
+    <EditText
+        android:id="@+id/etStepDescription"
+        android:hint="Enter Step Description"
+        android:layout_width="match_parent"
+        android:layout_height="120dp"
+        android:padding="12dp"
+        android:textSize="14sp"
+        android:gravity="top"
+        android:background="@drawable/custom_edit_text"
+        android:textColor="@color/black"
+        android:textColorHint="@color/greyline"
+        android:layout_marginBottom="12dp"/>
+    <Button
+        android:id="@+id/btnSaveGuide"
+        android:text="✅ Save Guide"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:backgroundTint="@color/main"
+        android:textColor="@color/white"
+        android:padding="12dp"
+        android:textSize="16sp"
+        android:elevation="4dp"/>
+
+</LinearLayout>

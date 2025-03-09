@@ -1,0 +1,134 @@
+<androidx.core.widget.NestedScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fillViewport="true">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="16dp">
+
+        <!-- Search Bar Section -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
+
+            <EditText
+                android:id="@+id/searchView"
+                android:layout_width="0dp"
+                android:layout_height="42dp"
+                android:layout_weight="1"
+                android:hint="Search..."
+                android:drawableStart="@drawable/searchicon"
+                android:background="@drawable/custom_edit_text"
+                android:textColor="@color/black"
+                android:textColorHint="@color/greyline"
+                android:paddingStart="12dp"
+                android:paddingEnd="12dp"
+                android:drawablePadding="10dp" />
+        </LinearLayout>
+
+        <!-- Heading and Advanced Search Button -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:paddingTop="12dp">
+
+            <TextView
+                android:id="@+id/recentHeadingTextView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Recent"
+                android:textColor="@color/black"
+                android:textSize="14sp"
+                android:fontFamily="@font/poppinsreg"
+                android:textStyle="bold"/>
+
+            <View
+                android:layout_width="0dp"
+                android:layout_height="1dp"
+                android:layout_weight="1"/>
+
+            <Button
+                android:id="@+id/advanceSearch"
+                android:layout_width="wrap_content"
+                android:layout_height="35dp"
+                android:text="Advanced Search"
+                android:textSize="12sp"
+                android:backgroundTint="@color/main"/>
+        </LinearLayout>
+
+        <!-- Recent Search ListView -->
+        <ListView
+            android:id="@+id/recentListView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:visibility="gone"
+            android:scrollbars="none"/>
+
+        <!-- Displayed Search ListView -->
+        <ListView
+            android:id="@+id/displayedListView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:visibility="gone"
+            android:scrollbars="none"/>
+
+        <!-- Recommendation Section -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:paddingTop="16dp"
+            android:layout_marginTop="200dp">
+
+            <TextView
+                android:id="@+id/recommendationTextView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Recommendations"
+                android:textSize="16sp"
+                android:textColor="@color/black"
+                android:textStyle="bold"
+                android:fontFamily="@font/poppinsreg"/>
+
+            <View
+                android:layout_width="0dp"
+                android:layout_height="1dp"
+                android:layout_weight="1"/>
+
+            <Spinner
+                android:id="@+id/spinnerSort"
+                android:layout_width="150dp"
+                android:layout_height="40dp"
+                android:background="@drawable/custom_edit_text"
+                android:padding="8dp"/>
+        </LinearLayout>
+
+        <!-- RecyclerView (For Search Results) -->
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/recommendationRecyclerView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:visibility="visible"
+            android:nestedScrollingEnabled="false"
+            android:scrollbars="none"
+            android:layout_marginTop="12dp"/>
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/processorRecyclerView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:visibility="visible"
+            android:nestedScrollingEnabled="false"
+            android:scrollbars="none"
+            android:layout_marginTop="12dp"/>
+
+    </LinearLayout>
+</androidx.core.widget.NestedScrollView>

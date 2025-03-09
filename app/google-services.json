@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "735703701299",
+    "project_id": "terramaster-6f801",
+    "storage_bucket": "terramaster-6f801.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:735703701299:android:3019bb9f6e44a9dc429046",
+        "android_client_info": {
+          "package_name": "com.example.terramaster"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyARJZ-jiDS8hhusXLe8LiNcUyZ4OT6JQ9Y"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

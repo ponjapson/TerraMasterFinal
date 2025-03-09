@@ -1,0 +1,287 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <!-- ScrollView for form content -->
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:padding="16dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:gravity="center_horizontal">
+
+            <ImageView
+                android:id="@+id/ivLogo"
+                android:layout_width="150dp"
+                android:layout_height="100dp"
+                android:src="@drawable/appicon"
+                android:contentDescription="App Logo"
+                android:layout_marginBottom="16dp" />
+
+            <TextView
+                android:id="@+id/tvTitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Create an Account"
+                android:textSize="24sp"
+                android:textStyle="bold"
+                android:layout_gravity="center"
+                android:layout_marginBottom="16dp" />
+
+            <!-- EditText fields with the custom border -->
+            <EditText
+                android:id="@+id/etFirstName"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="First Name"
+                android:inputType="textPersonName"
+                android:padding="12dp"
+                android:layout_marginTop="8dp"
+                android:background="@drawable/custom_edit_text"
+                android:drawableStart="@drawable/user"
+                android:drawablePadding="15dp" />
+
+            <EditText
+                android:id="@+id/etLastName"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Last Name"
+                android:inputType="textPersonName"
+                android:padding="12dp"
+                android:layout_marginTop="8dp"
+                android:background="@drawable/custom_edit_text"
+                android:drawableStart="@drawable/user"
+                android:drawablePadding="15dp" />
+
+            <EditText
+                android:id="@+id/etEmail"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Email"
+                android:inputType="textEmailAddress"
+                android:padding="12dp"
+                android:layout_marginTop="8dp"
+                android:background="@drawable/custom_edit_text"
+                android:drawableStart="@drawable/email"
+                android:drawablePadding="15dp" />
+
+            <EditText
+                android:id="@+id/etPassword"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Password"
+                android:inputType="textPassword"
+                android:padding="12dp"
+                android:layout_marginTop="8dp"
+                android:background="@drawable/custom_edit_text"
+                android:drawableStart="@drawable/padlock"
+                android:drawablePadding="15dp" />
+
+            <EditText
+                android:id="@+id/etConfirmPassword"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Confirm Password"
+                android:inputType="textPassword"
+                android:padding="12dp"
+                android:layout_marginTop="8dp"
+                android:background="@drawable/custom_edit_text"
+                android:drawableStart="@drawable/padlock"
+                android:drawablePadding="15dp" />
+            <EditText
+                android:id="@+id/etBarangay"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Barangay"
+                android:inputType="textPostalAddress"
+                android:padding="12dp"
+                android:layout_marginTop="8dp"
+                android:background="@drawable/custom_edit_text"
+                android:drawableStart="@drawable/address"
+                android:drawablePadding="15dp"/>
+            <EditText
+                android:id="@+id/etStreetAddress"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Street Address"
+                android:inputType="textPostalAddress"
+                android:padding="12dp"
+                android:layout_marginTop="8dp"
+                android:background="@drawable/custom_edit_text"
+                android:drawableStart="@drawable/address"
+                android:drawablePadding="15dp"/>
+
+            <EditText
+                android:id="@+id/etCity"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="City/Municipality"
+                android:inputType="textPostalAddress"
+                android:padding="12dp"
+                android:layout_marginTop="8dp"
+                android:background="@drawable/custom_edit_text"
+                android:drawableStart="@drawable/address"
+                android:drawablePadding="15dp"/>
+
+            <EditText
+                android:id="@+id/etProvince"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Province"
+                android:inputType="textPostalAddress"
+                android:padding="12dp"
+                android:layout_marginTop="8dp"
+                android:background="@drawable/custom_edit_text"
+                android:drawableStart="@drawable/address"
+                android:drawablePadding="15dp"/>
+
+            <EditText
+                android:id="@+id/etPostalCode"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Postal Code"
+                android:inputType="number"
+                android:padding="12dp"
+                android:layout_marginTop="8dp"
+                android:background="@drawable/custom_edit_text"
+                android:drawableStart="@drawable/address"
+                android:drawablePadding="15dp"/>
+
+
+            <!-- RadioButtons for User Type Selection -->
+            <TextView
+                android:id="@+id/tvUserType"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Select User Type"
+                android:layout_marginTop="16dp"
+                android:textSize="16sp"
+                android:textStyle="bold" />
+
+            <RadioGroup
+                android:id="@+id/rgUserType"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginTop="8dp">
+
+                <RadioButton
+                    android:id="@+id/rbLandowner"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Landowner"
+                    android:layout_marginEnd="16dp" />
+
+                <RadioButton
+                    android:id="@+id/rbProcessor"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Processor"
+                    android:layout_marginEnd="16dp" />
+
+                <RadioButton
+                    android:id="@+id/rbSurveyor"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Surveyor" />
+            </RadioGroup>
+
+            <TextView
+                android:id="@+id/tvUploadID"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Upload Valid ID (Front and Back)"
+                android:layout_marginTop="16dp"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:visibility="gone" />
+
+            <Button
+                android:id="@+id/btnUploadFront"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Upload Front of ID"
+                android:layout_marginTop="8dp"
+                android:backgroundTint="#713D22"
+                android:visibility="gone" />
+
+            <ImageView
+                android:id="@+id/ivFrontID"
+                android:layout_width="match_parent"
+                android:layout_height="200dp"
+                android:src="@drawable/idcard"
+                android:layout_marginTop="8dp"
+                android:contentDescription="Front ID Image"
+                android:scaleType="centerCrop"
+                android:visibility="gone" />
+
+            <Button
+                android:id="@+id/btnUploadBack"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Upload Back of ID"
+                android:layout_marginTop="8dp"
+                android:backgroundTint="#713D22"
+                android:visibility="gone" />
+
+            <ImageView
+                android:id="@+id/ivBackID"
+                android:layout_width="match_parent"
+                android:layout_height="200dp"
+                android:src="@drawable/idcard"
+                android:layout_marginTop="8dp"
+                android:contentDescription="Back ID Image"
+                android:scaleType="centerCrop"
+                android:visibility="gone" />
+
+            <Button
+                android:id="@+id/btnSignUp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Sign Up"
+                android:layout_marginTop="16dp"
+                android:padding="12dp"
+                android:backgroundTint="@android:color/holo_green_dark"
+                android:textColor="@android:color/white" />
+
+            <!-- Already have an account? -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center"
+                android:layout_marginTop="16dp">
+
+                <TextView
+                    android:id="@+id/tvAlreadyAccount"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Already have an account? "
+                    android:textColor="@color/black" />
+
+                <TextView
+                    android:id="@+id/tvSignIn"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Sign In"
+                    android:textStyle="bold"
+                    android:textColor="@color/colorAccent"
+                    android:clickable="true"
+                    android:focusable="true" />
+            </LinearLayout>
+        </LinearLayout>
+    </ScrollView>
+
+    <!-- ProgressBar centered in FrameLayout -->
+    <ProgressBar
+        android:id="@+id/progressBar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:visibility="gone" />
+</FrameLayout>
