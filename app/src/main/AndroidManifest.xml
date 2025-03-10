@@ -25,6 +25,8 @@
         android:theme="@style/Theme.TerraMaster"
         tools:targetApi="31">
 
+
+
         <activity
             android:name=".BookingActivity"
             android:exported="false" />

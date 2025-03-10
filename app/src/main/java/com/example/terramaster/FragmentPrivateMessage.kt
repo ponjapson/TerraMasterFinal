@@ -6,6 +6,7 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageButton
 import android.widget.TextView
@@ -38,6 +39,7 @@ class FragmentPrivateMessage : Fragment() {
     private var otherParticipantProfilePicture: String? = null
     private var messageListener: ListenerRegistration? = null
     private var otherUserId: String? = null
+    private lateinit var bookingButton: ImageButton
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -59,6 +61,7 @@ class FragmentPrivateMessage : Fragment() {
         chatRoomId = arguments?.getString("chatId") ?: ""
         otherUserId = arguments?.getString("otherUserId")
         otherParticipantProfilePicture = arguments?.getString("profilePicUrl")
+        bookingButton = view.findViewById(R.id.bookingButton)
 
         val backBtn: ImageButton = view.findViewById(R.id.back_btn)
         backBtn.setOnClickListener {
@@ -97,6 +100,14 @@ class FragmentPrivateMessage : Fragment() {
                 sendMessage(messageText)
                 messageEditText.text.clear()
             }
+        }
+
+        bookingButton.setOnClickListener {
+            val fragment = FragmentBooking()
+            val transaction = parentFragmentManager.beginTransaction()
+            transaction.replace(R.id.fragment_container, fragment)
+            transaction.addToBackStack(null) // Allows back navigation
+            transaction.commit()
         }
 
         return view

@@ -57,22 +57,6 @@
             android:orientation="horizontal"
             android:layout_gravity="center_vertical">
 
-            <!-- Audio Call Button -->
-            <ImageButton
-                android:id="@+id/phoneImgBtn"
-                android:layout_width="24dp"
-                android:layout_height="24dp"
-                android:background="@drawable/telephone"
-                android:layout_marginEnd="16dp" />
-
-            <!-- Video Call Button -->
-            <ImageButton
-                android:id="@+id/callImgBtn"
-                android:layout_width="24dp"
-                android:layout_height="24dp"
-                android:background="@drawable/video"
-                android:layout_marginEnd="16dp" />
-
             <!-- Booking Button -->
             <ImageButton
                 android:id="@+id/bookingButton"
