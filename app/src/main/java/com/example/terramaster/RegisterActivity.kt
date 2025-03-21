@@ -394,8 +394,9 @@ class RegisterActivity : AppCompatActivity() {
             .addOnCompleteListener { task ->
                 if (task.isSuccessful) {
                     val userId = auth.currentUser?.uid ?: UUID.randomUUID().toString() // Use Firebase UID or generate one
+
                     val user = hashMapOf(
-                        "uid" to userId, // Add UID explicitly to the document
+                        "uid" to userId,
                         "first_name" to firstName,
                         "last_name" to lastName,
                         "email" to email,
@@ -405,7 +406,7 @@ class RegisterActivity : AppCompatActivity() {
                         "Province" to Province,
                         "Postal_Code" to PostalCode,
                         "user_type" to userType,
-                        "status" to "Pending", // Set to Pending initially
+                        "status" to "email_not_verified",
                         "profile_picture" to DEFAULT_PROFILE_PICTURE_URL,
                         "fcmToken" to fcmToken,
                         "frontIDUrl" to frontIDUrl,
@@ -413,6 +414,11 @@ class RegisterActivity : AppCompatActivity() {
                         "longitude" to longitude,
                         "latitude" to latitude
                     )
+
+                    // Add rating only if user_type is "Processor" or "Surveyor"
+                    if (userType == "Processor" || userType == "Surveyor") {
+                        user["rating"] = 0.0
+                    }
 
                     db.collection("users").document(userId).set(user)
                         .addOnSuccessListener {
@@ -442,7 +448,6 @@ class RegisterActivity : AppCompatActivity() {
                 }
             }
     }
-
 
     private fun handleFailure(message: String) {
         Log.e("RegisterActivity", message)
