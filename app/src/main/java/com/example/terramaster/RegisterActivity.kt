@@ -395,8 +395,9 @@ class RegisterActivity : AppCompatActivity() {
                 if (task.isSuccessful) {
                     val userId = auth.currentUser?.uid ?: UUID.randomUUID().toString() // Use Firebase UID or generate one
 
+                    // Base user data
                     val user = hashMapOf(
-                        "uid" to userId,
+                        "uid" to userId, // Add UID explicitly to the document
                         "first_name" to firstName,
                         "last_name" to lastName,
                         "email" to email,
@@ -406,18 +407,19 @@ class RegisterActivity : AppCompatActivity() {
                         "Province" to Province,
                         "Postal_Code" to PostalCode,
                         "user_type" to userType,
-                        "status" to "email_not_verified",
+                        "status" to "Pending", // Set to Pending initially
                         "profile_picture" to DEFAULT_PROFILE_PICTURE_URL,
                         "fcmToken" to fcmToken,
                         "frontIDUrl" to frontIDUrl,
                         "backIDUrl" to backIDUrl,
                         "longitude" to longitude,
-                        "latitude" to latitude
+                        "latitude" to latitude,
+                        "status" to "email_not_verified"
                     )
 
-                    // Add rating only if user_type is "Processor" or "Surveyor"
-                    if (userType == "Processor" || userType == "Surveyor") {
-                        user["rating"] = 0.0
+                    // Add ratings if user type is Surveyor or Processor
+                    if (userType == "Surveyor" || userType == "Processor") {
+                        user["ratings"] = 0.0
                     }
 
                     db.collection("users").document(userId).set(user)
@@ -448,6 +450,8 @@ class RegisterActivity : AppCompatActivity() {
                 }
             }
     }
+
+
 
     private fun handleFailure(message: String) {
         Log.e("RegisterActivity", message)

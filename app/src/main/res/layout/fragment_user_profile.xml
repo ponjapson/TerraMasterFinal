@@ -67,7 +67,7 @@
         android:max="5"
         android:numStars="5"
         android:rating="2.1"
-        android:progressDrawable="@drawable/custome_rating_bar"
+        android:progressDrawable="@drawable/custom_rating_bar"
         android:stepSize="0.1"
         android:isIndicator="true"
         />

@@ -86,11 +86,47 @@ class LoginActivity : AppCompatActivity() {
     }
 
     private fun updateUserStatusAndToken(userId: String) {
+        db.collection("users").document(userId).get()
+            .addOnSuccessListener { document ->
+                if (document.exists()) {
+                    val userType = document.getString("user_type") ?: ""
+                    val currentStatus = document.getString("status") ?: ""
+
+                    if (userType == "Landowner") {
+                        // Directly update to Active for Landowner
+                        updateStatusAndToken(userId, "Active")
+                    } else if (userType == "Surveyor" || userType == "Processor") {
+                        if (currentStatus == "Verified" || currentStatus == "Active") {
+                            // Update to Active only if already Verified
+                            updateStatusAndToken(userId, "Active")
+                        } else {
+                            // Show waiting message if not Verified
+                            progressBar.visibility = View.GONE
+                            btnSignIn.isEnabled = true
+                            Toast.makeText(this, "Waiting for admin approval.", Toast.LENGTH_SHORT).show()
+                        }
+                    }
+                } else {
+                    progressBar.visibility = View.GONE
+                    btnSignIn.isEnabled = true
+                    Toast.makeText(this, "User data not found.", Toast.LENGTH_SHORT).show()
+                }
+            }
+            .addOnFailureListener { e ->
+                progressBar.visibility = View.GONE
+                btnSignIn.isEnabled = true
+                Log.e("LoginActivity", "Error fetching user data: ${e.message}")
+                Toast.makeText(this, "Error fetching user data.", Toast.LENGTH_SHORT).show()
+            }
+    }
+
+    // Function to update status and FCM token
+    private fun updateStatusAndToken(userId: String, newStatus: String) {
         FirebaseMessaging.getInstance().token.addOnCompleteListener { tokenTask ->
             if (tokenTask.isSuccessful) {
                 val fcmToken = tokenTask.result
                 db.collection("users").document(userId)
-                    .update(mapOf("status" to "Active", "fcmToken" to fcmToken))
+                    .update(mapOf("status" to newStatus, "fcmToken" to fcmToken))
                     .addOnSuccessListener {
                         progressBar.visibility = View.GONE
                         btnSignIn.isEnabled = true
