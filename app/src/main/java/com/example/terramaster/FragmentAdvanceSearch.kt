@@ -13,7 +13,7 @@ import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.example.yourapp.Suggested
+import com.example.terramaster.Suggested
 import com.google.firebase.firestore.FirebaseFirestore
 import okhttp3.*
 import org.json.JSONArray
@@ -116,12 +116,13 @@ class FragmentAdvanceSearch : Fragment() {
                     val surveyorLon = doc.getDouble("longitude") ?: 0.0
                     val userId = doc.getString("uid") ?: ""
                     val distance = calculateDistance(lat, lon, surveyorLat, surveyorLon)
+                    val ratings = doc.getDouble("ratings") ?: 0.0
 
                     if (distance <= 50.0) {
                         pendingRequests++  // Increase counter for each geocode request
                         convertCoordinatesToAddress(surveyorLat, surveyorLon) { address ->
                             val surveyor = Suggested(
-                                firstName, lastName, userType, address, profileUrl, distance, surveyorLat, surveyorLon, userId
+                                firstName, lastName, userType, address, profileUrl, distance, surveyorLat, surveyorLon, userId, ratings
                             )
                             tempList.add(surveyor)
 
@@ -183,12 +184,13 @@ class FragmentAdvanceSearch : Fragment() {
                             val processorLat = doc.getDouble("latitude") ?: 0.0
                             val processorLon = doc.getDouble("longitude") ?: 0.0
                             val userId = doc.getString("uid") ?: ""
+                            val ratings = doc.getDouble("ratings") ?: 0.0
 
                             pendingRequests++  // Increase counter for each geocode request
 
                             convertCoordinatesToAddress(processorLat, processorLon) { address ->
                                 val processor = Suggested(
-                                    firstName, lastName, userType, address, profileUrl, 0.0, processorLat, processorLon, userId
+                                    firstName, lastName, userType, address, profileUrl, 0.0, processorLat, processorLon, userId, ratings
                                 )
                                 tempList.add(processor)
 

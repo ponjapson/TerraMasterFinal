@@ -1,21 +1,201 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:gravity="center"
-    android:padding="20dp">
+    android:fillViewport="true"
+    android:background="#031620">
 
-    <Button
-        android:id="@+id/scanButton"
-        android:layout_width="wrap_content"
+    <LinearLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Scan Document" />
+        android:orientation="vertical"
+        android:padding="16dp">
 
-    <ImageView
-        android:id="@+id/imageView"
-        android:layout_width="250dp"
-        android:layout_height="250dp"
-        android:layout_marginTop="20dp"
-        android:scaleType="fitCenter"/>
-</LinearLayout>
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="18sp"
+            android:layout_gravity="center"
+            android:textColor="@color/white"
+            android:layout_marginTop="30dp"/>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginStart="12dp"
+            android:layout_marginEnd="12dp"
+            android:background="#FFFFFF"
+            android:layout_marginBottom="25dp"/>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:gravity="center"
+            android:id="@+id/LL11"
+            android:layout_marginStart="10dp"
+            android:layout_marginEnd="10dp">
+
+            <!-- Start DateTime Button -->
+            <Button
+                android:id="@+id/startDateTimeButton"
+                android:layout_width="match_parent"
+                android:layout_height="42dp"
+                android:text="Select Start Date and Time"
+                android:textColor="@color/white"
+                android:fontFamily="@font/poppinsm"
+                android:textAllCaps="false"
+                android:textSize="14sp"/>
+
+            <!-- Start DateTime Display -->
+            <TextView
+                android:id="@+id/selectedStartDateTimeTextView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Start Date and Time: Not Selected"
+                android:textSize="14sp"
+                android:textColor="@color/white"
+                android:paddingTop="10dp"
+                android:paddingBottom="10dp"/>
+
+            <!-- End DateTime Button -->
+            <Button
+                android:id="@+id/endDateTimeButton"
+                android:layout_width="match_parent"
+                android:layout_height="42dp"
+                android:text="Select End Date and Time"
+                android:textColor="@color/white"
+                android:fontFamily="@font/poppinsm"
+                android:textAllCaps="false"
+                android:textSize="14sp"
+                android:layout_marginTop="15dp"/>
+
+            <!-- End DateTime Display -->
+            <TextView
+                android:id="@+id/selectedEndDateTimeTextView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="End Date and Time: Not Selected"
+                android:textSize="14sp"
+                android:textColor="@color/white"
+                android:paddingTop="10dp"
+                android:paddingBottom="10dp"/>
+        </LinearLayout>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="14sp"
+            android:textColor="@color/white"
+            android:paddingTop="20dp"
+            android:paddingBottom="10dp"
+            android:text="Contract Price"
+            android:paddingStart="15dp"/>
+
+        <!-- Contract Amount Input -->
+        <EditText
+            android:id="@+id/contractAmount"
+            android:layout_width="match_parent"
+            android:layout_height="42dp"
+            android:background="@drawable/custom_edit_text"
+            android:hint="Enter Contract Amount"
+            android:paddingStart="15dp"
+            android:gravity="center_vertical"
+            android:textColor="@android:color/black"
+            android:textColorHint="#999999"
+            android:textSize="14sp"
+            android:fontFamily="@font/poppinsreg"
+            android:inputType="numberDecimal"
+            android:layout_marginStart="10dp"
+            android:layout_marginEnd="10dp"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="14sp"
+            android:textColor="@color/white"
+            android:paddingTop="20dp"
+            android:paddingBottom="10dp"
+            android:text="Downpayment"
+            android:paddingStart="15dp"/>
+
+        <!-- Downpayment Input -->
+
+        <EditText
+            android:id="@+id/downpaymentEditText"
+            android:layout_width="match_parent"
+            android:layout_height="42dp"
+            android:layout_marginStart="10dp"
+            android:layout_marginEnd="10dp"
+            android:background="@drawable/custom_edit_text"
+            android:fontFamily="@font/poppinsreg"
+            android:gravity="center_vertical"
+            android:hint="Enter payment"
+            android:inputType="numberDecimal"
+            android:paddingStart="15dp"
+            android:textColor="@android:color/black"
+            android:textColorHint="#999999"
+            android:textSize="14sp" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="14sp"
+            android:textColor="@color/white"
+            android:paddingTop="20dp"
+            android:paddingBottom="10dp"
+            android:text="Booking details"
+            android:paddingStart="15dp"/>
+
+        <!-- Booking Details Input -->
+        <EditText
+            android:id="@+id/bookingDetailsEditText"
+            android:layout_width="match_parent"
+            android:layout_height="100dp"
+            android:background="@drawable/custom_edit_text"
+            android:hint="Enter Booking Details"
+            android:paddingStart="12dp"
+            android:paddingEnd="12dp"
+            android:gravity="top|start"
+            android:textColor="@android:color/black"
+            android:textColorHint="#999999"
+            android:textSize="14sp"
+            android:fontFamily="@font/poppinsreg"
+            android:layout_marginStart="10dp"
+            android:layout_marginEnd="10dp"
+            android:inputType="textCapSentences|textMultiLine"
+            android:maxLines="7"
+            android:maxLength="250"
+            android:scrollbars="vertical"
+            android:minHeight="42dp"
+            android:paddingTop="10dp"/>
+        <Button
+            android:id="@+id/scanButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Scan Document" />
+
+        <ImageView
+            android:id="@+id/imageView"
+            android:layout_width="250dp"
+            android:layout_height="250dp"
+            android:layout_marginTop="20dp"
+            android:scaleType="fitCenter"/>
+
+        <!-- Submit Button -->
+        <Button
+            android:id="@+id/submitBookingButton"
+            android:layout_width="210dp"
+            android:layout_height="35dp"
+            android:text="Submit Booking"
+            android:layout_marginTop="25dp"
+            android:layout_gravity="center"
+            android:textAllCaps="false"
+            android:textColor="@color/white"
+            android:fontFamily="@font/poppinsm"
+            android:layout_marginStart="10dp"
+            android:layout_marginEnd="10dp" />
+    </LinearLayout>
+</ScrollView>

@@ -5,11 +5,11 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
+import android.widget.RatingBar
 import android.widget.TextView
 import androidx.fragment.app.FragmentActivity
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
-import com.example.yourapp.Suggested
 
 
 class SuggestionAdapter(private val surveyors: List<Suggested>, private val fragmentActivity: FragmentActivity,  private val onItemClick: (String) -> Unit) :
@@ -45,6 +45,7 @@ class SuggestionAdapter(private val surveyors: List<Suggested>, private val frag
                 .addToBackStack(null) // Enables back navigation
                 .commit()
         }
+        holder.ratings.rating = surveyor.ratings?.toFloat() ?: 0f
 
         Glide.with(holder.profileImageView.context)
             .load(surveyor.profileImage)
@@ -59,5 +60,6 @@ class SuggestionAdapter(private val surveyors: List<Suggested>, private val frag
         val nameTextView: TextView = view.findViewById(R.id.nameTextView)
         val userTypeTextView: TextView = view.findViewById(R.id.userTypeTextView)
         val addressTextView: TextView = view.findViewById(R.id.addressTextView)
+        val ratings: RatingBar = view.findViewById(R.id.ratingBar)
     }
 }

@@ -128,24 +128,31 @@ class LoginActivity : AppCompatActivity() {
                 db.collection("users").document(userId)
                     .update(mapOf("status" to newStatus, "fcmToken" to fcmToken))
                     .addOnSuccessListener {
-                        progressBar.visibility = View.GONE
-                        btnSignIn.isEnabled = true
-                        Toast.makeText(this, "Login successful!", Toast.LENGTH_SHORT).show()
-                        navigateToMainActivity()
+                        runOnUiThread {
+                            progressBar.visibility = View.GONE
+                            btnSignIn.isEnabled = true
+                            Toast.makeText(this, "Login successful!", Toast.LENGTH_SHORT).show()
+                            navigateToMainActivity()
+                        }
                     }
                     .addOnFailureListener { e ->
-                        progressBar.visibility = View.GONE
-                        btnSignIn.isEnabled = true
-                        Log.e("LoginActivity", "Error updating user status/token: ${e.message}")
-                        Toast.makeText(this, "Error updating user data.", Toast.LENGTH_SHORT).show()
+                        runOnUiThread {
+                            progressBar.visibility = View.GONE
+                            btnSignIn.isEnabled = true
+                            Log.e("LoginActivity", "Error updating user status/token: ${e.message}")
+                            Toast.makeText(this, "Error updating user data.", Toast.LENGTH_SHORT).show()
+                        }
                     }
             } else {
-                progressBar.visibility = View.GONE
-                btnSignIn.isEnabled = true
-                Log.e("LoginActivity", "Error fetching FCM token: ${tokenTask.exception?.message}")
-                Toast.makeText(this, "Error fetching FCM token.", Toast.LENGTH_SHORT).show()
+                runOnUiThread {
+                    progressBar.visibility = View.GONE
+                    btnSignIn.isEnabled = true
+                    Log.e("LoginActivity", "Error fetching FCM token: ${tokenTask.exception?.message}")
+                    Toast.makeText(this, "Error fetching FCM token.", Toast.LENGTH_SHORT).show()
+                }
             }
         }
+
     }
 
     private fun navigateToMainActivity() {

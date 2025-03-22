@@ -1,6 +1,7 @@
 package com.example.terramaster
 
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -11,6 +12,8 @@ import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentTransaction
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
@@ -23,6 +26,12 @@ class FragmentProfile: Fragment() {
     private lateinit var lastNameTextView: TextView
     private lateinit var usertypeTextView: TextView
 
+    private lateinit var recyclerView: RecyclerView
+    private lateinit var feedbackAdapter: FeedbackAdapter
+    private val feedbackList = mutableListOf<Feedback>()
+
+    private lateinit var db: FirebaseFirestore  // 🔹 Move db here
+    private var userId: String? = null  // 🔹 Move userId here
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -31,8 +40,8 @@ class FragmentProfile: Fragment() {
     ): View? {
         val view = inflater.inflate(R.layout.fragment_profile, container, false)
 
-        val db = FirebaseFirestore.getInstance()
-        val userId = FirebaseAuth.getInstance().currentUser?.uid
+        db = FirebaseFirestore.getInstance()
+        userId = FirebaseAuth.getInstance().currentUser?.uid  // 🔹 Now accessible in onViewCreated
 
         var Rating = view.findViewById<RatingBar>(R.id.ratingBar)
         var editProfile = view.findViewById<Button>(R.id.editProfile)
@@ -42,11 +51,16 @@ class FragmentProfile: Fragment() {
         lastNameTextView = view.findViewById(R.id.last_name)
         usertypeTextView = view.findViewById(R.id.userType)
 
-        if(userId != null){
-            db.collection("users").document(userId)
+        feedbackAdapter = FeedbackAdapter(feedbackList)
+        recyclerView = view.findViewById(R.id.recyclerView)
+        recyclerView.layoutManager = LinearLayoutManager(requireContext())
+        recyclerView.adapter = feedbackAdapter
+
+        if (userId != null) {
+            db.collection("users").document(userId!!)
                 .get()
                 .addOnSuccessListener { document ->
-                    if(document != null) {
+                    if (document != null && isAdded) {
                         val firstName = document.getString("first_name")
                         val lastName = document.getString("last_name")
                         val userType = document.getString("userType")
@@ -58,44 +72,95 @@ class FragmentProfile: Fragment() {
                         usertypeTextView.text = userType
                         Rating.rating = rating
 
-                        Glide.with(this)
-                            .load(profilePictureUrl)
-                            .placeholder(R.drawable.profilefree)
-                            .into(circleProfile)
-                    }else {
-                        Toast.makeText(requireContext(), "Document does not exist", Toast.LENGTH_SHORT).show()
+                        if (!profilePictureUrl.isNullOrEmpty()) {
+                            Glide.with(requireContext())
+                                .load(profilePictureUrl)
+                                .placeholder(R.drawable.profilefree)
+                                .into(circleProfile)
+                        }
                     }
                 }
                 .addOnFailureListener { exception ->
                     Toast.makeText(requireContext(), "Error fetching data: $exception", Toast.LENGTH_SHORT).show()
                 }
-
         }
 
         editProfile.setOnClickListener {
             navigateToEditProfile()
         }
 
+        fetchFeedback(userId)
         return view
     }
 
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+        userId?.let { uid ->
+            db.collection("users").document(uid).get()
+                .addOnSuccessListener { document ->
+                    if (document.exists() && isAdded) {
+                        val imageUrl = document.getString("profile_image_url") ?: ""
+
+                        if (imageUrl.isNotEmpty() && context != null) {
+                            Glide.with(requireContext())
+                                .load(imageUrl)
+                                .into(circleProfile)  // 🔹 Use circleProfile instead of profileImageView
+                        }
+                    }
+                }
+        }
+    }
+
     private fun navigateToEditProfile() {
-        // Create instance of EditProfileFragment
         val editProfileFragment = FragmentEditProfile()
-
-        // Get FragmentManager
         val fragmentManager: FragmentManager = requireActivity().supportFragmentManager
-
-        // Begin FragmentTransaction
         val transaction: FragmentTransaction = fragmentManager.beginTransaction()
 
-        // Replace current fragment with EditProfileFragment
         transaction.replace(R.id.fragment_container, editProfileFragment)
-
-        // Add transaction to back stack
         transaction.addToBackStack(null)
-
-        // Commit the transaction
         transaction.commit()
+    }
+
+    private fun fetchFeedback(professionalId: String?) {
+        if (professionalId == null) return
+
+        feedbackList.clear()
+        feedbackAdapter.notifyDataSetChanged()
+
+        db.collection("Feedback")
+            .whereEqualTo("professionalId", professionalId)
+            .get()
+            .addOnSuccessListener { feedbackDocuments ->
+                if (feedbackDocuments.isEmpty) return@addOnSuccessListener
+
+                var remainingTasks = feedbackDocuments.size()
+
+                for (document in feedbackDocuments) {
+                    val feedback = document.toObject(Feedback::class.java)
+
+                    db.collection("users").document(feedback.landownerId)
+                        .get()
+                        .addOnSuccessListener { userDocument ->
+                            if (userDocument.exists()) {
+                                feedback.first_name = userDocument.getString("first_name") ?: ""
+                                feedback.last_name = userDocument.getString("last_name") ?: ""
+                                feedback.profile_picture = userDocument.getString("profile_picture") ?: ""
+                            }
+
+                            feedbackList.add(feedback)
+                            remainingTasks--
+                            if (remainingTasks == 0) {
+                                feedbackAdapter.notifyDataSetChanged()
+                            }
+                        }
+                        .addOnFailureListener { e ->
+                            Log.e("Firestore", "Error fetching user details", e)
+                        }
+                }
+            }
+            .addOnFailureListener { e ->
+                Log.e("Firestore", "Error fetching feedback", e)
+            }
     }
 }

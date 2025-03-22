@@ -10,6 +10,7 @@ import android.widget.ProgressBar
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.example.terramaster.MainActivity
 import com.example.terramaster.R
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
@@ -34,7 +35,7 @@ class FragmentDisplayPDF : Fragment() {
         val view = inflater.inflate(R.layout.fragment_display_pdf, container, false)
         recyclerView = view.findViewById(R.id.recyclerViewPdf)
         progressBar = view.findViewById(R.id.progressBar) // Initialize ProgressBar
-
+        (requireActivity() as MainActivity).hideBottomNavigationBar()
         // Show the progress bar initially
         progressBar.visibility = View.VISIBLE
 

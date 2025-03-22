@@ -22,11 +22,13 @@ class FragmentDisplayStepByStepGuide : Fragment() {
         savedInstanceState: Bundle?
     ): View {
         return inflater.inflate(R.layout.fragment_display_stepbystep_guide, container, false)
+
+
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
+        (requireActivity() as MainActivity).hideBottomNavigationBar()
         tvGuideTitle = view.findViewById(R.id.tvGuideTitle) // Display guide title
         recyclerView = view.findViewById(R.id.recyclerViewSteps)
         recyclerView.layoutManager = LinearLayoutManager(requireContext())

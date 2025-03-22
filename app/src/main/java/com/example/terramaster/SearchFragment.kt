@@ -21,8 +21,9 @@ import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.example.yourapp.Suggested
+import com.example.terramaster.Suggested
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ListenerRegistration
 import okhttp3.Call
@@ -53,6 +54,12 @@ class SearchFragment : Fragment() {
     private val recommendationList = mutableListOf<Recommendation>()
     private val processorRecommendationList = mutableListOf<Recommendation>()
     private lateinit var processorRecyclerView: RecyclerView
+    private lateinit var spinner: Spinner
+    private lateinit var recommendationTextView: TextView
+    private lateinit var advanceSearch: Button
+    private var currentUser: FirebaseUser? = null
+    private lateinit var userType: String
+
 
 
     override fun onCreateView(
@@ -62,10 +69,44 @@ class SearchFragment : Fragment() {
     ): View? {
         val view = inflater.inflate(R.layout.fragment_search, container, false)
 
-        var advanceSearch: Button = view.findViewById(R.id.advanceSearch)
+        val auth = FirebaseAuth.getInstance()
+        currentUser = auth.currentUser
+        advanceSearch = view.findViewById(R.id.advanceSearch)
         recyclerView = view.findViewById(R.id.recommendationRecyclerView)
         processorRecyclerView = view.findViewById(R.id.processorRecyclerView)
-        var spinner: Spinner = view.findViewById(R.id.spinnerSort)
+        spinner = view.findViewById(R.id.spinnerSort)
+        recommendationTextView = view.findViewById(R.id.recommendationTextView)
+
+        if (currentUser != null) {
+            val auth = FirebaseAuth.getInstance()
+            val currentUser = auth.currentUser
+
+            currentUser?.let { user ->
+                val userId = user.uid
+                val db = FirebaseFirestore.getInstance()
+
+                db.collection("users").document(userId).get()
+                    .addOnSuccessListener { document ->
+                        if (document.exists()) {
+                            userType = document.getString("user_type") ?: ""
+
+                            val isRestrictedUser = userType.equals("Surveyor", ignoreCase = true) ||
+                                    userType.equals("Processor", ignoreCase = true)
+
+                            advanceSearch.visibility = if (isRestrictedUser) View.GONE else View.VISIBLE
+                            processorRecyclerView.visibility = if (isRestrictedUser) View.GONE else View.VISIBLE
+                            recyclerView.visibility = if (isRestrictedUser) View.GONE else View.VISIBLE
+                            recommendationTextView.visibility = if (isRestrictedUser) View.GONE else View.VISIBLE
+                            spinner.visibility = if (isRestrictedUser) View.GONE else View.VISIBLE
+                        }
+                    }
+                    .addOnFailureListener { e ->
+                        Log.e("FirestoreError", "Error fetching user type: ${e.message}")
+                    }
+            } ?: Log.e("FirebaseAuth", "User is not logged in")
+
+        }
+
 
         advanceSearch.setOnClickListener {
             requireActivity().supportFragmentManager.beginTransaction()
@@ -122,22 +163,54 @@ class SearchFragment : Fragment() {
                 currentSearchText = searchText
                 Log.d("Search", "Search text: $searchText")
 
+                val isRestrictedUser = userType.equals("Surveyor", ignoreCase = true) ||
+                        userType.equals("Processor", ignoreCase = true)
+
                 if (searchText.isNotEmpty()) {
                     Log.d("Search", "Showing Displayed ListView")
                     recentListView.visibility = View.GONE
                     recentHeadingTextView.visibility = View.GONE
-                    advanceSearch.visibility = View.GONE
                     displayedListView.visibility = View.VISIBLE
+                    advanceSearch.visibility = View.GONE
+                    processorRecyclerView.visibility = View.GONE
+                    recyclerView.visibility = View.GONE
+                    recommendationTextView.visibility = View.GONE
+                    spinner.visibility = View.GONE
+
+                    // Only hide these views if the user is restricted
+                    if (isRestrictedUser) {
+                        advanceSearch.visibility = View.GONE
+                        processorRecyclerView.visibility = View.GONE
+                        recyclerView.visibility = View.GONE
+                        recommendationTextView.visibility = View.GONE
+                        spinner.visibility = View.GONE
+                    } else {
+                        advanceSearch.visibility = View.GONE
+                        processorRecyclerView.visibility = View.GONE
+                        recyclerView.visibility = View.GONE
+                        recommendationTextView.visibility = View.GONE
+                        spinner.visibility = View.GONE
+                    }
+
                     filterNames(searchText)
                 } else {
                     Log.d("Search", "Showing Recent ListView")
                     recentListView.visibility = View.VISIBLE
                     recentHeadingTextView.visibility = View.VISIBLE
                     displayedListView.visibility = View.GONE
-                    advanceSearch.visibility = View.VISIBLE
+
+                    // If the user is restricted, keep them hidden
+                    if (!isRestrictedUser) {
+                        advanceSearch.visibility = View.VISIBLE
+                        processorRecyclerView.visibility = View.VISIBLE
+                        recyclerView.visibility = View.VISIBLE
+                        recommendationTextView.visibility = View.VISIBLE
+                        spinner.visibility = View.VISIBLE
+                    }
                 }
             }
         })
+
 
         // Handle long click to remove recent search
         recentListView.setOnItemLongClickListener { _, _, position, _ ->
@@ -206,6 +279,9 @@ class SearchFragment : Fragment() {
         fetchLandownerLocationAndRecommendSurveyors("Processor")
         return view
     }
+
+
+
     private fun fetchLandownerLocationAndRecommendSurveyors(selectedSort: String) {
         val currentUser = FirebaseAuth.getInstance().currentUser
         if (currentUser != null) {
@@ -273,56 +349,57 @@ class SearchFragment : Fragment() {
                     requireActivity().runOnUiThread {
                         Toast.makeText(requireContext(), "No processors found in $municipality", Toast.LENGTH_SHORT).show()
                     }
-                } else {
-                    for (doc in documents) {
-                        val dbCity = doc.getString("City")?.trim()?.lowercase() ?: ""
+                    return@addOnSuccessListener
+                }
 
-                        Log.d("Check", "Checking: dbCity='$dbCity' vs municipality='$municipalityLowerCase'")
+                for (doc in documents) {
+                    val dbCity = doc.getString("City")?.trim()?.lowercase() ?: ""
 
-                        if (dbCity.equals(municipalityLowerCase, ignoreCase = true)) {
-                            Log.d("Check", "Match found for ${doc.id}!")
+                    Log.d("Check", "Checking: dbCity='$dbCity' vs municipality='$municipalityLowerCase'")
 
-                            val firstName = doc.getString("first_name") ?: ""
-                            val lastName = doc.getString("last_name") ?: ""
-                            val profileUrl = doc.getString("profile_picture") ?: ""
-                            val userType = doc.getString("user_type") ?: ""
-                            val processorLat = doc.getDouble("latitude") ?: 0.0
-                            val processorLon = doc.getDouble("longitude") ?: 0.0
-                            val userId = doc.getString("uid") ?: ""
-                            val ratings = doc.getDouble("ratings") ?: 0.0
+                    if (dbCity.equals(municipalityLowerCase, ignoreCase = true)) {
+                        Log.d("Check", "Match found for ${doc.id}!")
 
-                            pendingRequests++  // Increase counter for each geocode request
+                        val firstName = doc.getString("first_name") ?: ""
+                        val lastName = doc.getString("last_name") ?: ""
+                        val profileUrl = doc.getString("profile_picture") ?: ""
+                        val userType = doc.getString("user_type") ?: ""
+                        val processorLat = doc.getDouble("latitude") ?: 0.0
+                        val processorLon = doc.getDouble("longitude") ?: 0.0
+                        val userId = doc.getString("uid") ?: ""
+                        val ratings = doc.getDouble("ratings") ?: 0.0
 
-                            convertCoordinatesToAddress(processorLat, processorLon) { address ->
-                                val processor = Recommendation(
-                                    firstName, lastName, userType, address, profileUrl, 0.0, processorLat, processorLon, userId, ratings
-                                )
-                                tempList.add(processor)
-
-                                pendingRequests--  // Decrease counter when request completes
-                                if (pendingRequests == 0) {
-                                    // Update UI only when all requests are done
-                                    requireActivity().runOnUiThread {
-                                        processorRecommendationList.clear()
-                                        processorRecommendationList.addAll(tempList.sortedBy { it.distance })
-                                        adapterProcessor.notifyDataSetChanged()
-                                        Log.d("Check", "UI Updated: ${processorRecommendationList.size} items added")
-                                    }
-                                }
-                            }
-                        } else {
-                            Log.e("Check", "Mismatch: dbCity='$dbCity' vs municipality='$municipalityLowerCase'")
+                        if (tempList.any { it.userId == userId }) {
+                            Log.d("Check", "Duplicate user detected, skipping: $userId")
+                            continue // Skip duplicate users
                         }
+
+                        pendingRequests++  // Increase counter for each geocode request
+
+                        convertCoordinatesToAddress(processorLat, processorLon) { address ->
+                            Log.d("DEBUG", "Processor: $firstName $lastName, Ratings: $ratings")
+
+                            val processor = Recommendation(
+                                firstName, lastName, userType, address, profileUrl, 0.0, processorLat, processorLon, userId, ratings
+                            )
+
+                            synchronized(tempList) {
+                                tempList.add(processor)
+                            }
+
+                            pendingRequests--  // Decrease counter when request completes
+
+                            if (pendingRequests == 0) {
+                                updateUI(tempList)
+                            }
+                        }
+                    } else {
+                        Log.e("Check", "Mismatch: dbCity='$dbCity' vs municipality='$municipalityLowerCase'")
                     }
                 }
 
                 if (pendingRequests == 0) {
-                    // If no requests were made, update UI immediately
-                    requireActivity().runOnUiThread {
-                        processorRecommendationList.clear()
-                        processorRecommendationList.addAll(tempList.sortedBy { it.distance })
-                        adapter.notifyDataSetChanged()
-                    }
+                    updateUI(tempList)
                 }
             }
             .addOnFailureListener {
@@ -331,6 +408,19 @@ class SearchFragment : Fragment() {
                 }
             }
     }
+
+    /**
+     * Updates UI with the processed list of processors.
+     */
+    private fun updateUI(processors: MutableList<Recommendation>) {
+        requireActivity().runOnUiThread {
+            processorRecommendationList.clear()
+            processorRecommendationList.addAll(processors.sortedBy { it.distance }.distinctBy { it.userId }) // Remove duplicates
+            adapterProcessor.notifyDataSetChanged()
+            Log.d("Check", "UI Updated: ${processorRecommendationList.size} items added")
+        }
+    }
+
     private fun getMunicipality(address: String, callback: (String?) -> Unit) {
         val client = OkHttpClient()
         val url = "https://nominatim.openstreetmap.org/search?q=${URLEncoder.encode(address, "UTF-8")}&format=json&addressdetails=1"
@@ -341,7 +431,7 @@ class SearchFragment : Fragment() {
             override fun onFailure(call: Call, e: IOException) {
                 Log.e("GetMunicipality", "Failed to fetch municipality: ${e.message}", e)
                 requireActivity().runOnUiThread {
-                    Toast.makeText(requireContext(), "Failed to fetch municipality", Toast.LENGTH_SHORT).show()
+                    Log.e("GetMunicipality", "Failed to fetch municipality",)
                 }
                 callback(null) // Return null
             }
@@ -353,7 +443,7 @@ class SearchFragment : Fragment() {
                     if (responseBody.isNullOrEmpty()) {
                         Log.w("GetMunicipality", "No municipality found")
                         requireActivity().runOnUiThread {
-                            Toast.makeText(requireContext(), "No municipality found", Toast.LENGTH_SHORT).show()
+                            Log.e("No municipality", "No municipality found")
                         }
                         callback(null)
                         return
@@ -377,23 +467,17 @@ class SearchFragment : Fragment() {
                             Log.i("GetMunicipality", "Extracted - City: ${addressDetails?.optString("city")}, Town: ${addressDetails?.optString("town")}, County: ${addressDetails?.optString("county")}")
                             Log.i("GetMunicipality", "Final Municipality: $municipality")
 
-                            requireActivity().runOnUiThread {
-                                Toast.makeText(requireContext(), "Municipality: $municipality", Toast.LENGTH_SHORT).show()
-                            }
+
 
                             callback(municipality)
                         } else {
                             Log.w("GetMunicipality", "Empty JSON response")
-                            requireActivity().runOnUiThread {
-                                Toast.makeText(requireContext(), "Empty response from server", Toast.LENGTH_SHORT).show()
-                            }
+
                             callback(null)
                         }
                     } catch (e: Exception) {
                         Log.e("GetMunicipality", "Error parsing response: ${e.message}", e)
-                        requireActivity().runOnUiThread {
-                            Toast.makeText(requireContext(), "Error parsing response", Toast.LENGTH_SHORT).show()
-                        }
+
                         callback(null)
                     }
                 }
@@ -679,5 +763,15 @@ class SearchFragment : Fragment() {
 
             (requireActivity() as MainActivity).showBottomNavigationBar()
 
+    }
+
+    override fun onResume() {
+        super.onResume()
+        (requireActivity() as MainActivity).showBottomNavigationBar()
+        advanceSearch.visibility = View.GONE
+        processorRecyclerView.visibility = View.GONE
+        recyclerView.visibility = View.GONE
+        recommendationTextView.visibility = View.GONE
+        spinner.visibility = View.GONE
     }
 }

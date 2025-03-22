@@ -44,8 +44,10 @@ class FragmentUserProfile: Fragment() {
         profilePictureUrl = view.findViewById(R.id.profile)
         Rating = view.findViewById(R.id.ratingBar)
 
+        feedbackAdapter = FeedbackAdapter(feedbackList)
         recyclerView = view.findViewById(R.id.recyclerView)
         recyclerView.layoutManager = LinearLayoutManager(requireContext())
+        recyclerView.adapter = feedbackAdapter
 
         var message = view.findViewById<Button>(R.id.Message)
 
@@ -120,8 +122,14 @@ class FragmentUserProfile: Fragment() {
 
     }
 
-    private fun fetchFeedback(professionalId: String) {
+    private fun fetchFeedback(professionalId: String?) {
         val db = FirebaseFirestore.getInstance()
+
+        if (professionalId == null) return
+
+        // 🔥 Clear list before fetching to prevent duplicates
+        feedbackList.clear()
+        feedbackAdapter.notifyDataSetChanged()
 
         db.collection("Feedback")
             .whereEqualTo("professionalId", professionalId)
@@ -134,7 +142,6 @@ class FragmentUserProfile: Fragment() {
                 for (document in feedbackDocuments) {
                     val feedback = document.toObject(Feedback::class.java)
 
-                    // Fetch user details based on userId
                     db.collection("users").document(feedback.landownerId)
                         .get()
                         .addOnSuccessListener { userDocument ->
@@ -146,11 +153,9 @@ class FragmentUserProfile: Fragment() {
 
                             feedbackList.add(feedback)
 
-                            // When all user details are fetched, update the RecyclerView
                             remainingTasks--
                             if (remainingTasks == 0) {
-                                feedbackAdapter = FeedbackAdapter(feedbackList)
-                                recyclerView.adapter = feedbackAdapter
+                                feedbackAdapter.notifyDataSetChanged() // ✅ Safe to call now
                             }
                         }
                         .addOnFailureListener { e ->

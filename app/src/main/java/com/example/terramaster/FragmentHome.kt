@@ -21,6 +21,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.terramaster.databinding.ActivityBookingBinding.inflate
 import com.google.android.play.integrity.internal.s
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.toObjects
 
@@ -119,10 +120,40 @@ class FragmentHome: Fragment() {
     }
 
 
+    private var menuItem: MenuItem? = null
+
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         inflater.inflate(R.menu.knowledge_guide_tool_bar_menu, menu)
         super.onCreateOptionsMenu(menu, inflater)
+
+        menuItem = menu.findItem(R.id.action_add) // Store reference to MenuItem
+
+        updateMenuVisibility() // Call function to handle visibility logic
     }
+
+    private fun updateMenuVisibility() {
+        val auth = FirebaseAuth.getInstance()
+        val currentUser = auth.currentUser
+
+        if (currentUser != null) {
+            val userId = currentUser.uid
+            val db = FirebaseFirestore.getInstance()
+
+            db.collection("users").document(userId).get()
+                .addOnSuccessListener { document ->
+                    if (document.exists()) {
+                        val userType = document.getString("user_type") ?: ""
+
+                        // Ensure menuItem is not null before modifying
+                        menuItem?.isVisible = userType.equals("Processor", ignoreCase = true)
+                    }
+                }
+                .addOnFailureListener { e ->
+                    Log.e("FirestoreError", "Error fetching user type: ${e.message}")
+                }
+        }
+    }
+
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {

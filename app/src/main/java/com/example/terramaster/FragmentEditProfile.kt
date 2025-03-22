@@ -42,6 +42,7 @@ class FragmentEditProfile : Fragment() {
     ): View? {
         val view = inflater.inflate(R.layout.fragment_edit_profiile, container, false)
 
+        (requireActivity() as MainActivity).hideBottomNavigationBar()
         firebaseAuth = FirebaseAuth.getInstance()
         firebaseFirestore = FirebaseFirestore.getInstance()
         firebaseStorage = FirebaseStorage.getInstance()
@@ -64,6 +65,7 @@ class FragmentEditProfile : Fragment() {
 
         backButton.setOnClickListener {
             parentFragmentManager.popBackStack()
+
         }
 
         editProfile.setOnClickListener {

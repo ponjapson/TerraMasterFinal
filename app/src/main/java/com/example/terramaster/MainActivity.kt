@@ -19,34 +19,35 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var fragmentContainer: FrameLayout
     private lateinit var bottomNavigationView: BottomNavigationView
+    private lateinit var userType: String
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+
         fragmentContainer = findViewById(R.id.fragment_container)
         bottomNavigationView = findViewById(R.id.bottom_navigation)
-
-
 
         // Disable icon tinting programmatically
         bottomNavigationView.itemIconTintList = null
 
-        // Initialize the default fragment (Feed)
+        // Initialize the default fragment (Jobs)
         replaceFragment(FragmentJobs(), false, true)
-
-        // Explicitly set the selected item in the bottom navigation to "Feed"
         bottomNavigationView.selectedItemId = R.id.nav_jobs
+
+        val user = FirebaseAuth.getInstance().currentUser
+        if (user != null) {
+            fetchUserType(user.uid)
+        }
 
         bottomNavigationView.setOnNavigationItemSelectedListener { item ->
             when (item.itemId) {
                 R.id.nav_jobs -> {
-                    Log.d("MainActivity", "Navigating to feed fragment")
                     replaceFragment(FragmentJobs(), false, true)
                     true
                 }
 
                 R.id.nav_home -> {
-                    Log.d("MainActivity", "Navigating to jobs fragment")
                     replaceFragment(FragmentHome(), true)
                     true
                 }
@@ -57,14 +58,16 @@ class MainActivity : AppCompatActivity() {
                 }
 
                 R.id.nav_messages -> {
-                    Log.d("MainActivity", "Navigating to messages fragment")
                     replaceFragment(FragmentMessage(), true)
                     true
                 }
 
                 R.id.nav_profile -> {
-                    Log.d("MainActivity", "Navigating to messages fragment")
-                    replaceFragment(FragmentProfile(), true)
+                    if (userType.equals("Landowner", ignoreCase = true)) {
+                        replaceFragment(FragmentProfileLandowner(), true)
+                    } else {
+                        replaceFragment(FragmentProfile(), true)
+                    }
                     true
                 }
 
@@ -73,7 +76,28 @@ class MainActivity : AppCompatActivity() {
         }
 
     }
+    fun fetchUserType(userId: String) {
+        val db = FirebaseFirestore.getInstance()
 
+        db.collection("users").document(userId).get()
+            .addOnSuccessListener { document ->
+                if (document.exists()) {
+                    userType = document.getString("user_type") ?: ""
+
+                    // Hide Chatbot if user is Surveyor or Processor
+                    if (userType.equals("Surveyor", ignoreCase = true) ||
+                        userType.equals("Processor", ignoreCase = true)) {
+                        bottomNavigationView.menu.findItem(R.id.nav_chatbot).isVisible = false
+                    }
+                    if (userType.equals("Surveyor", ignoreCase = true)) {
+                        bottomNavigationView.menu.findItem(R.id.nav_home).isVisible = false
+                    }
+                }
+            }
+            .addOnFailureListener { e ->
+                Log.e("FirestoreError", "Error fetching user type: ${e.message}")
+            }
+    }
     override fun onBackPressed() {
         val currentFragment = supportFragmentManager.findFragmentById(R.id.fragment_container)
 
@@ -128,7 +152,7 @@ class MainActivity : AppCompatActivity() {
     private fun updateBottomNavigationVisibility(fragment: Fragment) {
         // Show BottomNavigationView for main fragments
         if (fragment is FragmentHome || fragment is FragmentChatbot ||
-            fragment is FragmentMessage || fragment is FragmentProfile || fragment is FragmentJobs) {
+            fragment is FragmentMessage || fragment is FragmentProfile || fragment is FragmentJobs || fragment is FragmentProfileLandowner) {
             showBottomNavigationBar()  // Show BottomNavigationView
         } else {
             hideBottomNavigationBar()  // Hide BottomNavigationView

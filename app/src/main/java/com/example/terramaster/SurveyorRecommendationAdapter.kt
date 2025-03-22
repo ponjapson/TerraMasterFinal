@@ -5,6 +5,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
+import android.widget.RatingBar
 import android.widget.TextView
 import androidx.fragment.app.FragmentActivity
 import androidx.recyclerview.widget.RecyclerView
@@ -44,7 +45,7 @@ class SurveyorRecommendationAdapter(private val surveyors: List<Recommendation>,
                 .addToBackStack(null) // Enables back navigation
                 .commit()
         }
-
+        holder.ratings.rating = surveyor.ratings?.toFloat() ?: 0f
         Glide.with(holder.profileImageView.context)
             .load(surveyor.profileImage)
             .placeholder(R.drawable.profile) // Default image if none provided
@@ -58,5 +59,6 @@ class SurveyorRecommendationAdapter(private val surveyors: List<Recommendation>,
         val nameTextView: TextView = view.findViewById(R.id.nameTextView)
         val userTypeTextView: TextView = view.findViewById(R.id.userTypeTextView)
         val addressTextView: TextView = view.findViewById(R.id.addressTextView)
+        val ratings: RatingBar = view.findViewById(R.id.ratingBar)
     }
 }
