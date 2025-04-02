@@ -68,6 +68,7 @@ class RequestTabFragment : Fragment(), OnPaymentClickListener {
                         // Extract PDF file name if it exists
                         val pdfUrl = doc.getString("pdfUrl")
                         job.pdfFileName = pdfUrl?.let { extractFileNameFromUrl(it) } // Set PDF file name
+                        job.pdfUrl = pdfUrl ?: ""
 
                         convertCoordinatesToAddress(job.latitude, job.longitude) { address ->
                             job.address = address // Update job with address

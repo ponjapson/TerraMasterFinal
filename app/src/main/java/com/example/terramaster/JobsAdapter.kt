@@ -1,5 +1,6 @@
 package com.example.terramaster
 
+import FragmentDisplayPDF
 import android.app.DatePickerDialog
 import android.app.TimePickerDialog
 import android.content.Context
@@ -15,6 +16,7 @@ import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
+import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.FragmentActivity
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
@@ -124,30 +126,19 @@ class JobsAdapter(private val jobs: MutableList<Job>, private val context: Conte
 
         holder.pdfFile.text = job.pdfFileName
         holder.pdfFile.setOnClickListener {
-            if (job.pdfFileName.isNullOrEmpty()) {
-                Log.e("PDF Viewer", "No PDF URL found!")
-                return@setOnClickListener
-            }
+            val pdfUrl = jobs[position].pdfUrl // Ensure you have the correct PDF URL
+            val fragment = FragmentDisplayPDF()
+            val bundle = Bundle()
+            bundle.putString("pdfUrl", pdfUrl) // Pass the PDF URL instead of guideId
+            fragment.arguments = bundle
 
-            Log.d("PDF Viewer", "Attempting to fetch PDF from: ${job.pdfFileName}")
-
-            // Construct Firebase Storage reference
-            val storageRef = FirebaseStorage.getInstance().reference.child("${job.pdfFileName}")
-
-            storageRef.downloadUrl.addOnSuccessListener { uri ->
-                val downloadUrl = uri.toString()
-                Log.d("PDF Viewer", "Download URL: $downloadUrl")
-
-                // Start PDFViewerActivity and pass the URL
-                val intent = Intent(fragmentActivity, PDFViewerActivity::class.java).apply {
-                    putExtra("pdfUrl", downloadUrl)
-                }
-                fragmentActivity.startActivity(intent)
-
-            }.addOnFailureListener { exception ->
-                Log.e("PDF Viewer", "Failed to get signed URL: ${exception.message}")
-            }
+            val fragmentManager = (holder.itemView.context as AppCompatActivity).supportFragmentManager
+            fragmentManager.beginTransaction()
+                .replace(R.id.fragment_container, fragment)
+                .addToBackStack(null)
+                .commit()
         }
+
 
 
 

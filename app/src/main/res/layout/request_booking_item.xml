@@ -54,40 +54,6 @@
                 android:textColor="@color/black"
                 android:fontFamily="@font/poppinsm" />
 
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Contract Price"
-                android:textSize="12sp"
-                android:layout_marginTop="4dp"
-                android:textColor="@color/black" />
-
-            <TextView
-                android:id="@+id/contractPrice"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Contract Price"
-                android:textSize="14sp"
-                android:layout_marginTop="4dp"
-                android:textColor="@color/black" />
-
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Downpayment"
-                android:textSize="12sp"
-                android:layout_marginTop="4dp"
-                android:textColor="@color/black" />
-
-            <TextView
-                android:id="@+id/booking_downpayment"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Amount"
-                android:textSize="14sp"
-                android:layout_marginTop="4dp"
-                android:textColor="@color/black" />
-
 
             <TextView
                 android:layout_width="match_parent"
@@ -149,6 +115,40 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="Status"
+                android:textSize="14sp"
+                android:layout_marginTop="4dp"
+                android:textColor="@color/black" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Contract Price"
+                android:textSize="12sp"
+                android:layout_marginTop="4dp"
+                android:textColor="@color/black" />
+
+            <TextView
+                android:id="@+id/contractPrice"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Contract Price"
+                android:textSize="14sp"
+                android:layout_marginTop="4dp"
+                android:textColor="@color/black" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Downpayment"
+                android:textSize="12sp"
+                android:layout_marginTop="4dp"
+                android:textColor="@color/black" />
+
+            <TextView
+                android:id="@+id/booking_downpayment"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Amount"
                 android:textSize="14sp"
                 android:layout_marginTop="4dp"
                 android:textColor="@color/black" />
