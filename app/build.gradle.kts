@@ -14,6 +14,7 @@ android {
         targetSdk = 34
         versionCode = 1
         versionName = "1.0"
+        multiDexEnabled = true
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -50,6 +51,7 @@ dependencies {
     implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.8.6")
     implementation("com.google.ai.client.generativeai:generativeai:0.9.0")
     implementation("com.google.android.gms:play-services-location:21.3.0")
+    implementation("com.google.firebase:firebase-functions-ktx:21.2.0")
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.2.1")
     androidTestImplementation("androidx.test.espresso:espresso-core:3.6.1")
@@ -67,6 +69,12 @@ dependencies {
     implementation ("org.osmdroid:osmdroid-android:6.1.14")
     implementation ("androidx.preference:preference-ktx:1.2.1")
     implementation ("com.google.android.gms:play-services-mlkit-document-scanner:16.0.0-beta1")
+    implementation ("com.google.android.material:material:1.10.0")
+    implementation("com.stripe:stripe-android:21.0.1")
+    implementation("com.stripe:stripe-java:28.0.0")
+    implementation ("com.github.barteksc:android-pdf-viewer:2.8.2")
+    implementation ("androidx.multidex:multidex:2.0.1")
+
 
 
 

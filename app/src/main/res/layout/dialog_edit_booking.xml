@@ -18,7 +18,7 @@
             android:layout_marginTop="30dp"
             android:textColor="@color/black"
             android:textSize="18sp"
-            android:text="Booked Professional"/>
+            android:text="Edit Booking Details"/>
 
         <View
             android:layout_width="match_parent"
@@ -38,14 +38,6 @@
             android:layout_marginStart="10dp"
             android:layout_marginEnd="10dp">
 
-            <TextView
-                android:id="@+id/notice"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textSize="14sp"
-                android:textColor="@color/black"
-                android:paddingBottom="10dp"
-                android:text="Notice: Republic Act No. 3019, also known as the Anti-Graft and Corrupt Practices Act, is the primary law in the Philippines aimed at preventing and punishing graft and corruption, particularly among public officials and employees."/>
             <!-- Start DateTime Button -->
             <Button
                 android:id="@+id/startDateTimeButton"

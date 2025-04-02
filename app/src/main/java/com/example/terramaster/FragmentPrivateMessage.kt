@@ -30,7 +30,7 @@ class FragmentPrivateMessage : Fragment() {
     private val messages = mutableListOf<PrivateMessageSealed>()
     private lateinit var profileImageView: CircleImageView
     private lateinit var chatRecipientNameTextView: TextView
-    private lateinit var moreImgBtn: ImageButton
+    //private lateinit var moreImgBtn: ImageButton
     private val firestore = FirebaseFirestore.getInstance()
     private val currentUser = FirebaseAuth.getInstance().currentUser
     private lateinit var chatRoomId: String
@@ -50,7 +50,7 @@ class FragmentPrivateMessage : Fragment() {
         recyclerView = view.findViewById(R.id.messageRecyclerView)
         messageEditText = view.findViewById(R.id.messageInput)
         sendButton = view.findViewById(R.id.sendButton)
-        moreImgBtn = view.findViewById(R.id.bookingButton)
+        //moreImgBtn = view.findViewById(R.id.bookingButton)
 
         messageAdapter = PrivateMessageAdapter(messages)
         recyclerView.layoutManager = LinearLayoutManager(requireContext())
@@ -76,11 +76,11 @@ class FragmentPrivateMessage : Fragment() {
             }
         }
 
-        moreImgBtn.setOnClickListener {
+       /* moreImgBtn.setOnClickListener {
             val intent = Intent(requireContext(), BookingActivity::class.java)
             intent.putExtra("bookedUserId", otherUserId)
             startActivity(intent)
-        }
+        }*/
 
         if (chatRoomId.isEmpty() && otherUserId != null) {
             chatRoomId = generateChatRoomId(currentUser!!.uid, otherUserId!!)
@@ -103,11 +103,16 @@ class FragmentPrivateMessage : Fragment() {
         }
 
         bookingButton.setOnClickListener {
-            val fragment = FragmentBooking()
-            val transaction = parentFragmentManager.beginTransaction()
-            transaction.replace(R.id.fragment_container, fragment)
-            transaction.addToBackStack(null) // Allows back navigation
-            transaction.commit()
+            val fragmentTransaction = requireActivity().supportFragmentManager.beginTransaction()
+            val fragment = FragmentBooking() // Replace with your target fragment
+            val bundle = Bundle()
+            bundle.putString("bookedUserId", otherUserId)
+            fragment.arguments = bundle
+
+            fragmentTransaction.replace(R.id.fragment_container, fragment) // Replace `R.id.fragment_container` with your actual container ID
+            fragmentTransaction.addToBackStack(null) // Optional: if you want the user to be able to navigate back
+            fragmentTransaction.commit()
+
         }
 
         return view

@@ -1,0 +1,289 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="8dp"
+    android:layout_marginBottom="10dp">
+
+    <TextView
+        android:id="@+id/booking_date"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Booking Date: Jan 01, 2023"
+        android:textSize="14sp"
+        android:textColor="#FF9900"
+        android:layout_marginTop="4dp"
+        android:layout_margin="10dp"
+        android:fontFamily="@font/poppinsm"/>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:paddingLeft="10dp"
+        android:paddingRight="10dp">
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
+
+            <de.hdodenhof.circleimageview.CircleImageView
+                android:id="@+id/profile_image"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:src="@drawable/profile_pic"
+                android:scaleType="centerCrop"
+                android:layout_marginEnd="8dp"
+                android:clipToOutline="true" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_marginLeft="10dp">
+
+            <TextView
+                android:id="@+id/user_name"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="User Name"
+                android:textStyle="bold"
+                android:textSize="16sp"
+                android:textColor="@color/black"
+                android:fontFamily="@font/poppinsm" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Contract Price"
+                android:textSize="12sp"
+                android:layout_marginTop="4dp"
+                android:textColor="@color/black" />
+
+            <TextView
+                android:id="@+id/contractPrice"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Contract Price"
+                android:textSize="14sp"
+                android:layout_marginTop="4dp"
+                android:textColor="@color/black" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Downpayment"
+                android:textSize="12sp"
+                android:layout_marginTop="4dp"
+                android:textColor="@color/black" />
+
+            <TextView
+                android:id="@+id/booking_downpayment"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Amount"
+                android:textSize="14sp"
+                android:layout_marginTop="4dp"
+                android:textColor="@color/black" />
+
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Start"
+                android:textSize="12sp"
+                android:layout_marginTop="4dp"
+                android:textColor="@color/black" />
+
+            <TextView
+                android:id="@+id/booking_start_date"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Start Date"
+                android:textSize="14sp"
+                android:textColor="@color/black"
+                android:layout_marginTop="4dp" />
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Address"
+                android:textSize="12sp"
+                android:layout_marginTop="4dp"
+                android:textColor="@color/black" />
+
+            <TextView
+                android:id="@+id/address"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Address"
+                android:textSize="14sp"
+                android:textColor="@color/black"
+                android:layout_marginTop="4dp" />
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Documents"
+                android:textSize="12sp"
+                android:layout_marginTop="4dp"
+                android:textColor="@color/black" />
+
+            <TextView
+                android:id="@+id/pdfFileName"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="FileName"
+                android:textSize="14sp"
+                android:textColor="@android:color/holo_blue_light" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Status"
+                android:textSize="12sp"
+                android:layout_marginTop="4dp"
+                android:textColor="@color/black" />
+            <TextView
+                android:id="@+id/requestStatus"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Status"
+                android:textSize="14sp"
+                android:layout_marginTop="4dp"
+                android:textColor="@color/black" />
+        </LinearLayout>
+    </LinearLayout>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center"
+        android:layout_marginTop="8dp"
+        android:padding="10dp">
+        <Button
+            android:id="@+id/payButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Pay Now"
+            android:layout_marginStart="8dp"
+            android:textColor="@color/white"
+            android:background="#F44336"
+            android:visibility="gone"/>
+        <Button
+            android:id="@+id/btn_confirm"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Confirm"
+            android:textColor="@color/white"
+            android:background="#4CAF50"
+            android:visibility="gone"
+            />
+        <Button
+            android:id="@+id/btn_revise"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Edit"
+            android:layout_marginStart="8dp"
+            android:textColor="@color/white"
+            android:background="#FFA200"
+            android:visibility="gone"/>
+        <Button
+            android:id="@+id/btn_reviseonGOing"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Revise"
+            android:layout_marginStart="8dp"
+            android:textColor="@color/white"
+            android:background="#FFA200"
+            android:visibility="gone"/>
+        <Button
+            android:id="@+id/btn_InProgress"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="In Progress"
+            android:layout_marginStart="8dp"
+            android:textColor="@color/white"
+            android:background="#4CAF50"
+            android:visibility="gone"/>
+        <Button
+            android:id="@+id/btn_Done"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Done"
+            android:layout_marginStart="8dp"
+            android:textColor="@color/white"
+            android:background="#4CAF50"
+            android:visibility="gone"/>
+
+        <Button
+            android:id="@+id/btn_completed"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Completed"
+            android:layout_marginStart="8dp"
+            android:textColor="@color/white"
+            android:background="#4CAF50"
+            android:visibility="gone"/>
+        <Button
+            android:id="@+id/btn_remainingPayment"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Pay Now"
+            android:layout_marginStart="8dp"
+            android:textColor="@color/white"
+            android:background="#F44336"
+            android:visibility="gone"/>
+
+        <Button
+            android:id="@+id/btn_Approve"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Approve"
+            android:layout_marginStart="8dp"
+            android:textColor="@color/white"
+            android:background="#4CAF50"
+            android:visibility="gone"/>
+        <Button
+            android:id="@+id/btn_cancel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Cancel"
+            android:layout_marginStart="8dp"
+            android:textColor="@color/white"
+            android:background="#F44336"
+            android:visibility="gone"/>
+        <Button
+            android:id="@+id/btn_declined"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Declined"
+            android:layout_marginStart="8dp"
+            android:textColor="@color/white"
+            android:background="#F44336"
+            android:visibility="gone"/>
+
+        <Button
+            android:id="@+id/btn_Agree"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Confirm"
+            android:layout_marginStart="8dp"
+            android:textColor="@color/white"
+            android:background="#4CAF50"
+            android:visibility="gone"/>
+        <Button
+            android:id="@+id/btn_Disagree"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="disagree"
+            android:layout_marginStart="8dp"
+            android:textColor="@color/white"
+            android:background="#F44336"
+            android:visibility="gone"/>
+    </LinearLayout>
+
+
+
+
+</LinearLayout>

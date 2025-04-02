@@ -1,0 +1,161 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="16dp"
+    android:gravity="center">
+
+    <TextView
+        android:id="@+id/booking_date"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Booking Date: Jan 01, 2023"
+        android:textSize="14sp"
+        android:textColor="#FF9900"
+        android:layout_marginTop="10dp"
+        android:layout_margin="10dp"
+        android:fontFamily="@font/poppinsm"/>
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
+
+            <de.hdodenhof.circleimageview.CircleImageView
+                android:id="@+id/profile_image"
+                android:layout_width="62dp"
+                android:layout_height="62dp"
+                android:src="@drawable/profile_pic"
+                android:scaleType="centerCrop" />
+        </LinearLayout>
+
+
+            <TextView
+                android:id="@+id/user_name"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="User Name"
+                android:textStyle="bold"
+                android:textSize="16sp"
+                android:textColor="@color/white"
+                android:fontFamily="@font/poppinsm"
+                android:layout_marginTop="10dp"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Description"
+                android:textSize="12sp"
+                android:textColor="@color/greyline"
+                android:fontFamily="@font/poppinsreg"
+                android:layout_marginTop="10dp"/>
+
+            <TextView
+                android:id="@+id/booking_description"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Description"
+                android:textSize="14sp"
+                android:textColor="@color/white"
+                android:fontFamily="@font/poppinsreg"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Contract Price"
+                android:textSize="12sp"
+                android:layout_marginTop="10dp"
+                android:textColor="@color/greyline"
+                />
+
+            <TextView
+                android:id="@+id/contractPrice"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Contract Price"
+                android:textSize="14sp"
+                android:layout_marginTop="4dp"
+                android:textColor="#FF9900" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Downpayment"
+                android:textSize="12sp"
+                android:layout_marginTop="10dp"
+                android:textColor="@color/greyline"/>
+
+            <TextView
+                android:id="@+id/booking_downpayment"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Amount"
+                android:textSize="14sp"
+                android:layout_marginTop="4dp"
+                android:textColor="#FF9900" />
+
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Start"
+                android:textSize="12sp"
+                android:layout_marginTop="10dp"
+                android:textColor="@color/greyline" />
+
+            <TextView
+                android:id="@+id/booking_start_date"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Start Date"
+                android:textSize="14sp"
+                android:textColor="@color/white"
+                android:layout_marginTop="4dp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="End"
+                android:textSize="12sp"
+                android:layout_marginTop="10dp"
+                android:textColor="@color/greyline" />
+
+            <TextView
+                android:id="@+id/booking_end_date"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="End Date"
+                android:textSize="14sp"
+                android:layout_marginTop="4dp"
+                android:textColor="@color/white" />
+
+    <TextView
+        android:id="@+id/bookingIdTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Booking ID will be shown here"
+        android:textSize="16sp"
+        android:textColor="@color/white"
+        android:layout_marginTop="15dp"/>
+
+    <TextView
+        android:id="@+id/paymentDescription"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Complete your payment below"
+        android:textSize="18sp"
+        android:paddingTop="10dp"
+        android:fontFamily="@font/poppinssb"
+        android:textColor="@color/white"/>
+
+    <Button
+        android:id="@+id/payButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Pay Now"
+        android:layout_marginRight="20dp"
+        android:layout_marginLeft="20dp"
+        android:textColor="@android:color/white"
+        android:layout_marginTop="10dp"/>
+
+</LinearLayout>

@@ -1,7 +1,10 @@
 package com.example.terramaster
 
 import android.content.Context
+import android.os.Handler
+import android.os.Looper
 import android.util.Log
+import org.json.JSONArray
 import org.json.JSONObject
 import java.net.HttpURLConnection
 import java.net.URL
@@ -18,24 +21,32 @@ class OpenStreetMapGeocoder(private val context: Context) {
                 val url = URL("https://nominatim.openstreetmap.org/search?format=json&q=$encodedAddress")
                 val connection = url.openConnection() as HttpURLConnection
                 connection.requestMethod = "GET"
-                connection.setRequestProperty("User-Agent", "Mozilla/5.0")
+                connection.setRequestProperty("User-Agent", "YourAppName/1.0 (ponponjapson@gmail.com)")
 
                 val response = connection.inputStream.bufferedReader().use { it.readText() }
-                val jsonArray = JSONObject("{data:$response}").getJSONArray("data")
+                val jsonArray = JSONArray(response)
 
                 if (jsonArray.length() > 0) {
                     val firstResult = jsonArray.getJSONObject(0)
                     val lat = firstResult.getDouble("lat")
                     val lon = firstResult.getDouble("lon")
-                    callback(Coordinates(lat, lon))
+
+                    Handler(Looper.getMainLooper()).post {
+                        callback(Coordinates(lat, lon))
+                    }
                 } else {
-                    callback(null)
+                    Handler(Looper.getMainLooper()).post {
+                        callback(null)
+                    }
                 }
             } catch (e: Exception) {
                 Log.e("OSM Geocoder", "Error fetching coordinates: ${e.message}")
-                callback(null)
+                Handler(Looper.getMainLooper()).post {
+                    callback(null)
+                }
             }
         }
+
     }
 
     fun getAddressFromCoordinates(lat: Double, lon: Double, callback: (String?) -> Unit) {
