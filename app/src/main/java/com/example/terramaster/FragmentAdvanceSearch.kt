@@ -107,6 +107,13 @@ class FragmentAdvanceSearch : Fragment() {
                 val tempList = mutableListOf<Suggested>()
                 var pendingRequests = 0  // Counter to track pending geocode requests
 
+                if (documents.isEmpty) {
+                    requireActivity().runOnUiThread {
+                        Toast.makeText(requireContext(), "No surveyors found", Toast.LENGTH_SHORT).show()
+                    }
+                    return@addOnSuccessListener
+                }
+
                 for (doc in documents) {
                     val firstName = doc.getString("first_name") ?: ""
                     val lastName = doc.getString("last_name") ?: ""
@@ -128,10 +135,11 @@ class FragmentAdvanceSearch : Fragment() {
 
                             pendingRequests--  // Decrease counter when request completes
                             if (pendingRequests == 0) {
-                                // Update UI only when all requests are done
-                                suggestionList.clear()
-                                suggestionList.addAll(tempList.sortedBy { it.distance })
-                                adapter.notifyDataSetChanged()
+                                requireActivity().runOnUiThread {
+                                    suggestionList.clear()
+                                    suggestionList.addAll(tempList.sortedBy { it.distance })
+                                    adapter.notifyDataSetChanged()
+                                }
                             }
                         }
                     }
@@ -139,16 +147,19 @@ class FragmentAdvanceSearch : Fragment() {
 
                 if (pendingRequests == 0) {
                     // If no requests were made, update UI immediately
-                    suggestionList.clear()
-                    suggestionList.addAll(tempList.sortedBy { it.distance })
-                    adapter.notifyDataSetChanged()
+                    requireActivity().runOnUiThread {
+                        suggestionList.clear()
+                        suggestionList.addAll(tempList.sortedBy { it.distance })
+                        adapter.notifyDataSetChanged()
+                    }
                 }
             }
             .addOnFailureListener {
-                Toast.makeText(requireContext(), "Error fetching surveyors", Toast.LENGTH_SHORT).show()
+                requireActivity().runOnUiThread {
+                    Toast.makeText(requireContext(), "Error fetching surveyors", Toast.LENGTH_SHORT).show()
+                }
             }
     }
-
 
     private fun fetchProcessorsByMunicipality(municipality: String) {
         val municipalityLowerCase = municipality.trim().lowercase()
@@ -157,56 +168,46 @@ class FragmentAdvanceSearch : Fragment() {
             .whereEqualTo("user_type", "Processor")
             .get()
             .addOnSuccessListener { documents ->
-                Log.d("Check", "Extracted Municipality: '$municipalityLowerCase' (Length: ${municipalityLowerCase.length})")
-                Log.d("Check", "Total documents retrieved: ${documents.size()}")
+                if (documents.isEmpty) {
+                    requireActivity().runOnUiThread {
+                        Toast.makeText(requireContext(), "No processors found in $municipality", Toast.LENGTH_SHORT).show()
+                    }
+                    return@addOnSuccessListener
+                }
 
                 suggestionList.clear()
                 val tempList = mutableListOf<Suggested>()
                 var pendingRequests = 0  // Counter to track geocode requests
 
-                if (documents.isEmpty) {
-                    requireActivity().runOnUiThread {
-                        Toast.makeText(requireContext(), "No processors found in $municipality", Toast.LENGTH_SHORT).show()
-                    }
-                } else {
-                    for (doc in documents) {
-                        val dbCity = doc.getString("City")?.trim()?.lowercase() ?: ""
+                for (doc in documents) {
+                    val dbCity = doc.getString("City")?.trim()?.lowercase() ?: ""
 
-                        Log.d("Check", "Checking: dbCity='$dbCity' vs municipality='$municipalityLowerCase'")
+                    if (dbCity.equals(municipalityLowerCase, ignoreCase = true)) {
+                        val firstName = doc.getString("first_name") ?: ""
+                        val lastName = doc.getString("last_name") ?: ""
+                        val profileUrl = doc.getString("profile_picture") ?: ""
+                        val userType = doc.getString("user_type") ?: ""
+                        val processorLat = doc.getDouble("latitude") ?: 0.0
+                        val processorLon = doc.getDouble("longitude") ?: 0.0
+                        val userId = doc.getString("uid") ?: ""
+                        val ratings = doc.getDouble("ratings") ?: 0.0
 
-                        if (dbCity.equals(municipalityLowerCase, ignoreCase = true)) {
-                            Log.d("Check", "Match found for ${doc.id}!")
+                        pendingRequests++  // Increase counter for each geocode request
 
-                            val firstName = doc.getString("first_name") ?: ""
-                            val lastName = doc.getString("last_name") ?: ""
-                            val profileUrl = doc.getString("profile_picture") ?: ""
-                            val userType = doc.getString("user_type") ?: ""
-                            val processorLat = doc.getDouble("latitude") ?: 0.0
-                            val processorLon = doc.getDouble("longitude") ?: 0.0
-                            val userId = doc.getString("uid") ?: ""
-                            val ratings = doc.getDouble("ratings") ?: 0.0
+                        convertCoordinatesToAddress(processorLat, processorLon) { address ->
+                            val processor = Suggested(
+                                firstName, lastName, userType, address, profileUrl, 0.0, processorLat, processorLon, userId, ratings
+                            )
+                            tempList.add(processor)
 
-                            pendingRequests++  // Increase counter for each geocode request
-
-                            convertCoordinatesToAddress(processorLat, processorLon) { address ->
-                                val processor = Suggested(
-                                    firstName, lastName, userType, address, profileUrl, 0.0, processorLat, processorLon, userId, ratings
-                                )
-                                tempList.add(processor)
-
-                                pendingRequests--  // Decrease counter when request completes
-                                if (pendingRequests == 0) {
-                                    // Update UI only when all requests are done
-                                    requireActivity().runOnUiThread {
-                                        suggestionList.clear()
-                                        suggestionList.addAll(tempList.sortedBy { it.distance })
-                                        adapter.notifyDataSetChanged()
-                                        Log.d("Check", "UI Updated: ${suggestionList.size} items added")
-                                    }
+                            pendingRequests--  // Decrease counter when request completes
+                            if (pendingRequests == 0) {
+                                requireActivity().runOnUiThread {
+                                    suggestionList.clear()
+                                    suggestionList.addAll(tempList.sortedBy { it.distance })
+                                    adapter.notifyDataSetChanged()
                                 }
                             }
-                        } else {
-                            Log.e("Check", "Mismatch: dbCity='$dbCity' vs municipality='$municipalityLowerCase'")
                         }
                     }
                 }

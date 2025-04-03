@@ -11,7 +11,7 @@ data class Job(
     val startDateTime: Timestamp? = null,
     var status: String = "",
     val timestamp: Timestamp? = null,
-    val stage: String = "",
+    var stage: String = "",
     val latitude: Double = 0.0,
     val longitude: Double = 0.0,
     var address: String = "",

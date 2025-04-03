@@ -58,7 +58,8 @@ class SearchFragment : Fragment() {
     private lateinit var recommendationTextView: TextView
     private lateinit var advanceSearch: Button
     private var currentUser: FirebaseUser? = null
-    private lateinit var userType: String
+    private var userType: String? = null   // ✅ Avoids crashes
+
 
 
 
@@ -287,47 +288,53 @@ class SearchFragment : Fragment() {
         if (currentUser != null) {
             val currentUserId = currentUser.uid
 
-
             firestore.collection("users").document(currentUserId).get()
                 .addOnSuccessListener { document ->
                     val landownerLat = document.getDouble("latitude") ?: 0.0
                     val landownerLon = document.getDouble("longitude") ?: 0.0
 
                     if (landownerLat != 0.0 && landownerLon != 0.0) {
-                        if(selectedSort == "Sort by Distance") {
+                        if (selectedSort == "Sort by Distance") {
                             fetchNearestSurveyors(landownerLat, landownerLon)
-                        }else if(selectedSort == "Sort by Ratings"){
+                        } else if (selectedSort == "Sort by Ratings") {
                             fetchHighRatingsSurveyors(landownerLat, landownerLon)
-                        }else if(selectedSort == "Processor"){
+                        } else if (selectedSort == "Processor") {
                             convertCoordinatesToAddress(landownerLat, landownerLon) { address ->
                                 Log.d("AddressDebug", "Extracted Address: $address") // Log the address here
 
                                 getMunicipality(address) { municipality ->
-                                    requireActivity().runOnUiThread {
-                                        if (municipality != null) {
-                                            fetchProcessorsByMunicipality(municipality)
-                                        } else {
-                                            Log.e("AddressDebug", "Failed to extract municipality from: $address") // Log failure
-                                            Toast.makeText(
-                                                requireContext(),
-                                                "Failed to extract municipality",
-                                                Toast.LENGTH_SHORT
-                                            ).show()
+                                    if (isAdded) { // Check if fragment is attached
+                                        requireActivity().runOnUiThread {
+                                            if (municipality != null) {
+                                                fetchProcessorsByMunicipality(municipality)
+                                            } else {
+                                                Log.e("AddressDebug", "Failed to extract municipality from: $address") // Log failure
+                                                Toast.makeText(
+                                                    requireContext(),
+                                                    "Failed to extract municipality",
+                                                    Toast.LENGTH_SHORT
+                                                ).show()
+                                            }
                                         }
                                     }
                                 }
                             }
-
                         }
                     } else {
-                        Toast.makeText(requireContext(), "Landowner location not found", Toast.LENGTH_SHORT).show()
+                        if (isAdded) {
+                            Toast.makeText(requireContext(), "Landowner location not found", Toast.LENGTH_SHORT).show()
+                        }
                     }
                 }
                 .addOnFailureListener {
-                    Toast.makeText(requireContext(), "Error fetching landowner data", Toast.LENGTH_SHORT).show()
+                    if (isAdded) {
+                        Toast.makeText(requireContext(), "Error fetching landowner data", Toast.LENGTH_SHORT).show()
+                    }
                 }
         } else {
-            Toast.makeText(requireContext(), "Error", Toast.LENGTH_SHORT).show()
+            if (isAdded) {
+                Toast.makeText(requireContext(), "Error", Toast.LENGTH_SHORT).show()
+            }
         }
     }
 
@@ -346,8 +353,10 @@ class SearchFragment : Fragment() {
                 var pendingRequests = 0  // Counter to track geocode requests
 
                 if (documents.isEmpty) {
-                    requireActivity().runOnUiThread {
-                        Toast.makeText(requireContext(), "No processors found in $municipality", Toast.LENGTH_SHORT).show()
+                    if (isAdded) {
+                        requireActivity().runOnUiThread {
+                            Toast.makeText(requireContext(), "No processors found in $municipality", Toast.LENGTH_SHORT).show()
+                        }
                     }
                     return@addOnSuccessListener
                 }
@@ -390,7 +399,9 @@ class SearchFragment : Fragment() {
                             pendingRequests--  // Decrease counter when request completes
 
                             if (pendingRequests == 0) {
-                                updateUI(tempList)
+                                if (isAdded) {
+                                    updateUI(tempList)
+                                }
                             }
                         }
                     } else {
@@ -399,27 +410,38 @@ class SearchFragment : Fragment() {
                 }
 
                 if (pendingRequests == 0) {
-                    updateUI(tempList)
+                    if (isAdded) {
+                        updateUI(tempList)
+                    }
                 }
             }
             .addOnFailureListener {
-                requireActivity().runOnUiThread {
-                    Toast.makeText(requireContext(), "Error fetching processors", Toast.LENGTH_SHORT).show()
+                if (isAdded) {
+                    requireActivity().runOnUiThread {
+                        Toast.makeText(requireContext(), "Error fetching processors", Toast.LENGTH_SHORT).show()
+                    }
                 }
             }
     }
+
 
     /**
      * Updates UI with the processed list of processors.
      */
     private fun updateUI(processors: MutableList<Recommendation>) {
-        requireActivity().runOnUiThread {
-            processorRecommendationList.clear()
-            processorRecommendationList.addAll(processors.sortedBy { it.distance }.distinctBy { it.userId }) // Remove duplicates
-            adapterProcessor.notifyDataSetChanged()
-            Log.d("Check", "UI Updated: ${processorRecommendationList.size} items added")
+        // Check if the fragment is attached to an activity
+        if (isAdded && activity != null) {
+            requireActivity().runOnUiThread {
+                processorRecommendationList.clear()
+                processorRecommendationList.addAll(processors.sortedBy { it.distance }.distinctBy { it.userId }) // Remove duplicates
+                adapterProcessor.notifyDataSetChanged()
+                Log.d("Check", "UI Updated: ${processorRecommendationList.size} items added")
+            }
+        } else {
+            Log.e("FragmentError", "Fragment is not attached, skipping UI update")
         }
     }
+
 
     private fun getMunicipality(address: String, callback: (String?) -> Unit) {
         val client = OkHttpClient()
@@ -484,8 +506,6 @@ class SearchFragment : Fragment() {
             }
         })
     }
-
-
     private fun fetchHighRatingsSurveyors(landownerLat: Double, landownerLon: Double) {
         firestore.collection("users")
             .whereEqualTo("user_type", "Surveyor")
@@ -587,19 +607,32 @@ class SearchFragment : Fragment() {
         return earthRadius * c
     }
     private fun convertCoordinatesToAddress(lat: Double, lon: Double, callback: (String) -> Unit) {
+        if (!isAdded || context == null) {
+            Log.e("FragmentError", "convertCoordinatesToAddress() called when fragment is not attached")
+            callback("Unknown Address") // Return a default value to avoid breaking the flow
+            return
+        }
+
         val geocoder = OpenStreetMapGeocoder(requireContext())
         geocoder.getAddressFromCoordinates(lat, lon) { address ->
             callback(address ?: "Unknown Address")
         }
     }
 
+
     private fun updateAdapter(sortedList: List<Recommendation>) {
-        requireActivity().runOnUiThread {
-            recommendationList.clear()
-            recommendationList.addAll(sortedList)
-            adapter.notifyDataSetChanged()
+        // Check if fragment is still attached to its activity
+        if (isAdded && activity != null) {
+            requireActivity().runOnUiThread {
+                recommendationList.clear()
+                recommendationList.addAll(sortedList)
+                adapter.notifyDataSetChanged()
+            }
+        } else {
+            Log.e("FragmentError", "Fragment is not attached, skipping UI update")
         }
     }
+
 
 
 

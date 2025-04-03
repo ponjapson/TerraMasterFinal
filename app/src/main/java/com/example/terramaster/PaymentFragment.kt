@@ -1,5 +1,7 @@
 package com.example.terramaster
 
+import FragmentDisplayPDF
+import android.net.Uri
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -25,6 +27,8 @@ class PaymentFragment : Fragment() {
     private var clientSecret: String? = null
     private var bookingId: String? = null
     private var downPaymentAmount: Int? = null // This will be fetched based on bookingId
+    private lateinit var address: TextView
+    private lateinit var pdfFile: TextView
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -36,6 +40,8 @@ class PaymentFragment : Fragment() {
         bookingId = arguments?.getString("bookingId")
 
         val bookingIdTextView: TextView = view.findViewById(R.id.bookingIdTextView)
+        address = view.findViewById(R.id.landAddress)
+        pdfFile = view.findViewById(R.id.pdfFileName)
 
         bookingId?.let { nonNullBookingId ->
             fetchBookingDetails(nonNullBookingId) // Now nonNullBookingId is guaranteed to be non-null
@@ -63,6 +69,7 @@ class PaymentFragment : Fragment() {
                 Toast.makeText(context, "Invalid booking ID", Toast.LENGTH_SHORT).show()
             }
         }
+
 
         return view
     }
@@ -200,23 +207,76 @@ class PaymentFragment : Fragment() {
                     val bookedUserId = documentSnapshot.getString("bookedUserId")
                     val contractPrice = documentSnapshot.getLong("contractPrice")?.toInt()
                     val startDateTime = documentSnapshot.getTimestamp("startDateTime")?.toDate()
-                    val endDateTime = documentSnapshot.getTimestamp("endDateTime")?.toDate()
-                    val description = documentSnapshot.getString("details")
+                    val lat = documentSnapshot.getDouble("latitude") ?: 0.0
+                    val lon = documentSnapshot.getDouble("longitude") ?: 0.0
+                    val pdfUrl = documentSnapshot.getString("pdfUrl")
+
+                    val fileName = extractFileNameFromUrl(pdfUrl)
+                    convertCoordinatesToAddress(lat, lon) { address ->
+                        Log.d("Address", "Received address: $address")
+                        activity?.runOnUiThread {
+                            view?.findViewById<TextView>(R.id.landAddress)?.text = address
+                        }
+                    }
+
+
+                    view?.findViewById<TextView>(R.id.pdfFileName)?.text = fileName
 
                     val dateFormatter = SimpleDateFormat("MMM dd, yyyy HH:mm", Locale.getDefault())
                     val formattedStartDate = startDateTime?.let { dateFormatter.format(it) } ?: "N/A"
-                    val formattedEndDate = endDateTime?.let { dateFormatter.format(it) } ?: "N/A"
 
                     view?.findViewById<TextView>(R.id.contractPrice)?.text = "PHP $contractPrice"
                     view?.findViewById<TextView>(R.id.booking_start_date)?.text = formattedStartDate
-                    view?.findViewById<TextView>(R.id.booking_end_date)?.text = formattedEndDate
-                    view?.findViewById<TextView>(R.id.booking_description)?.text = description
 
                     bookedUserId?.let {
                         fetchUserDetails(it)
                     } ?: run {
                         Log.e("PaymentFragment", "Booked User ID is null")
                     }
+
+                    address.setOnClickListener {
+                        val fragment = FragmentMap()
+
+                        // Pass latitude & longitude to the map fragment
+                        val args = Bundle().apply {
+                            putDouble("latitude", lat)
+                            putDouble("longitude", lon)
+                        }
+                        fragment.arguments = args
+
+                        // Replace current fragment with MapFragment
+                        requireActivity().supportFragmentManager.beginTransaction()
+                            .replace(R.id.fragment_container, fragment) // Make sure R.id.fragment_container exists in your activity layout
+                            .addToBackStack(null) // Enables back navigation
+                            .commit()
+                    }
+                    pdfFile.setOnClickListener {
+                        // Fetch PDF URL from the database (Firestore or your data source)
+                        val pdfUrl = documentSnapshot.getString("pdfUrl") // Replace with your actual data fetching method
+
+                        if (pdfUrl.isNullOrEmpty()) {
+                            Log.e("PDF_ERROR", "Invalid PDF URL: $pdfUrl") // Log error if URL is empty
+                            Toast.makeText(requireContext(), "PDF not available", Toast.LENGTH_SHORT).show()
+                            return@setOnClickListener // Stop execution if PDF URL is invalid
+                        }
+
+                        Log.d("PDF_DEBUG", "Opening PDF with URL: $pdfUrl") // Log valid PDF URL
+
+
+                        val fragment = FragmentDisplayPDF().apply {
+                            arguments = Bundle().apply {
+                                putString("pdfUrl", pdfUrl)
+                            }
+                        }
+
+
+                        parentFragmentManager.beginTransaction()
+                            .replace(R.id.fragment_container, fragment) // Ensure R.id.fragment_container is the correct container ID
+                            .addToBackStack(null) // Allows user to go back to the previous fragment
+                            .commit()
+
+                    }
+
                 } else {
                     Log.e("PaymentFragment", "No booking document found for ID: $bookingId")
                     Toast.makeText(context, "Booking details not found", Toast.LENGTH_SHORT).show()
@@ -226,6 +286,15 @@ class PaymentFragment : Fragment() {
                 Log.e("PaymentFragment", "Error fetching booking details", e)
                 Toast.makeText(context, "Error fetching booking details", Toast.LENGTH_SHORT).show()
             }
+    }
+    private fun extractFileNameFromUrl(url: String?): String {
+        return Uri.parse(url).lastPathSegment ?: "Unknown File"
+    }
+    private fun convertCoordinatesToAddress(lat: Double, lon: Double, callback: (String) -> Unit) {
+        val geocoder = OpenStreetMapGeocoder(requireContext())
+        geocoder.getAddressFromCoordinates(lat, lon) { address ->
+            callback(address ?: "Unknown Address")
+        }
     }
 
     private fun fetchUserDetails(bookedUserId: String) {
@@ -241,7 +310,7 @@ class PaymentFragment : Fragment() {
 
                     val firstName = userSnapshot.getString("first_name") ?: "N/A"
                     val lastName = userSnapshot.getString("last_name") ?: "N/A"
-                    val profilePicUrl = userSnapshot.getString("profile_pic")
+                    val profilePicUrl = userSnapshot.getString("profile_picture")
 
                     view?.findViewById<TextView>(R.id.user_name)?.text = "$firstName $lastName"
 

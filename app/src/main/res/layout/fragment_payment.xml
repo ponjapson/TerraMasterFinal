@@ -37,26 +37,26 @@
                 android:text="User Name"
                 android:textStyle="bold"
                 android:textSize="16sp"
-                android:textColor="@color/white"
+                android:textColor="@color/black"
                 android:fontFamily="@font/poppinsm"
                 android:layout_marginTop="10dp"/>
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Description"
+                android:text="Land Address"
                 android:textSize="12sp"
-                android:textColor="@color/greyline"
+                android:textColor="@color/black"
                 android:fontFamily="@font/poppinsreg"
                 android:layout_marginTop="10dp"/>
 
             <TextView
-                android:id="@+id/booking_description"
+                android:id="@+id/landAddress"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Description"
+                android:text="Land Address"
                 android:textSize="14sp"
-                android:textColor="@color/white"
+                android:textColor="@color/black"
                 android:fontFamily="@font/poppinsreg"/>
 
             <TextView
@@ -65,7 +65,7 @@
                 android:text="Contract Price"
                 android:textSize="12sp"
                 android:layout_marginTop="10dp"
-                android:textColor="@color/greyline"
+                android:textColor="@color/black"
                 />
 
             <TextView
@@ -83,7 +83,7 @@
                 android:text="Downpayment"
                 android:textSize="12sp"
                 android:layout_marginTop="10dp"
-                android:textColor="@color/greyline"/>
+                android:textColor="@color/black"/>
 
             <TextView
                 android:id="@+id/booking_downpayment"
@@ -101,7 +101,7 @@
                 android:text="Start"
                 android:textSize="12sp"
                 android:layout_marginTop="10dp"
-                android:textColor="@color/greyline" />
+                android:textColor="@color/black" />
 
             <TextView
                 android:id="@+id/booking_start_date"
@@ -109,25 +109,25 @@
                 android:layout_height="wrap_content"
                 android:text="Start Date"
                 android:textSize="14sp"
-                android:textColor="@color/white"
+                android:textColor="@color/black"
                 android:layout_marginTop="4dp" />
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="End"
-                android:textSize="12sp"
-                android:layout_marginTop="10dp"
-                android:textColor="@color/greyline" />
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Documents"
+        android:textSize="12sp"
+        android:layout_marginTop="10dp"
+        android:textColor="@color/black" />
 
-            <TextView
-                android:id="@+id/booking_end_date"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="End Date"
-                android:textSize="14sp"
-                android:layout_marginTop="4dp"
-                android:textColor="@color/white" />
+    <TextView
+        android:id="@+id/pdfFileName"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="PdfFileName"
+        android:textSize="14sp"
+        android:textColor="@color/black"
+        android:layout_marginTop="4dp" />
 
     <TextView
         android:id="@+id/bookingIdTextView"
@@ -135,7 +135,7 @@
         android:layout_height="wrap_content"
         android:text="Booking ID will be shown here"
         android:textSize="16sp"
-        android:textColor="@color/white"
+        android:textColor="@color/black"
         android:layout_marginTop="15dp"/>
 
     <TextView
@@ -146,7 +146,7 @@
         android:textSize="18sp"
         android:paddingTop="10dp"
         android:fontFamily="@font/poppinssb"
-        android:textColor="@color/white"/>
+        android:textColor="@color/black"/>
 
     <Button
         android:id="@+id/payButton"

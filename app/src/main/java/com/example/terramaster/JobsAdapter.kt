@@ -6,6 +6,8 @@ import android.app.TimePickerDialog
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -17,6 +19,7 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContentProviderCompat.requireContext
 import androidx.fragment.app.FragmentActivity
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
@@ -36,6 +39,7 @@ class JobsAdapter(private val jobs: MutableList<Job>, private val context: Conte
     private val firestore = FirebaseFirestore.getInstance()
     private val auth = FirebaseAuth.getInstance()
 
+
     class JobsViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val profileImage: ImageView = view.findViewById(R.id.profile_image)
         val userName: TextView = view.findViewById(R.id.user_name)
@@ -46,11 +50,14 @@ class JobsAdapter(private val jobs: MutableList<Job>, private val context: Conte
         val status: TextView = view.findViewById(R.id.requestStatus)
         val address: TextView = view.findViewById(R.id.address)
         val pdfFile: TextView = view.findViewById(R.id.pdfFileName)
+        val labelPrice: TextView = view.findViewById(R.id.labelPrice)
+        val labelDown: TextView = view.findViewById(R.id.labeldown)
 
         val confirmButton: Button = view.findViewById(R.id.btn_confirm)
         val reviseButton: Button = view.findViewById(R.id.btn_revise)
         val declinedButton: Button = view.findViewById(R.id.btn_declined)
         val payButton: Button = view.findViewById(R.id.payButton)
+        val esign: Button = view.findViewById(R.id.btn_esign)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): JobsViewHolder {
@@ -97,6 +104,44 @@ class JobsAdapter(private val jobs: MutableList<Job>, private val context: Conte
                 holder.profileImage.setImageResource(R.drawable.profile_pic) // Default placeholder
             }
 
+
+
+        // Fetch the user document for the bookedUserId (the artist)
+        firestore.collection("users").document(bookedUserId)
+            .get()
+            .addOnSuccessListener { userSnapshot ->
+                val userType = userSnapshot.getString("user_type")
+
+                // Check the userType and adjust the visibility accordingly
+                when (userType) {
+                    "Processor" -> {
+                        // If the user is a "Processor", hide contract price and downpayment
+                        holder.contractPrice.visibility = View.GONE
+                        holder.downpayment.visibility = View.GONE
+                        holder.labelDown.visibility = View.GONE
+                        holder.labelPrice.visibility = View.GONE
+                    }
+                    "Surveyor" -> {
+                        // If the user is a "Surveyor", show contract price and downpayment
+                        holder.contractPrice.visibility = View.VISIBLE
+                        holder.downpayment.visibility = View.VISIBLE
+                        holder.labelDown.visibility = View.VISIBLE
+                        holder.labelPrice.visibility = View.VISIBLE
+                    }
+                    else -> {
+                        // Default case if there is no specific userType
+                        holder.contractPrice.visibility = View.VISIBLE
+                        holder.downpayment.visibility = View.VISIBLE
+                        holder.labelDown.visibility = View.VISIBLE
+                        holder.labelPrice.visibility = View.VISIBLE
+                    }
+                }
+            }
+            .addOnFailureListener { e ->
+                // Handle the error if the user document can't be fetched
+                Log.e("BookingAdapter", "Error fetching user data: ${e.message}")
+            }
+
         // Bind job details
 
         holder.startDate.text = "Start: ${formatTimestamp(job.startDateTime)}"
@@ -126,11 +171,21 @@ class JobsAdapter(private val jobs: MutableList<Job>, private val context: Conte
 
         holder.pdfFile.text = job.pdfFileName
         holder.pdfFile.setOnClickListener {
-            val pdfUrl = jobs[position].pdfUrl // Ensure you have the correct PDF URL
-            val fragment = FragmentDisplayPDF()
-            val bundle = Bundle()
-            bundle.putString("pdfUrl", pdfUrl) // Pass the PDF URL instead of guideId
-            fragment.arguments = bundle
+            val pdfUrl = jobs[position].pdfUrl
+
+            if (pdfUrl.isNullOrEmpty()) {
+                Log.e("PDF_ERROR", "Invalid PDF URL: $pdfUrl") // Log error if URL is empty
+                Toast.makeText(holder.itemView.context, "PDF not available", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener // Stop execution if PDF URL is invalid
+            }
+
+            Log.d("PDF_DEBUG", "Opening PDF with URL: $pdfUrl") // Log valid PDF URL
+
+            val fragment = FragmentDisplayPDF().apply {
+                arguments = Bundle().apply {
+                    putString("pdfUrl", pdfUrl)
+                }
+            }
 
             val fragmentManager = (holder.itemView.context as AppCompatActivity).supportFragmentManager
             fragmentManager.beginTransaction()
@@ -140,10 +195,9 @@ class JobsAdapter(private val jobs: MutableList<Job>, private val context: Conte
         }
 
 
-
-
         when (bookingStatus) {
-            "new" -> {
+            //Surveyor
+            "new surveyor request" -> {
                 if (currentUserId == bookingUserId) {
                     //Current user is the one who booked, show Edit and Decline buttons
                     holder.reviseButton.visibility = View.VISIBLE
@@ -244,18 +298,14 @@ class JobsAdapter(private val jobs: MutableList<Job>, private val context: Conte
             "professional edit details" -> {
                 if (currentUserId == bookingUserId) {
                     // Client (Booking User) sees Pay Now button
-                    holder.reviseButton.visibility =
-                        View.VISIBLE  // Optional: Client can revise the booking
-                    holder.declinedButton.visibility =
-                        View.VISIBLE  // Client can cancel the booking
+                    holder.reviseButton.visibility = View.VISIBLE  // Optional: Client can revise the booking
+                    holder.declinedButton.visibility = View.VISIBLE  // Client can cancel the booking
                     holder.payButton.visibility = View.GONE  // Pay Now button for client to pay
-                    holder.confirmButton.visibility =
-                        View.VISIBLE  // No confirm button for the client
+                    holder.confirmButton.visibility = View.VISIBLE  // No confirm button for the client
                 } else if (currentUserId == bookedUserId) {
                     // Artist (Booked User) sees only Decline and Revise buttons
                     holder.reviseButton.visibility = View.VISIBLE  // Artist can revise the booking
-                    holder.declinedButton.visibility =
-                        View.VISIBLE  // Artist can decline the booking
+                    holder.declinedButton.visibility = View.VISIBLE  // Artist can decline the booking
                     // Pay Now button is hidden for the artist
                     holder.confirmButton.visibility = View.GONE  // No confirm button for the artist
                 } else {
@@ -288,6 +338,25 @@ class JobsAdapter(private val jobs: MutableList<Job>, private val context: Conte
                     holder.confirmButton.visibility = View.GONE
                 }
             }
+
+            //Processor
+            "new processor request" -> {
+                if (currentUserId == bookingUserId) {
+                    //Current user is the one who booked, show Edit and Decline buttons
+                    holder.reviseButton.visibility = View.VISIBLE
+                    holder.declinedButton.visibility = View.VISIBLE
+                } else if (currentUserId == bookedUserId) {
+                    // Current user is the one being booked, show Confirm, Edit, and Decline buttons
+                    holder.reviseButton.visibility = View.VISIBLE
+                    holder.declinedButton.visibility = View.VISIBLE
+                    holder.esign.visibility = View.VISIBLE
+                } else {
+                    // Hide all buttons if the current user is neither
+                    holder.reviseButton.visibility = View.GONE
+                    holder.declinedButton.visibility = View.GONE
+                    holder.confirmButton.visibility = View.GONE
+                }
+            }
         }
         // Accept button functionality with confirmation dialog
         holder.confirmButton.setOnClickListener {
@@ -299,7 +368,7 @@ class JobsAdapter(private val jobs: MutableList<Job>, private val context: Conte
 
             // Assuming you're using an adapter and have a booking list
             if (currentUserId != null) {
-                confirmBooking(bookingId, currentUserId)
+                confirmBooking(bookingId, currentUserId, position)
             } else {
                 // Ensure context is available and show the toast
                 context?.let {
@@ -322,32 +391,37 @@ class JobsAdapter(private val jobs: MutableList<Job>, private val context: Conte
             bookingRef.get().addOnSuccessListener { document ->
                 if (document.exists()) {
                     // Get current data from Firestore document
-                    val currentDetails = document.getString("details") ?: ""
+
                     val currentDownpayment = document.getDouble("downpayment") ?: 0.0
                     val currentContractPrice = document.getDouble("contractPrice") ?: 0.0
                     val currentStartDateTimeTimestamp = document.getTimestamp("startDateTime")
                     val currentStartDateTime = currentStartDateTimeTimestamp?.toDate()?.let {
                         SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault()).format(it)
                     } ?: ""
+                    val lat = document.getDouble("latitude") ?: 0.0
+                    val lon = document.getDouble("longitude") ?: 0.0
 
-
-                    // Inflate the custom dialog layout
                     val dialogView =
                         LayoutInflater.from(context).inflate(R.layout.dialog_edit_booking, null)
+                    val Address = dialogView.findViewById<EditText>(R.id.Address)
+                    convertCoordinatesToAddress(context, lat, lon) { address ->
+
+                        Address.setText(address)
+                    }
+
+                    // Inflate the custom dialog layout
+
 
                     // Initialize the fields in the dialog
                     val startDateTimeButton = dialogView.findViewById<Button>(R.id.startDateTimeButton)
                     val selectedStartDateTimeTextView =
                         dialogView.findViewById<TextView>(R.id.selectedStartDateTimeTextView)
-                    val bookingDetailsEditText =
-                        dialogView.findViewById<EditText>(R.id.Address)
                     val downpaymentEditText =
                         dialogView.findViewById<EditText>(R.id.downpaymentEditText)
                     val contractPriceEditText =
                         dialogView.findViewById<EditText>(R.id.contractAmount) // Add this field in your layout
 
                     // Set the current values to the respective UI elements
-                    bookingDetailsEditText.setText(currentDetails)
                     downpaymentEditText.setText(currentDownpayment.toString())
                     contractPriceEditText.setText(currentContractPrice.toString())
                     selectedStartDateTimeTextView.text = "Start Date and Time: $currentStartDateTime"
@@ -364,7 +438,7 @@ class JobsAdapter(private val jobs: MutableList<Job>, private val context: Conte
                         .setTitle("Edit Booking Details")
                         .setView(dialogView)
                         .setPositiveButton("Save") { _, _ ->
-                            val newDetails = bookingDetailsEditText.text.toString()
+                           val newAddress = Address.text.toString()
                             val newDownpayment =
                                 downpaymentEditText.text.toString().toDoubleOrNull() ?: 0.0
                             val newContractPrice =
@@ -379,7 +453,7 @@ class JobsAdapter(private val jobs: MutableList<Job>, private val context: Conte
 
                             // Perform the update logic (update Firestore or your data model)
                             updateBookingDetails(
-                                newDetails,
+                                newAddress,
                                 newDownpayment,
                                 newStartDateTimeDate,
                                 bookingId,
@@ -529,14 +603,13 @@ class JobsAdapter(private val jobs: MutableList<Job>, private val context: Conte
 
     // Function to update booking details
     fun updateBookingDetails(
-        newDetails: String,
+        newAddress: String,
         newDownpayment: Double,
         newStartDateTime: Date?,
         bookingId: String,
-        contactPrice: Double
+        contractPrice: Double
     ) {
-        val currentUserId =
-            FirebaseAuth.getInstance().currentUser?.uid ?: return // Get current user ID
+        val currentUserId = FirebaseAuth.getInstance().currentUser?.uid ?: return // Get current user ID
         val bookingRef = firestore.collection("bookings").document(bookingId)
 
         // Fetch the booking document to determine the user role
@@ -545,52 +618,65 @@ class JobsAdapter(private val jobs: MutableList<Job>, private val context: Conte
                 val bookedUserId = document.getString("bookedUserId") // The artist
                 val bookingUserId = document.getString("landOwnerUserId") // The client
 
+                if (bookedUserId == null || bookingUserId == null) {
+                    Toast.makeText(context, "Error: Missing user data in booking document.", Toast.LENGTH_SHORT).show()
+                    return@addOnSuccessListener
+                }
+
                 // Determine status based on the current user
                 val updatedStatus = when (currentUserId) {
-                    bookedUserId -> "profesional edit details"
+                    bookedUserId -> "professional edit details"
                     bookingUserId -> "landowner edit details"
                     else -> {
-                        Toast.makeText(
-                            context,
-                            "User is not authorized to update this booking.",
-                            Toast.LENGTH_SHORT
-                        ).show()
+                        Toast.makeText(context, "User is not authorized to update this booking.", Toast.LENGTH_SHORT).show()
                         return@addOnSuccessListener
                     }
                 }
 
-                // Prepare the data to update
-                val updatedBookingData = mapOf(
-                    "details" to newDetails,
-                    "downpayment" to newDownpayment,
-                    "startDateTime" to newStartDateTime,
-                    "status" to updatedStatus,
-                    "lastModifiedBy" to currentUserId,
-                    "contractPrice" to contactPrice
-                )
+                // Geocode the address and get coordinates
+                convertLocationToCoordinates(newAddress) { lat, lon ->
+                    if (lat == 0.0 || lon == 0.0) {
+                        Toast.makeText(context, "Failed to get location coordinates.", Toast.LENGTH_SHORT).show()
+                        return@convertLocationToCoordinates
+                    }
 
-                // Update the booking in Firestore
-                bookingRef.update(updatedBookingData)
-                    .addOnSuccessListener {
-                        Toast.makeText(context, "Booking updated successfully.", Toast.LENGTH_SHORT)
-                            .show()
-                    }
-                    .addOnFailureListener { e ->
-                        Toast.makeText(
-                            context,
-                            "Error updating booking: ${e.message}",
-                            Toast.LENGTH_SHORT
-                        ).show()
-                    }
+                    // Prepare the data to update
+                    val updatedBookingData = mapOf(
+                        "address" to newAddress,
+                        "downpayment" to newDownpayment,
+                        "startDateTime" to newStartDateTime,
+                        "status" to updatedStatus,
+                        "lastModifiedBy" to currentUserId,
+                        "contractPrice" to contractPrice,
+                        "latitude" to lat,
+                        "longitude" to lon
+                    )
+
+                    // Update the booking in Firestore
+                    bookingRef.update(updatedBookingData)
+                        .addOnSuccessListener {
+                            Toast.makeText(context, "Booking updated successfully.", Toast.LENGTH_SHORT).show()
+                        }
+                        .addOnFailureListener { e ->
+                            Toast.makeText(context, "Error updating booking: ${e.message}", Toast.LENGTH_SHORT).show()
+                        }
+                }
             } else {
                 Toast.makeText(context, "Booking not found.", Toast.LENGTH_SHORT).show()
             }
         }.addOnFailureListener { e ->
-            Toast.makeText(
-                context,
-                "Error fetching booking details: ${e.message}",
-                Toast.LENGTH_SHORT
-            ).show()
+            Toast.makeText(context, "Error fetching booking details: ${e.message}", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    private fun convertLocationToCoordinates(locationName: String, callback: (Double, Double) -> Unit) {
+        val geocoder = OpenStreetMapGeocoder(context)
+        geocoder.getCoordinatesFromAddress(locationName) { coordinates ->
+            if (coordinates != null) {
+                callback(coordinates.latitude, coordinates.longitude)
+            } else {
+                Toast.makeText(context, "Location not found", Toast.LENGTH_SHORT).show()
+            }
         }
     }
 
@@ -607,63 +693,135 @@ class JobsAdapter(private val jobs: MutableList<Job>, private val context: Conte
         } ?: "N/A"
     }
 
-    fun confirmBooking(bookingId: String, userId: String) {
+    fun confirmBooking(bookingId: String, userId: String, position: Int) {
         val bookingRef = FirebaseFirestore.getInstance().collection("bookings").document(bookingId)
 
-        // Start a transaction to ensure atomicity
         FirebaseFirestore.getInstance().runTransaction { transaction ->
             val document = transaction.get(bookingRef)
 
             if (document.exists()) {
-                val artistId = document.getString("bookedUserId")
-                val clientId = document.getString("landOwnerUserId")
+                val surveyorId = document.getString("bookedUserId")
+                val landownerId = document.getString("landOwnerUserId")
                 val bookingStatus = document.getString("status")
 
-                // Prepare the update map
                 val updatedBooking: MutableMap<String, Any> = HashMap()
 
                 when {
-                    userId == clientId -> {
-                        // Client is confirming the booking
-                        Log.d("ConfirmBooking", "Client confirmed booking, opening PaymentFragment")
-                        listener.onPayNowClicked(bookingId) // Open payment screen for the client
-                        updatedBooking["status"] = "pending_payment"
+                    userId == landownerId -> {
+                        val job = jobs[position] // Get current job object
+                        if (job.downpayment != 0.0) {
+                            Log.d("ConfirmBooking", "Client confirmed booking, opening PaymentFragment")
+                            listener.onPayNowClicked(bookingId)
+                            updatedBooking["status"] = "pending_payment"
+                            job.status = "pending_payment" // ✅ Update local list
+                        } else {
+                            Log.d("ConfirmBooking", "Client booking confirmed without downpayment.")
+                            updatedBooking["status"] = "pending"
+                            updatedBooking["stage"] = "ongoing"
+                            job.status = "pending" // ✅ Update local list
+                            job.stage = "ongoing"
+                        }
                     }
 
-                    userId == artistId -> {
-                        // Artist is confirming the booking
+                    userId == surveyorId -> {
+                        Log.d("ConfirmBooking", "Surveyor confirmed booking. Current Status: $bookingStatus")
+
                         when (bookingStatus) {
                             "payment_submitted" -> {
-                                // If payment is submitted, move to ongoing status
+                                Log.d("ConfirmBooking", "Payment is submitted, moving to ongoing")
                                 updatedBooking["status"] = "pending"
                                 updatedBooking["stage"] = "ongoing"
+                                jobs[position].status = "pending" // ✅ Update local list
+                                jobs[position].stage = "ongoing"
                             }
 
                             else -> {
-                                // If the status is not payment_submitted, update status to artist_approved
+                                Log.d("ConfirmBooking", "Booking status not payment_submitted, setting artist_approved")
                                 updatedBooking["status"] = "artist_approved"
+                                jobs[position].status = "artist_approved" // ✅ Update local list
                             }
                         }
                     }
+
+                    else -> {
+                        Log.e("ConfirmBooking", "Neither landowner nor surveyor matched. UserId: $userId")
+                    }
                 }
 
-                // Apply the update only if valid
                 if (updatedBooking.isNotEmpty()) {
                     transaction.update(bookingRef, updatedBooking)
                 }
             } else {
-                // Handle the case where the booking document does not exist
                 Log.e("ConfirmBooking", "Booking document not found.")
             }
-            return@runTransaction null // No result to return, so return null
+            return@runTransaction null
         }
             .addOnSuccessListener {
-                // Successfully updated the booking status
                 Log.d("ConfirmBooking", "Booking $bookingId status updated.")
+
+                // ✅ Remove item from list if it is now "ongoing"
+                Handler(Looper.getMainLooper()).post {
+                    if (jobs[position].stage == "ongoing") {
+                        jobs.removeAt(position)
+                        notifyItemRemoved(position)
+
+                        // Now use the context to navigate
+                        val fragmentTransaction = (context as? AppCompatActivity)?.supportFragmentManager?.beginTransaction()
+                        val ongoingFragment = OnGoingFragment() // Your target fragment
+
+                        fragmentTransaction?.replace(R.id.fragment_container, ongoingFragment) // Replace with your container ID
+                        fragmentTransaction?.addToBackStack(null) // Optional: if you want back navigation
+                        fragmentTransaction?.commit()
+                    } else {
+                        notifyItemChanged(position)
+                    }
+                }
             }
             .addOnFailureListener { e ->
-                // Handle failure
                 Log.e("ConfirmBooking", "Error updating booking: ", e)
             }
     }
+
+    private fun fetchUserTypeForStatus(bookedUserId: String, callback: (String?) -> Unit) {
+        val db = FirebaseFirestore.getInstance()
+        val userRef = db.collection("users").document(bookedUserId)
+
+        userRef.get()
+            .addOnSuccessListener { document ->
+                if (document.exists()) {
+                    val fetchedUserType = document.getString("user_type")
+                    if (fetchedUserType != null) {
+                        Log.d("fetchUserType", "User type fetched: $fetchedUserType")
+                    } else {
+                        Log.e("fetchUserType", "User type field is missing in Firestore")
+                    }
+                    callback(fetchedUserType) // Pass the value to callback
+                } else {
+                    Log.e("fetchUserType", "Document does not exist for user ID: $bookedUserId")
+                    callback(null) // Return null if document does not exist
+                }
+            }
+            .addOnFailureListener { e ->
+                Log.e("fetchUserType", "Error fetching user type", e)
+                callback(null) // Return null if query fails
+            }
+    }
+
+    fun convertCoordinatesToAddress(
+        context: Context, // Pass context explicitly
+        lat: Double,
+        lon: Double,
+        callback: (String) -> Unit
+    ) {
+        val geocoder = OpenStreetMapGeocoder(context)
+        geocoder.getAddressFromCoordinates(lat, lon) { address ->
+            Log.d("Adapter", "Geocoding result: $address for coordinates: ($lat, $lon)")
+
+            // Ensure UI update happens on the main thread
+            Handler(Looper.getMainLooper()).post {
+                callback(address ?: "Unknown Address")
+            }
+        }
+    }
+
 }

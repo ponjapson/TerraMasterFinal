@@ -47,7 +47,7 @@ class RequestTabFragment : Fragment(), OnPaymentClickListener {
 
         firestore.collection("bookings")
             .whereEqualTo("bookedUserId", userId)
-            .whereEqualTo("stage", "request")
+            .whereEqualTo("stage", "request") // ✅ Only fetch "request" stage
             .orderBy("timestamp", Query.Direction.DESCENDING)
             .addSnapshotListener { bookedUserSnapshots, error ->
                 if (error != null) {
@@ -55,32 +55,31 @@ class RequestTabFragment : Fragment(), OnPaymentClickListener {
                     return@addSnapshotListener
                 }
 
-                pendingJobs.clear()
+                pendingJobs.clear() // ✅ Clear list before adding new items
+                jobCount = 0 // Reset job count
+
                 bookedUserSnapshots?.let { snapshots ->
                     if (snapshots.isEmpty) {
-                        fetchBookingUserJobs(userId, pendingJobs) // No jobs, move to next fetch
+                        fetchBookingUserJobs(userId, pendingJobs) // If no jobs, check for landowner jobs
                         return@let
                     }
 
                     snapshots.documents.forEach { doc ->
                         val job = createJobFromDocument(doc)
 
-                        // Extract PDF file name if it exists
+                        // ✅ Ensure job is still in "request" stage before adding
+                        if (job.stage != "request") return@forEach
+
                         val pdfUrl = doc.getString("pdfUrl")
-                        job.pdfFileName = pdfUrl?.let { extractFileNameFromUrl(it) } // Set PDF file name
+                        job.pdfFileName = pdfUrl?.let { extractFileNameFromUrl(it) }
                         job.pdfUrl = pdfUrl ?: ""
 
                         convertCoordinatesToAddress(job.latitude, job.longitude) { address ->
-                            job.address = address // Update job with address
-                            Log.d("RequestTabFragment", "Updated job with address: ${job.address}")
-
+                            job.address = address
                             pendingJobs.add(job)
                             jobCount++
 
-                            Log.d("RequestTabFragment", "JobCount: $jobCount, Total Jobs: ${snapshots.size()}")
-
                             if (jobCount == snapshots.size()) {
-                                Log.d("RequestTabFragment", "All geocoding complete, updating adapter")
                                 fetchBookingUserJobs(userId, pendingJobs)
                             }
                         }
@@ -94,7 +93,7 @@ class RequestTabFragment : Fragment(), OnPaymentClickListener {
 
         firestore.collection("bookings")
             .whereEqualTo("landOwnerUserId", userId)
-            .whereEqualTo("stage", "request")
+            .whereEqualTo("stage", "request") // ✅ Only fetch "request" stage
             .orderBy("timestamp", Query.Direction.DESCENDING)
             .addSnapshotListener { bookingUserSnapshots, clientError ->
                 if (clientError != null) {
@@ -104,29 +103,26 @@ class RequestTabFragment : Fragment(), OnPaymentClickListener {
 
                 bookingUserSnapshots?.let { snapshots ->
                     if (snapshots.isEmpty) {
-                        updateAdapter(pendingJobs) // No new jobs, update adapter immediately
+                        updateAdapter(pendingJobs) // ✅ No new jobs, update adapter immediately
                         return@let
                     }
 
                     snapshots.documents.forEach { doc ->
                         val job = createJobFromDocument(doc)
 
-                        // Extract PDF file name if it exists
-                        val pdfUrl = doc.getString("pdfUrl")
-                        job.pdfFileName = pdfUrl?.let { extractFileNameFromUrl(it) } // Set PDF file name
+                        // ✅ Ensure job is still in "request" stage before adding
+                        if (job.stage != "request") return@forEach
 
+                        val pdfUrl = doc.getString("pdfUrl")
+                        job.pdfFileName = pdfUrl?.let { extractFileNameFromUrl(it) }
+                        job.pdfUrl = pdfUrl ?: ""
 
                         convertCoordinatesToAddress(job.latitude, job.longitude) { address ->
-                            job.address = address // Update job with address
-                            Log.d("RequestTabFragment", "Updated job with address: ${job.address}")
-
+                            job.address = address
                             pendingJobs.add(job)
                             jobCount++
 
-                            Log.d("RequestTabFragment", "JobCount: $jobCount, Total Jobs: ${snapshots.size()}")
-
                             if (jobCount == snapshots.size()) {
-                                Log.d("RequestTabFragment", "All geocoding complete, updating adapter")
                                 updateAdapter(pendingJobs)
                             }
                         }
@@ -134,6 +130,7 @@ class RequestTabFragment : Fragment(), OnPaymentClickListener {
                 }
             }
     }
+
 
 
     private fun createJobFromDocument(doc: DocumentSnapshot): Job {
@@ -164,16 +161,23 @@ class RequestTabFragment : Fragment(), OnPaymentClickListener {
 
 
     private fun convertCoordinatesToAddress(lat: Double, lon: Double, callback: (String) -> Unit) {
-        val geocoder = OpenStreetMapGeocoder(requireContext())
+        val context = context ?: return // Avoid crash if fragment is not attached
+
+        val geocoder = OpenStreetMapGeocoder(context)
         geocoder.getAddressFromCoordinates(lat, lon) { address ->
             Log.d("RequestTabFragment", "Geocoding result: $address for coordinates: ($lat, $lon)")
 
-            // Ensure UI update happens on the main thread
+            // Ensure UI update happens on the main thread and only if fragment is still attached
             activity?.runOnUiThread {
-                callback(address ?: "Unknown Address")
+                if (isAdded) { // Prevent crash if fragment is detached
+                    callback(address ?: "Unknown Address")
+                } else {
+                    Log.e("convertCoordinatesToAddress", "Fragment not attached, skipping callback")
+                }
             }
         }
     }
+
 
 
 

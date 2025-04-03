@@ -38,7 +38,6 @@ import kotlin.contracts.contract
 class FragmentBooking : Fragment() {
 
     private var startDateTime: Calendar? = null
-    private var endDateTime: Calendar? = null
     private val dateTimeFormat = SimpleDateFormat("MMM dd, yyyy HH:mm", Locale.getDefault())
     //private var bookedUserId: String? = null
 
@@ -46,6 +45,7 @@ class FragmentBooking : Fragment() {
     private lateinit var scanButton: Button
     private lateinit var pdfFileNameTextView: TextView
     private var scannedPdfUri: Uri? = null
+
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
@@ -72,12 +72,14 @@ class FragmentBooking : Fragment() {
         val selectedStartDateTimeTextView = view.findViewById<TextView>(R.id.selectedStartDateTimeTextView)
         val notice = view.findViewById<TextView>(R.id.notice)
 
+
+
         scanButton = view.findViewById(R.id.scanButton)
         pdfFileNameTextView = view.findViewById(R.id.pdfFileNameTextView)
 
         downpaymentEditText.setText("0.00")
         setupDateTimePickers(startDateTimeButton, selectedStartDateTimeTextView)
-        setupSubmitBookingButton(submitBookingButton, addressEditText, downpaymentEditText, contractAmount, bookedUserId)
+
 
         scanButton.setOnClickListener {
             launchScanner()
@@ -103,6 +105,31 @@ class FragmentBooking : Fragment() {
                 notice.visibility = View.GONE
             }
         }
+
+        fetchUserTypeForStatus(bookedUserId) {userType ->
+            if(userType == "Surveyor") {
+                setupSubmitBookingButton(
+                    submitBookingButton,
+                    addressEditText,
+                    downpaymentEditText,
+                    contractAmount,
+                    bookedUserId,
+                    "new surveyor request"
+                )
+            }else if(userType == "Processor"){
+
+                setupSubmitBookingButton(
+                    submitBookingButton,
+                    addressEditText,
+                    downpaymentEditText,
+                    contractAmount,
+                    bookedUserId,
+                    "new processor request"
+                )
+            }else{
+                Log.e("Status", userType.toString());
+            }
+        }
     }
 
     private fun fetchUserType(bookedUserId: String, callback: (String?) -> Unit) {
@@ -124,6 +151,32 @@ class FragmentBooking : Fragment() {
             }
     }
 
+    private fun fetchUserTypeForStatus(bookedUserId: String, callback: (String?) -> Unit) {
+        val db = FirebaseFirestore.getInstance()
+        val userRef = db.collection("users").document(bookedUserId)
+
+        userRef.get()
+            .addOnSuccessListener { document ->
+                if (document.exists()) {
+                    val fetchedUserType = document.getString("user_type")
+                    if (fetchedUserType != null) {
+                        Log.d("fetchUserType", "User type fetched: $fetchedUserType")
+                    } else {
+                        Log.e("fetchUserType", "User type field is missing in Firestore")
+                    }
+                    callback(fetchedUserType) // Pass the value to callback
+                } else {
+                    Log.e("fetchUserType", "Document does not exist for user ID: $bookedUserId")
+                    callback(null) // Return null if document does not exist
+                }
+            }
+            .addOnFailureListener { e ->
+                Log.e("fetchUserType", "Error fetching user type", e)
+                callback(null) // Return null if query fails
+            }
+    }
+
+
 
 
     private fun setupDateTimePickers(startDateTimeButton: Button, selectedStartDateTimeTextView: TextView) {
@@ -140,7 +193,8 @@ class FragmentBooking : Fragment() {
         addressEditText: EditText,
         downpaymentEditText: EditText,
         contractAmount: EditText,
-        bookedUserId: String
+        bookedUserId: String,
+        status: String
     ) {
         submitBookingButton.setOnClickListener {
 
@@ -151,7 +205,7 @@ class FragmentBooking : Fragment() {
 
                 if (validateInput(address, downpayment, contractPrice)) {
                     showLoadingToast()
-                    saveBookingToFirestore(address, downpayment, contractPrice, lat, lon, bookedUserId)
+                    saveBookingToFirestore(address, downpayment, contractPrice, lat, lon, bookedUserId, status)
                 }
             }
         }
@@ -222,11 +276,7 @@ class FragmentBooking : Fragment() {
         showToast("Booking in progress...")
     }
 
-    private fun saveBookingToFirestore(address: String, downpayment: Double, contractPrice: Double, lat: Double, lon: Double, bookedUserId: String) {
-        if (downpayment == 0.00) {
-            showDownpaymentAlertDialog()
-            return
-        }
+    private fun saveBookingToFirestore(address: String, downpayment: Double, contractPrice: Double, lat: Double, lon: Double, bookedUserId: String, status: String) {
 
         val db = FirebaseFirestore.getInstance()
         val bookingUserId = FirebaseAuth.getInstance().currentUser?.uid
@@ -244,19 +294,19 @@ class FragmentBooking : Fragment() {
             pdfRef.putFile(scannedPdfUri!!)
                 .addOnSuccessListener { taskSnapshot ->
                     taskSnapshot.metadata?.reference?.downloadUrl?.addOnSuccessListener { pdfDownloadUrl ->
-                        saveBookingWithPdf(address, downpayment, contractPrice, pdfDownloadUrl.toString(), lat, lon, bookedUserId)
+                        saveBookingWithPdf(address, downpayment, contractPrice, pdfDownloadUrl.toString(), lat, lon, bookedUserId, status)
                     }
                 }
                 .addOnFailureListener { e ->
                     showToast("Failed to upload PDF: ${e.message}")
                 }
         } else {
-            saveBookingWithPdf(address, downpayment, contractPrice, null, lat, lon, bookedUserId)
+            saveBookingWithPdf(address, downpayment, contractPrice, null, lat, lon, bookedUserId, status)
         }
     }
 
     private fun saveBookingWithPdf(
-        address: String, downpayment: Double, contractPrice: Double, pdfDownloadUrl: String?, lat: Double, lon: Double, bookedUserId: String
+        address: String, downpayment: Double, contractPrice: Double, pdfDownloadUrl: String?, lat: Double, lon: Double, bookedUserId: String, status: String
     ) {
         val db = FirebaseFirestore.getInstance()
         val bookingUserId = FirebaseAuth.getInstance().currentUser?.uid
@@ -267,7 +317,7 @@ class FragmentBooking : Fragment() {
             "timestamp" to FieldValue.serverTimestamp(),
             "address" to address,
             "downpayment" to downpayment,
-            "status" to "new",
+            "status" to status,
             "stage" to "request",
             "startDateTime" to Timestamp(startDateTime!!.timeInMillis / 1000, 0),
             "contractPrice" to contractPrice,

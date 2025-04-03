@@ -17,6 +17,7 @@ import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.SetOptions
 import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.StorageReference
 
@@ -38,7 +39,6 @@ class AddGuideDialogFragment : Fragment() {
     private var pdfUri: Uri? = null
 
     private val stepList = mutableListOf<Step>()
-
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -129,10 +129,17 @@ class AddGuideDialogFragment : Fragment() {
             val db = FirebaseFirestore.getInstance()
             db.collection("knowledge_guide").add(guide).addOnSuccessListener { documentReference ->
                 val guideId = documentReference.id
-                documentReference.update("knowledgeGuideId", guideId).addOnSuccessListener {
-                    Toast.makeText(requireContext(), "Guide saved successfully!", Toast.LENGTH_SHORT).show()
-                }.addOnFailureListener {
-                    Toast.makeText(requireContext(), "Failed to update guide ID", Toast.LENGTH_SHORT).show()
+                db.collection("knowledge_guide").document(guideId).update("knowledgeGuideId", guideId)
+                    .addOnSuccessListener {
+                        Toast.makeText(requireContext(), "Guide saved successfully!", Toast.LENGTH_SHORT).show()
+                    }
+                    .addOnFailureListener {
+                        Toast.makeText(requireContext(), "Failed to update guide ID", Toast.LENGTH_SHORT).show()
+                    }
+
+                // Upload PDF if available
+                if (pdfUri != null) {
+                    uploadPdfToStorage(guideId, guideTitle)
                 }
             }.addOnFailureListener {
                 Toast.makeText(requireContext(), "Failed to save guide", Toast.LENGTH_SHORT).show()
@@ -163,7 +170,6 @@ class AddGuideDialogFragment : Fragment() {
         }
     }
 
-    // Function to get file name from Uri
     private fun getFileName(uri: Uri): String {
         var name = "Unknown"
         val cursor = requireContext().contentResolver.query(uri, null, null, null, null)
@@ -179,7 +185,7 @@ class AddGuideDialogFragment : Fragment() {
     }
 
     companion object {
-        private const val PDF_PICK_CODE = 1001 // Fixes the unresolved reference error
+        private const val PDF_PICK_CODE = 1001
     }
 
     private fun saveGuidePDFToFirestore() {
@@ -226,10 +232,12 @@ class AddGuideDialogFragment : Fragment() {
                 .addOnSuccessListener {
                     pdfRef.downloadUrl.addOnSuccessListener { uri ->
                         savePdfUrlToFirestore(guideId, guideTitle, uri.toString())
+                    }.addOnFailureListener { e ->
+                        Toast.makeText(requireContext(), "Failed to get download URL: ${e.message}", Toast.LENGTH_LONG).show()
                     }
                 }
-                .addOnFailureListener {
-                    Toast.makeText(requireContext(), "Failed to upload PDF", Toast.LENGTH_SHORT).show()
+                .addOnFailureListener { e ->
+                    Toast.makeText(requireContext(), "Failed to upload PDF: ${e.message}", Toast.LENGTH_LONG).show()
                 }
         }
     }
@@ -241,19 +249,19 @@ class AddGuideDialogFragment : Fragment() {
             "pdfUrl" to pdfUrl
         )
 
-        db.collection("knowledge_guide").document(guideId).update(updateData)
+        db.collection("knowledge_guide").document(guideId)
+            .set(updateData, SetOptions.merge()) // Using 'set' with merge to update the document
             .addOnSuccessListener {
                 if (isAdded) {
                     Toast.makeText(requireContext(), "PDF uploaded successfully", Toast.LENGTH_SHORT).show()
                 }
             }
-            .addOnFailureListener {
-                if (isAdded) { //
-                    Toast.makeText(requireContext(), "Failed to save PDF URL", Toast.LENGTH_SHORT).show()
+            .addOnFailureListener { e ->
+                if (isAdded) {
+                    Toast.makeText(requireContext(), "Failed to save PDF URL: ${e.message}", Toast.LENGTH_SHORT).show()
                 }
             }
     }
-
     override fun onResume() {
         super.onResume()
         (requireActivity() as MainActivity).showBottomNavigationBar()

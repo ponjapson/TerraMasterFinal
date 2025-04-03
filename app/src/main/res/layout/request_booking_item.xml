@@ -120,6 +120,7 @@
                 android:textColor="@color/black" />
 
             <TextView
+                android:id="@+id/labelPrice"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="Contract Price"
@@ -137,6 +138,7 @@
                 android:textColor="@color/black" />
 
             <TextView
+                android:id="@+id/labeldown"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="Downpayment"
@@ -281,9 +283,14 @@
             android:textColor="@color/white"
             android:background="#F44336"
             android:visibility="gone"/>
+        <Button
+            android:id="@+id/btn_esign"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="e-signature"
+            android:layout_marginStart="8dp"
+            android:textColor="@color/white"
+            android:background="#4CAF50"
+            android:visibility="gone"/>
     </LinearLayout>
-
-
-
-
 </LinearLayout>
