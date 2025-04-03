@@ -5,6 +5,7 @@
     android:orientation="vertical"
     android:padding="16dp">
 
+    <!-- RecyclerView for displaying the PDF (or document) -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerViewPdf"
         android:layout_width="match_parent"
@@ -12,6 +13,7 @@
         android:orientation="vertical"
         android:scrollbars="vertical"/>
 
+    <!-- ProgressBar to show when document is loading -->
     <ProgressBar
         android:id="@+id/progressBar"
         android:layout_width="wrap_content"
@@ -20,5 +22,29 @@
         android:visibility="gone"
         android:indeterminate="true"
         android:indeterminateTint="@color/main"/>
+    <!-- Buttons for signing -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center"
+        android:layout_marginTop="16dp">
+
+        <!-- Clear Button -->
+        <Button
+            android:id="@+id/btnClearSignature"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Clear"
+            android:layout_marginEnd="16dp"/>
+
+        <!-- Save/Sign Button -->
+        <Button
+            android:id="@+id/btnSaveSignature"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Sign"/>
+
+    </LinearLayout>
 
 </LinearLayout>
