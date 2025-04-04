@@ -94,7 +94,6 @@
             android:textColorHint="@color/black"
             android:textSize="14sp"
             android:fontFamily="@font/poppinsreg"
-            android:inputType="numberDecimal"
             android:layout_marginStart="10dp"
             android:layout_marginEnd="10dp"/>
 
@@ -109,7 +108,6 @@
             android:paddingStart="15dp"/>
 
         <!-- Downpayment Input -->
-
         <EditText
             android:id="@+id/contactNumber"
             android:layout_width="match_parent"
@@ -125,6 +123,36 @@
             android:textColor="@android:color/black"
             android:textColorHint="@color/black"
             android:textSize="14sp" />
+
+        <TextView
+            android:id="@+id/ageLabel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="14sp"
+            android:textColor="@color/black"
+            android:paddingTop="20dp"
+            android:paddingBottom="10dp"
+            android:text="Age"
+            android:paddingStart="15dp"
+            android:visibility="gone"/>
+
+        <!-- Downpayment Input -->
+        <EditText
+            android:id="@+id/age"
+            android:layout_width="match_parent"
+            android:layout_height="42dp"
+            android:layout_marginStart="10dp"
+            android:layout_marginEnd="10dp"
+            android:background="@drawable/custom_edit_text"
+            android:fontFamily="@font/poppinsreg"
+            android:gravity="center_vertical"
+            android:hint="Enter Age"
+            android:inputType="numberDecimal"
+            android:paddingStart="15dp"
+            android:textColor="@android:color/black"
+            android:textColorHint="@color/black"
+            android:textSize="14sp"
+            android:visibility="gone"/>
 
         <TextView
             android:layout_width="wrap_content"
@@ -153,6 +181,7 @@
             android:textSize="14sp"/>
 
         <TextView
+            android:id="@+id/tinLabel"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textSize="14sp"
@@ -160,7 +189,8 @@
             android:paddingTop="20dp"
             android:paddingBottom="10dp"
             android:text="Tax identification number(TIN)"
-            android:paddingStart="15dp"/>
+            android:paddingStart="15dp"
+            android:visibility="gone"/>
 
         <!-- Booking Details Input -->
         <EditText
@@ -176,62 +206,8 @@
             android:paddingStart="15dp"
             android:textColor="@android:color/black"
             android:textColorHint="@color/black"
-            android:textSize="14sp"/>
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
             android:textSize="14sp"
-            android:textColor="@color/black"
-            android:paddingTop="20dp"
-            android:paddingBottom="10dp"
-            android:text="Contract Price"
-            android:paddingStart="15dp"/>
-
-        <!-- Contract Amount Input -->
-        <EditText
-            android:id="@+id/contractAmount"
-            android:layout_width="match_parent"
-            android:layout_height="42dp"
-            android:background="@drawable/custom_edit_text"
-            android:hint="Enter Contract Amount"
-            android:paddingStart="15dp"
-            android:gravity="center_vertical"
-            android:textColor="@android:color/black"
-            android:textColorHint="@color/black"
-            android:textSize="14sp"
-            android:fontFamily="@font/poppinsreg"
-            android:inputType="numberDecimal"
-            android:layout_marginStart="10dp"
-            android:layout_marginEnd="10dp"/>
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textSize="14sp"
-            android:textColor="@color/black"
-            android:paddingTop="20dp"
-            android:paddingBottom="10dp"
-            android:text="Downpayment"
-            android:paddingStart="15dp"/>
-
-        <!-- Downpayment Input -->
-
-        <EditText
-            android:id="@+id/downpaymentEditText"
-            android:layout_width="match_parent"
-            android:layout_height="42dp"
-            android:layout_marginStart="10dp"
-            android:layout_marginEnd="10dp"
-            android:background="@drawable/custom_edit_text"
-            android:fontFamily="@font/poppinsreg"
-            android:gravity="center_vertical"
-            android:hint="Enter payment"
-            android:inputType="numberDecimal"
-            android:paddingStart="15dp"
-            android:textColor="@android:color/black"
-            android:textColorHint="@color/black"
-            android:textSize="14sp" />
+            android:visibility="gone"/>
 
         <TextView
             android:layout_width="wrap_content"
@@ -258,6 +234,114 @@
             android:textColor="@android:color/black"
             android:textColorHint="@color/black"
             android:textSize="14sp"/>
+
+        <!-- Property Type Section -->
+        <TextView
+            android:id="@+id/propertyLabel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="14sp"
+            android:textColor="@color/black"
+            android:paddingTop="20dp"
+            android:paddingBottom="10dp"
+            android:text="Property Type"
+            android:paddingStart="15dp"
+            android:visibility="gone"/>
+
+        <RadioGroup
+            android:id="@+id/propertyTypeGroup"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:visibility="gone">
+
+            <RadioButton
+                android:id="@+id/residential"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Residential"/>
+
+            <RadioButton
+                android:id="@+id/commercial"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Commercial"/>
+
+            <RadioButton
+                android:id="@+id/agricultural"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Agricultural"/>
+
+            <RadioButton
+                android:id="@+id/vacantLand"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Vacant Land"/>
+
+            <RadioButton
+                android:id="@+id/otherProperty"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Other (please specify)"/>
+        </RadioGroup>
+
+        <TextView
+            android:id="@+id/purposeLabel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="14sp"
+            android:textColor="@color/black"
+            android:paddingTop="20dp"
+            android:paddingBottom="10dp"
+            android:text="Purpose of Survey"
+            android:paddingStart="15dp"
+            android:visibility="gone"/>
+
+        <RadioGroup
+            android:id="@+id/purposeOfSurveyGroup"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:visibility="gone">
+
+            <RadioButton
+                android:id="@+id/propertySale"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Property sale or purchase"/>
+
+            <RadioButton
+                android:id="@+id/legalDispute"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Legal dispute or boundary issue"/>
+
+            <RadioButton
+                android:id="@+id/propertyDevelopment"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Property development or construction"/>
+
+            <RadioButton
+                android:id="@+id/landSubdivision"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Land subdivision"/>
+
+            <RadioButton
+                android:id="@+id/environmentalAssessment"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Environmental or flood assessment"/>
+
+            <RadioButton
+                android:id="@+id/otherPurpose"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Other (please explain)"/>
+        </RadioGroup>
+
         <TextView
             android:id="@+id/notes"
             android:layout_width="match_parent"
@@ -287,7 +371,6 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Scan Documents"/>
-
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -313,19 +396,27 @@
                 android:paddingBottom="10dp"
                 android:paddingStart="15dp"/>
         </LinearLayout>
-        <!-- Submit Button -->
-        <Button
-            android:id="@+id/submitBookingButton"
-            android:layout_width="210dp"
-            android:layout_height="50dp"
-            android:text="Submit Booking"
-            android:layout_marginTop="25dp"
-            android:layout_gravity="center"
-            android:textAllCaps="false"
-            android:textColor="@color/white"
-            android:fontFamily="@font/poppinsm"
-            android:layout_marginStart="10dp"
-            android:layout_marginEnd="10dp"/>
 
-    </LinearLayout>
+    <!-- Submit Button -->
+    <Button
+        android:id="@+id/submitBookingButton"
+        android:layout_width="210dp"
+        android:layout_height="50dp"
+        android:text="Submit Booking"
+        android:layout_marginTop="25dp"
+        android:layout_gravity="center"
+        android:textAllCaps="false"
+        android:textColor="@color/white"
+        android:fontFamily="@font/poppinsm"
+        android:layout_marginStart="10dp"
+        android:layout_marginEnd="10dp"/>
+
+
+
+
+
+
+
+
+</LinearLayout>
 </ScrollView>

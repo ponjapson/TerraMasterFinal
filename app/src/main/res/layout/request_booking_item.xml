@@ -136,6 +136,77 @@
                 android:textSize="14sp"
                 android:layout_marginTop="4dp"
                 android:textColor="@color/black" />
+            <TextView
+                android:id="@+id/labelAge"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Age"
+                android:textSize="12sp"
+                android:layout_marginTop="4dp"
+                android:textColor="@color/black" />
+
+            <TextView
+                android:id="@+id/age"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Age"
+                android:textSize="14sp"
+                android:layout_marginTop="4dp"
+                android:textColor="@color/black" />
+
+            <TextView
+                android:id="@+id/labelTin"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Tax Payer Number"
+                android:textSize="12sp"
+                android:layout_marginTop="4dp"
+                android:textColor="@color/black" />
+
+            <TextView
+                android:id="@+id/Tin"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Tax Payer Number"
+                android:textSize="14sp"
+                android:layout_marginTop="4dp"
+                android:textColor="@color/black" />
+
+            <TextView
+                android:id="@+id/purposeLabel"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Purpose of survey"
+                android:textSize="12sp"
+                android:layout_marginTop="4dp"
+                android:textColor="@color/black" />
+
+            <TextView
+                android:id="@+id/purposeOfSuurvey"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Purpose of survey"
+                android:textSize="14sp"
+                android:layout_marginTop="4dp"
+                android:textColor="@color/black" />
+
+            <TextView
+                android:id="@+id/propertyLabel"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Property Type"
+                android:textSize="12sp"
+                android:layout_marginTop="4dp"
+                android:textColor="@color/black" />
+
+            <TextView
+                android:id="@+id/propertyTypeLabel"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Property Type"
+                android:textSize="14sp"
+                android:layout_marginTop="4dp"
+                android:textColor="@color/black" />
 
             <TextView
                 android:id="@+id/labeldown"

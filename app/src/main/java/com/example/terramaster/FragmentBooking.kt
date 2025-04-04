@@ -14,6 +14,8 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.EditText
+import android.widget.RadioButton
+import android.widget.RadioGroup
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.IntentSenderRequest
@@ -64,22 +66,41 @@ class FragmentBooking : Fragment() {
         }
 
         // Initialize the views
-        val downpaymentEditText = view.findViewById<EditText>(R.id.downpaymentEditText)
+
         val addressEditText = view.findViewById<EditText>(R.id.Address)
-        val contractAmount = view.findViewById<EditText>(R.id.contractAmount)
         val startDateTimeButton = view.findViewById<Button>(R.id.startDateTimeButton)
         val submitBookingButton = view.findViewById<Button>(R.id.submitBookingButton)
         val selectedStartDateTimeTextView = view.findViewById<TextView>(R.id.selectedStartDateTimeTextView)
+        val fullName = view.findViewById<EditText>(R.id.fullName)
+        val contactNumber = view.findViewById<EditText>(R.id.contactNumber)
+        val emailAddress = view.findViewById<EditText>(R.id.emailAddress)
+        val tinNumber = view.findViewById<EditText>(R.id.tinNumber)
+        val age = view.findViewById<EditText>(R.id.age)
+        val propertyTypeGroup = view.findViewById<RadioGroup>(R.id.propertyTypeGroup)
+        val purposeOfSurveyGroup = view.findViewById<RadioGroup>(R.id.purposeOfSurveyGroup)
+        val residentialRadioButton = view.findViewById<RadioButton>(R.id.residential)
+        val commercialRadioButton = view.findViewById<RadioButton>(R.id.commercial)
+        val agriculturalRadioButton = view.findViewById<RadioButton>(R.id.agricultural)
+        val vacantLandRadioButton = view.findViewById<RadioButton>(R.id.vacantLand)
+        val otherPropertyRadioButton = view.findViewById<RadioButton>(R.id.otherProperty)
+        val purposeLabel = view.findViewById<TextView>(R.id.purposeLabel)
+        val propertyLabel = view.findViewById<TextView>(R.id.propertyLabel)
+
+        val propertySaleRadioButton = view.findViewById<RadioButton>(R.id.propertySale)
+        val legalDisputeRadioButton = view.findViewById<RadioButton>(R.id.legalDispute)
+        val propertyDevelopmentRadioButton = view.findViewById<RadioButton>(R.id.propertyDevelopment)
+        val landSubdivisionRadioButton = view.findViewById<RadioButton>(R.id.landSubdivision)
+        val environmentalAssessmentRadioButton = view.findViewById<RadioButton>(R.id.environmentalAssessment)
+        val otherPurposeRadioButton = view.findViewById<RadioButton>(R.id.otherPurpose)
+        val ageLabel = view.findViewById<TextView>(R.id.ageLabel)
+        val tinLabel = view.findViewById<TextView>(R.id.tinLabel)
         val notice = view.findViewById<TextView>(R.id.notice)
         val notes = view.findViewById<TextView>(R.id.notes)
         val notesProcessor = view.findViewById<TextView>(R.id.notesProcessor)
         val firestore = FirebaseFirestore.getInstance()
         val notesRef = firestore.collection("notes") // Replace "notes" with your collection name
         val noteId = "q3liLgg9khwBKjTdcN6q" // Replace this with the actual document ID you want to fetch
-        val fullName = view.findViewById<EditText>(R.id.fullName)
-        val contactNumber = view.findViewById<EditText>(R.id.contactNumber)
-        val emailAddress = view.findViewById<EditText>(R.id.emailAddress)
-        val tinNumber = view.findViewById<EditText>(R.id.tinNumber)
+
 
 
         notesRef.document(noteId).get()
@@ -115,7 +136,6 @@ class FragmentBooking : Fragment() {
         scanButton = view.findViewById(R.id.scanButton)
         pdfFileNameTextView = view.findViewById(R.id.pdfFileNameTextView)
 
-        downpaymentEditText.setText("0.00")
         setupDateTimePickers(startDateTimeButton, selectedStartDateTimeTextView)
 
 
@@ -126,62 +146,67 @@ class FragmentBooking : Fragment() {
         fetchUserType(bookedUserId) { userType ->
             // Check if userType is "Processor" and disable the appropriate views
             if (userType == "Processor") {
-                contractAmount.isEnabled = false
+                /*contractAmount.isEnabled = false
                 downpaymentEditText.isEnabled = false
                 contractAmount.visibility = View.GONE
-                downpaymentEditText.visibility = View.GONE
-
-                context?.let {
-
-                    downpaymentEditText.setTextColor(ContextCompat.getColor(it, android.R.color.darker_gray))
-                }
-                context?.let {
-                    contractAmount.setTextColor(ContextCompat.getColor(it, android.R.color.darker_gray))
-
-                }
+                downpaymentEditText.visibility = View.GONE*/
                 notice.visibility = View.VISIBLE
                 notesProcessor.visibility = View.VISIBLE
+                tinNumber.visibility = View.VISIBLE
+                age.visibility = View.VISIBLE
+                ageLabel.visibility = View.VISIBLE
+                tinLabel.visibility = View.VISIBLE
             } else {
-                contractAmount.isEnabled = true
-                downpaymentEditText.isEnabled = true
+               /* contractAmount.isEnabled = true
+                downpaymentEditText.isEnabled = true*/
                 notice.visibility = View.GONE
                 notes.visibility = View.VISIBLE
+                /*contractAmount.visibility = View.GONE
+                downpaymentEditText.visibility = View.GONE*/
+                propertyLabel.visibility = View.VISIBLE
+                purposeLabel.visibility = View.VISIBLE
+                propertyTypeGroup.visibility = View.VISIBLE
+                purposeOfSurveyGroup.visibility = View.VISIBLE
+
             }
         }
 
-        fetchUserTypeForStatus(bookedUserId) {userType ->
-            if(userType == "Surveyor") {
+        // Pass the EditText views and RadioButton views directly
+        fetchUserTypeForStatus(bookedUserId) { userType ->
+            if (userType == "Surveyor") {
+                // Pass EditText and RadioButton views to the function
                 setupSubmitBookingButton(
                     submitBookingButton,
-                    fullName,
-                    contactNumber,
-                    emailAddress,
-                    tinNumber,
-                    addressEditText,
-                    downpaymentEditText,
-                    contractAmount,
+                    fullName,  // EditText
+                    contactNumber,  // EditText
+                    emailAddress,  // EditText
+                    addressEditText,  // EditText
+                    propertyTypeGroup,  // RadioGroup for Property Type
+                    purposeOfSurveyGroup,  // RadioGroup for Purpose of Survey
                     bookedUserId,
                     "new surveyor request"
                 )
-            }else if(userType == "Processor"){
-
-                setupSubmitBookingButton(
+            } else if (userType == "Processor") {
+                // For Processor, include tinNumber as well
+                setupSubmitBookingButtonProcessor(
                     submitBookingButton,
-                    fullName,
-                    contactNumber,
-                    emailAddress,
-                    tinNumber,
-                    addressEditText,
-                    downpaymentEditText,
-                    contractAmount,
+                    fullName,  // EditText
+                    contactNumber,  // EditText
+                    emailAddress,  // EditText// EditText
+                    addressEditText,  // EditText
                     bookedUserId,
-                    "new processor request"
+                    "new processor request",
+                    tinNumber,
+                    age
                 )
-            }else{
-                Log.e("Status", userType.toString());
+            } else {
+                // If neither Surveyor nor Processor, log an error
+                Log.e("Status", userType.toString())
             }
         }
+
     }
+
 
     private fun fetchUserType(bookedUserId: String, callback: (String?) -> Unit) {
         val db = FirebaseFirestore.getInstance()
@@ -241,26 +266,77 @@ class FragmentBooking : Fragment() {
 
     private fun setupSubmitBookingButton(
         submitBookingButton: Button,
-        fullName: EditText,
-        contactNumber: EditText,
-        emailAddress: EditText,
-        tinNumber: EditText,
+        fullNameEditText: EditText,
+        contactNumberEditText: EditText,
+        emailAddressEditText: EditText,
         addressEditText: EditText,
-        downpaymentEditText: EditText,
-        contractAmount: EditText,
+        propertyTypeGroup: RadioGroup,
+        purposeOfSurveyGroup: RadioGroup,
         bookedUserId: String,
         status: String
     ) {
         submitBookingButton.setOnClickListener {
-
+            // Extract values directly from EditText views
+            val fullName = fullNameEditText.text.toString()
+            val contactNumber = contactNumberEditText.text.toString()
+            val emailAddress = emailAddressEditText.text.toString()
             val address = addressEditText.text.toString()
-            convertLocationToCoordinates(address) { lat: Double, lon: Double ->
-                val downpayment = downpaymentEditText.text.toString().toDoubleOrNull() ?: 0.00
-                val contractPrice = contractAmount.text.toString().toDoubleOrNull() ?: 0.00
 
-                if (validateInput(address, downpayment, contractPrice)) {
+            // Get selected property type from RadioGroup
+            val selectedPropertyTypeId = propertyTypeGroup.checkedRadioButtonId
+            val propertyTypeRadioButton = propertyTypeGroup.findViewById<RadioButton>(selectedPropertyTypeId)
+            val propertyType = propertyTypeRadioButton?.text.toString()
+
+            // Get selected purpose of survey from RadioGroup
+            val selectedPurposeOfSurveyId = purposeOfSurveyGroup.checkedRadioButtonId
+            val purposeOfSurveyRadioButton = purposeOfSurveyGroup.findViewById<RadioButton>(selectedPurposeOfSurveyId)
+            val purposeOfSurvey = purposeOfSurveyRadioButton?.text.toString()
+
+            // Validate input and convert address to coordinates
+            if (validateInput(address)) {
+                convertLocationToCoordinates(address) { lat: Double, lon: Double ->
+                    // Show loading toast and save booking to Firestore
                     showLoadingToast()
-                    saveBookingToFirestore(address, downpayment, contractPrice, lat, lon, bookedUserId, status, fullName, contactNumber, emailAddress, tinNumber)
+                    saveBookingToFirestore(
+                        address, lat, lon, bookedUserId, status, fullName,
+                        contactNumber, emailAddress, propertyType, purposeOfSurvey
+                    )
+                }
+            }
+        }
+    }
+
+    private fun setupSubmitBookingButtonProcessor(
+        submitBookingButton: Button,
+        fullNameEditText: EditText,
+        contactNumberEditText: EditText,
+        emailAddressEditText: EditText,
+        addressEditText: EditText,
+        bookedUserId: String,
+        status: String,
+        tinNumber: EditText,
+        age: EditText
+    ) {
+        submitBookingButton.setOnClickListener {
+            // Extract values directly from EditText views
+            val fullName = fullNameEditText.text.toString()
+            val contactNumber = contactNumberEditText.text.toString()
+            val emailAddress = emailAddressEditText.text.toString()
+            val address = addressEditText.text.toString()
+            val tinNumber = tinNumber.text.toString()
+            val age = age.text.toString()
+
+
+
+            // Validate input and convert address to coordinates
+            if (validateInput(address)) {
+                convertLocationToCoordinates(address) { lat: Double, lon: Double ->
+                    // Show loading toast and save booking to Firestore
+                    showLoadingToast()
+                    saveBookingToFirestoreProcessor(
+                        address, lat, lon, bookedUserId, status, fullName,
+                        contactNumber, emailAddress, tinNumber, age
+                    )
                 }
             }
         }
@@ -309,7 +385,7 @@ class FragmentBooking : Fragment() {
         datePickerDialog.show()
     }
 
-    private fun validateInput(address: String, downpayment: Double?, contractPrice: Double?): Boolean {
+    private fun validateInput(address: String): Boolean {
         return when {
             startDateTime == null -> {
                 showToast("Please select start and end times.")
@@ -319,10 +395,7 @@ class FragmentBooking : Fragment() {
                 showToast("Please provide an address.")
                 false
             }
-            contractPrice == null || contractPrice < 0 -> {
-                showToast("Enter a Contract Price.")
-                false
-            }
+
             else -> true
         }
     }
@@ -331,11 +404,18 @@ class FragmentBooking : Fragment() {
         showToast("Booking in progress...")
     }
 
-    private fun saveBookingToFirestore(address: String, downpayment: Double, contractPrice: Double, lat: Double, lon: Double, bookedUserId: String, status: String,fullName: EditText,
-                                       contactNumber: EditText,
-                                       emailAddress: EditText,
-                                       tinNumber: EditText) {
-
+    private fun saveBookingToFirestore(
+        address: String,
+        lat: Double,
+        lon: Double,
+        bookedUserId: String,
+        status: String,
+        fullName: String,  // Now passing String values instead of EditText
+        contactNumber: String,  // Same here
+        emailAddress: String,  // Same here
+        propertyType: String,  // Added propertyType
+        purposeOfSurvey: String  // Added purposeOfSurvey
+    ) {
         val db = FirebaseFirestore.getInstance()
         val bookingUserId = FirebaseAuth.getInstance().currentUser?.uid
 
@@ -352,43 +432,100 @@ class FragmentBooking : Fragment() {
             pdfRef.putFile(scannedPdfUri!!)
                 .addOnSuccessListener { taskSnapshot ->
                     taskSnapshot.metadata?.reference?.downloadUrl?.addOnSuccessListener { pdfDownloadUrl ->
-                        saveBookingWithPdf(address, downpayment, contractPrice, pdfDownloadUrl.toString(), lat, lon, bookedUserId, status, fullName, contactNumber, emailAddress, tinNumber)
+                        saveBookingWithPdf(
+                            address, pdfDownloadUrl.toString(), lat, lon, bookedUserId, status,
+                            fullName, contactNumber, emailAddress, propertyType, purposeOfSurvey
+                        )
                     }
                 }
                 .addOnFailureListener { e ->
                     showToast("Failed to upload PDF: ${e.message}")
                 }
         } else {
-            saveBookingWithPdf(address, downpayment, contractPrice, null, lat, lon, bookedUserId, status, fullName, contactNumber, emailAddress, tinNumber)
+            saveBookingWithPdf(
+                address, null, lat, lon, bookedUserId, status, fullName, contactNumber,
+                emailAddress, propertyType, purposeOfSurvey
+            )
+        }
+    }
+    private fun saveBookingToFirestoreProcessor(
+        address: String,
+        lat: Double,
+        lon: Double,
+        bookedUserId: String,
+        status: String,
+        fullName: String,  // Now passing String values instead of EditText
+        contactNumber: String,  // Same here
+        emailAddress: String,  // Same here
+        tinNumber: String,
+        age: String
+    ) {
+        val db = FirebaseFirestore.getInstance()
+        val bookingUserId = FirebaseAuth.getInstance().currentUser?.uid
+
+        if (bookingUserId == null) {
+            showToast("User not logged in.")
+            return
+        }
+
+        // Upload the scanned PDF to Firebase Storage
+        if (scannedPdfUri != null) {
+            val storageRef = FirebaseStorage.getInstance().reference
+            val pdfRef = storageRef.child("bookings/${UUID.randomUUID()}.pdf")
+
+            pdfRef.putFile(scannedPdfUri!!)
+                .addOnSuccessListener { taskSnapshot ->
+                    taskSnapshot.metadata?.reference?.downloadUrl?.addOnSuccessListener { pdfDownloadUrl ->
+                        saveBookingWithPdfProcessor(
+                            address, pdfDownloadUrl.toString(), lat, lon, bookedUserId, status,
+                            fullName, contactNumber, emailAddress, tinNumber, age
+                        )
+                    }
+                }
+                .addOnFailureListener { e ->
+                    showToast("Failed to upload PDF: ${e.message}")
+                }
+        } else {
+            saveBookingWithPdf(
+                address, null, lat, lon, bookedUserId, status, fullName, contactNumber,
+                emailAddress, tinNumber, age
+            )
         }
     }
 
+
     private fun saveBookingWithPdf(
-        address: String, downpayment: Double, contractPrice: Double, pdfDownloadUrl: String?, lat: Double, lon: Double, bookedUserId: String, status: String, fullName: EditText,
-        contactNumber: EditText,
-        emailAddress: EditText,
-        tinNumber: EditText
+        address: String,
+        pdfDownloadUrl: String?,
+        lat: Double,
+        lon: Double,
+        bookedUserId: String,
+        status: String,
+        fullName: String,  // Receive fullName as String, not EditText
+        contactNumber: String,  // Receive contactNumber as String
+        emailAddress: String,  // Receive emailAddress as String
+        propertyType: String,  // Receive propertyType as String
+        purposeOfSurvey: String  // Receive purposeOfSurvey as String
     ) {
         val db = FirebaseFirestore.getInstance()
         val bookingUserId = FirebaseAuth.getInstance().currentUser?.uid
 
         val bookingData = hashMapOf(
             "landOwnerUserId" to bookingUserId,
-            "bookedUserId" to bookedUserId!!,
+            "bookedUserId" to bookedUserId,
             "timestamp" to FieldValue.serverTimestamp(),
             "address" to address,
-            "downpayment" to downpayment,
             "status" to status,
             "stage" to "request",
             "startDateTime" to Timestamp(startDateTime!!.timeInMillis / 1000, 0),
-            "contractPrice" to contractPrice,
             "pdfUrl" to (pdfDownloadUrl ?: ""),
             "latitude" to lat,
             "longitude" to lon,
-            "fullName" to fullName,
-            "contactNumber" to contactNumber,
-            "emailAddress" to emailAddress,
-            "tinNumber" to tinNumber
+            "fullName" to fullName,  // Added fullName
+            "contactNumber" to contactNumber,  // Added contactNumber
+            "emailAddress" to emailAddress,  // Added emailAddress
+            "propertyType" to propertyType,  // Added propertyType
+            "purposeOfSurvey" to purposeOfSurvey  // Added purposeOfSurvey
         )
 
         db.collection("bookings")
@@ -402,6 +539,53 @@ class FragmentBooking : Fragment() {
                 showToast("Error adding booking: ${e.message}")
             }
     }
+
+    private fun saveBookingWithPdfProcessor(
+        address: String,
+        pdfDownloadUrl: String?,
+        lat: Double,
+        lon: Double,
+        bookedUserId: String,
+        status: String,
+        fullName: String,  // Receive fullName as String, not EditText
+        contactNumber: String,  // Receive contactNumber as String
+        emailAddress: String,  // Receive emailAddress as String
+        tinNumber: String,
+        age: String
+    ) {
+        val db = FirebaseFirestore.getInstance()
+        val bookingUserId = FirebaseAuth.getInstance().currentUser?.uid
+
+        val bookingData = hashMapOf(
+            "landOwnerUserId" to bookingUserId,
+            "bookedUserId" to bookedUserId,
+            "timestamp" to FieldValue.serverTimestamp(),
+            "address" to address,
+            "status" to status,
+            "stage" to "request",
+            "startDateTime" to Timestamp(startDateTime!!.timeInMillis / 1000, 0),
+            "pdfUrl" to (pdfDownloadUrl ?: ""),
+            "latitude" to lat,
+            "longitude" to lon,
+            "fullName" to fullName,  // Added fullName
+            "contactNumber" to contactNumber,  // Added contactNumber
+            "emailAddress" to emailAddress,  // Added emailAddress
+            "tinNumber" to tinNumber,
+            "age" to age
+        )
+
+        db.collection("bookings")
+            .add(bookingData)
+            .addOnSuccessListener { documentReference ->
+                documentReference.update("bookingId", documentReference.id)
+                showToast("Booking successfully created.")
+                requireActivity().onBackPressed()
+            }
+            .addOnFailureListener { e ->
+                showToast("Error adding booking: ${e.message}")
+            }
+    }
+
 
     private fun showDownpaymentAlertDialog() {
         AlertDialog.Builder(requireContext())

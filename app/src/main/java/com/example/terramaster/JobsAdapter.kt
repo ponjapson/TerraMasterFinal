@@ -54,6 +54,15 @@ class JobsAdapter(private val jobs: MutableList<Job>, private val context: Conte
         val pdfFile: TextView = view.findViewById(R.id.pdfFileName)
         val labelPrice: TextView = view.findViewById(R.id.labelPrice)
         val labelDown: TextView = view.findViewById(R.id.labeldown)
+        val labelAge: TextView = view.findViewById(R.id.labelAge)
+        val age: TextView = view.findViewById(R.id.age)
+        val labelTin: TextView = view.findViewById(R.id.labelTin)
+        val tin: TextView = view.findViewById(R.id.Tin)
+        val purposeLabel: TextView = view.findViewById(R.id.purposeLabel)
+        val purposeOfSurvey: TextView = view.findViewById(R.id.purposeOfSuurvey)
+        val propertyTypeLabel: TextView = view.findViewById(R.id.propertyTypeLabel)
+        val propertyLabel: TextView = view.findViewById(R.id.propertyLabel)
+
 
         val confirmButton: Button = view.findViewById(R.id.btn_confirm)
         val reviseButton: Button = view.findViewById(R.id.btn_revise)
@@ -124,6 +133,14 @@ class JobsAdapter(private val jobs: MutableList<Job>, private val context: Conte
                         holder.downpayment.visibility = View.GONE
                         holder.labelDown.visibility = View.GONE
                         holder.labelPrice.visibility = View.GONE
+                        holder.labelAge.visibility = View.VISIBLE
+                        holder.age.visibility = View.VISIBLE
+                        holder.labelTin.visibility = View.VISIBLE
+                        holder.tin.visibility = View.VISIBLE
+                        holder.purposeLabel.visibility = View.GONE
+                        holder.purposeOfSurvey.visibility = View.GONE
+                        holder.propertyTypeLabel.visibility = View.GONE
+                        holder.propertyLabel.visibility = View.GONE
                     }
                     "Surveyor" -> {
                         // If the user is a "Surveyor", show contract price and downpayment
@@ -131,6 +148,14 @@ class JobsAdapter(private val jobs: MutableList<Job>, private val context: Conte
                         holder.downpayment.visibility = View.VISIBLE
                         holder.labelDown.visibility = View.VISIBLE
                         holder.labelPrice.visibility = View.VISIBLE
+                        holder.labelAge.visibility = View.GONE
+                        holder.age.visibility = View.GONE
+                        holder.labelTin.visibility = View.GONE
+                        holder.tin.visibility = View.GONE
+                        holder.purposeLabel.visibility = View.VISIBLE
+                        holder.purposeOfSurvey.visibility = View.VISIBLE
+                        holder.propertyTypeLabel.visibility = View.VISIBLE
+                        holder.propertyLabel.visibility = View.VISIBLE
                     }
                     else -> {
                         // Default case if there is no specific userType
