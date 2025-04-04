@@ -12,6 +12,7 @@
         android:padding="16dp">
 
         <TextView
+            android:id="@+id/surveyorNote"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
@@ -38,15 +39,15 @@
             android:layout_marginStart="10dp"
             android:layout_marginEnd="10dp">
 
+            <!-- Start DateTime Button -->
             <TextView
                 android:id="@+id/notice"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textSize="14sp"
-                android:textColor="@color/black"
                 android:paddingBottom="10dp"
-                android:text="Notice: Republic Act No. 3019, also known as the Anti-Graft and Corrupt Practices Act, is the primary law in the Philippines aimed at preventing and punishing graft and corruption, particularly among public officials and employees."/>
-            <!-- Start DateTime Button -->
+                android:textColor="@color/black"
+                android:textSize="14sp" />
+
             <Button
                 android:id="@+id/startDateTimeButton"
                 android:layout_width="match_parent"
@@ -69,6 +70,113 @@
                 android:paddingBottom="10dp"
                 />
         </LinearLayout>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="14sp"
+            android:textColor="@color/black"
+            android:paddingTop="20dp"
+            android:paddingBottom="10dp"
+            android:text="Name"
+            android:paddingStart="15dp"/>
+
+        <!-- Contract Amount Input -->
+        <EditText
+            android:id="@+id/fullName"
+            android:layout_width="match_parent"
+            android:layout_height="42dp"
+            android:background="@drawable/custom_edit_text"
+            android:hint="Enter Full Name"
+            android:paddingStart="15dp"
+            android:gravity="center_vertical"
+            android:textColor="@android:color/black"
+            android:textColorHint="@color/black"
+            android:textSize="14sp"
+            android:fontFamily="@font/poppinsreg"
+            android:inputType="numberDecimal"
+            android:layout_marginStart="10dp"
+            android:layout_marginEnd="10dp"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="14sp"
+            android:textColor="@color/black"
+            android:paddingTop="20dp"
+            android:paddingBottom="10dp"
+            android:text="Contact Number"
+            android:paddingStart="15dp"/>
+
+        <!-- Downpayment Input -->
+
+        <EditText
+            android:id="@+id/contactNumber"
+            android:layout_width="match_parent"
+            android:layout_height="42dp"
+            android:layout_marginStart="10dp"
+            android:layout_marginEnd="10dp"
+            android:background="@drawable/custom_edit_text"
+            android:fontFamily="@font/poppinsreg"
+            android:gravity="center_vertical"
+            android:hint="Enter Contact Number"
+            android:inputType="numberDecimal"
+            android:paddingStart="15dp"
+            android:textColor="@android:color/black"
+            android:textColorHint="@color/black"
+            android:textSize="14sp" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="14sp"
+            android:textColor="@color/black"
+            android:paddingTop="20dp"
+            android:paddingBottom="10dp"
+            android:text="Email Address"
+            android:paddingStart="15dp"/>
+
+        <!-- Booking Details Input -->
+        <EditText
+            android:id="@+id/emailAddress"
+            android:layout_width="match_parent"
+            android:layout_height="42dp"
+            android:layout_marginStart="10dp"
+            android:layout_marginEnd="10dp"
+            android:background="@drawable/custom_edit_text"
+            android:fontFamily="@font/poppinsreg"
+            android:gravity="center_vertical"
+            android:hint="Enter Email Address"
+            android:paddingStart="15dp"
+            android:textColor="@android:color/black"
+            android:textColorHint="@color/black"
+            android:textSize="14sp"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="14sp"
+            android:textColor="@color/black"
+            android:paddingTop="20dp"
+            android:paddingBottom="10dp"
+            android:text="Tax identification number(TIN)"
+            android:paddingStart="15dp"/>
+
+        <!-- Booking Details Input -->
+        <EditText
+            android:id="@+id/tinNumber"
+            android:layout_width="match_parent"
+            android:layout_height="42dp"
+            android:layout_marginStart="10dp"
+            android:layout_marginEnd="10dp"
+            android:background="@drawable/custom_edit_text"
+            android:fontFamily="@font/poppinsreg"
+            android:gravity="center_vertical"
+            android:hint="Enter Tax identification number"
+            android:paddingStart="15dp"
+            android:textColor="@android:color/black"
+            android:textColorHint="@color/black"
+            android:textSize="14sp"/>
 
         <TextView
             android:layout_width="wrap_content"
@@ -150,12 +258,36 @@
             android:textColor="@android:color/black"
             android:textColorHint="@color/black"
             android:textSize="14sp"/>
+        <TextView
+            android:id="@+id/notes"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="16sp"
+            android:textColor="@android:color/black"
+            android:lineSpacingExtra="4sp"
+            android:padding="16dp"
+            android:layout_margin="15dp"
+            android:fontFamily="sans-serif"
+            android:visibility="gone"/>
+
+        <TextView
+            android:id="@+id/notesProcessor"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="16sp"
+            android:textColor="@android:color/black"
+            android:lineSpacingExtra="4sp"
+            android:padding="16dp"
+            android:layout_margin="15dp"
+            android:fontFamily="sans-serif"
+            android:visibility="gone"/>
+
         <Button
             android:id="@+id/scanButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Scan Document"
-            android:layout_marginTop="20dp"/>
+            android:text="Scan Documents"/>
+
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"

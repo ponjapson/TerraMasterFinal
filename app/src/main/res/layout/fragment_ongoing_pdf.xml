@@ -35,40 +35,7 @@
         android:layout_margin="15dp"
         android:fontFamily="sans-serif"
         android:visibility="gone"/>
-    <!-- SignaturePad (Below the PDF preview) -->
-    <com.github.gcacace.signaturepad.views.SignaturePad
-        android:id="@+id/signature_pad"
-        android:layout_width="match_parent"
-        android:layout_height="200dp"
-        android:layout_marginTop="16dp"
-        android:background="@android:color/darker_gray"
-        app:penColor="@android:color/black"
-        android:visibility="gone"/>
 
-    <!-- Buttons for Clear and Save -->
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:gravity="center"
-        android:layout_marginTop="8dp">
 
-        <Button
-            android:id="@+id/btnClearSignature"
-            android:layout_width="0dp"
-            android:layout_weight="1"
-            android:layout_height="wrap_content"
-            android:text="Clear"
-            android:layout_marginEnd="8dp"
-            android:visibility="gone"/>
-
-        <Button
-            android:id="@+id/btnSaveSignature"
-            android:layout_width="0dp"
-            android:layout_weight="1"
-            android:layout_height="wrap_content"
-            android:text="Sign"
-            android:visibility="gone"/>
-    </LinearLayout>
 
 </LinearLayout>

@@ -73,4 +73,5 @@ dependencies {
     implementation("com.stripe:stripe-android:21.0.1")
     implementation("com.stripe:stripe-java:28.0.0")
     implementation ("androidx.multidex:multidex:2.0.1")
+    implementation ("com.github.gcacace:signature-pad:1.3.1")
 }

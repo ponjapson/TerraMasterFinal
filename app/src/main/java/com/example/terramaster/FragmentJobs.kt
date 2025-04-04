@@ -7,6 +7,7 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.viewpager.widget.ViewPager
 import androidx.viewpager2.widget.ViewPager2
 import com.google.android.material.tabs.TabLayout
 import com.google.android.material.tabs.TabLayoutMediator
@@ -53,7 +54,12 @@ class FragmentJobs : Fragment() {
             viewPager.setCurrentItem(it, true)
         }
 
+        navigateToTab0(viewPager)
         return view
+    }
+
+    private fun navigateToTab0(viewPager: ViewPager2) {
+        viewPager.setCurrentItem(0, true)
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {

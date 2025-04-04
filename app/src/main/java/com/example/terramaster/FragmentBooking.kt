@@ -71,7 +71,45 @@ class FragmentBooking : Fragment() {
         val submitBookingButton = view.findViewById<Button>(R.id.submitBookingButton)
         val selectedStartDateTimeTextView = view.findViewById<TextView>(R.id.selectedStartDateTimeTextView)
         val notice = view.findViewById<TextView>(R.id.notice)
+        val notes = view.findViewById<TextView>(R.id.notes)
+        val notesProcessor = view.findViewById<TextView>(R.id.notesProcessor)
+        val firestore = FirebaseFirestore.getInstance()
+        val notesRef = firestore.collection("notes") // Replace "notes" with your collection name
+        val noteId = "q3liLgg9khwBKjTdcN6q" // Replace this with the actual document ID you want to fetch
+        val fullName = view.findViewById<EditText>(R.id.fullName)
+        val contactNumber = view.findViewById<EditText>(R.id.contactNumber)
+        val emailAddress = view.findViewById<EditText>(R.id.emailAddress)
+        val tinNumber = view.findViewById<EditText>(R.id.tinNumber)
 
+
+        notesRef.document(noteId).get()
+            .addOnSuccessListener { documentSnapshot ->
+                if (documentSnapshot.exists()) {
+                    val processorBookingNote = documentSnapshot.getString("processorBookingNote")
+                    val processorDocumentsNote = documentSnapshot.getString("processorDocumentsNote")
+                    val surveyorDocumentNotes = documentSnapshot.getString("surveyorDocumentNotes")
+
+                    if (processorBookingNote != null || processorDocumentsNote != null || surveyorDocumentNotes != null) {
+                        // Set the note to the TextView
+                        val formattedText = processorDocumentsNote?.replace("\\n", "\n")
+                        val formattedTextSurveyor = surveyorDocumentNotes?.replace("\\n", "\n")
+                        val noticeTextView: TextView = notice // Replace with your TextView ID
+                        noticeTextView.text = processorBookingNote
+                        notes.text = formattedTextSurveyor
+                        notesProcessor.text = formattedText
+                    } else {
+                        // Handle the case where the field is missing or null
+                        Log.e("Firestore", "processorBookingNote field is missing or null.")
+                    }
+                } else {
+                    // Handle the case where the document does not exist
+                    Log.e("Firestore", "Document not found.")
+                }
+            }
+            .addOnFailureListener { e ->
+                // Handle the error
+                Log.e("Firestore", "Error fetching document", e)
+            }
 
 
         scanButton = view.findViewById(R.id.scanButton)
@@ -90,6 +128,9 @@ class FragmentBooking : Fragment() {
             if (userType == "Processor") {
                 contractAmount.isEnabled = false
                 downpaymentEditText.isEnabled = false
+                contractAmount.visibility = View.GONE
+                downpaymentEditText.visibility = View.GONE
+
                 context?.let {
 
                     downpaymentEditText.setTextColor(ContextCompat.getColor(it, android.R.color.darker_gray))
@@ -99,10 +140,12 @@ class FragmentBooking : Fragment() {
 
                 }
                 notice.visibility = View.VISIBLE
+                notesProcessor.visibility = View.VISIBLE
             } else {
                 contractAmount.isEnabled = true
                 downpaymentEditText.isEnabled = true
                 notice.visibility = View.GONE
+                notes.visibility = View.VISIBLE
             }
         }
 
@@ -110,6 +153,10 @@ class FragmentBooking : Fragment() {
             if(userType == "Surveyor") {
                 setupSubmitBookingButton(
                     submitBookingButton,
+                    fullName,
+                    contactNumber,
+                    emailAddress,
+                    tinNumber,
                     addressEditText,
                     downpaymentEditText,
                     contractAmount,
@@ -120,6 +167,10 @@ class FragmentBooking : Fragment() {
 
                 setupSubmitBookingButton(
                     submitBookingButton,
+                    fullName,
+                    contactNumber,
+                    emailAddress,
+                    tinNumber,
                     addressEditText,
                     downpaymentEditText,
                     contractAmount,
@@ -190,6 +241,10 @@ class FragmentBooking : Fragment() {
 
     private fun setupSubmitBookingButton(
         submitBookingButton: Button,
+        fullName: EditText,
+        contactNumber: EditText,
+        emailAddress: EditText,
+        tinNumber: EditText,
         addressEditText: EditText,
         downpaymentEditText: EditText,
         contractAmount: EditText,
@@ -205,7 +260,7 @@ class FragmentBooking : Fragment() {
 
                 if (validateInput(address, downpayment, contractPrice)) {
                     showLoadingToast()
-                    saveBookingToFirestore(address, downpayment, contractPrice, lat, lon, bookedUserId, status)
+                    saveBookingToFirestore(address, downpayment, contractPrice, lat, lon, bookedUserId, status, fullName, contactNumber, emailAddress, tinNumber)
                 }
             }
         }
@@ -276,7 +331,10 @@ class FragmentBooking : Fragment() {
         showToast("Booking in progress...")
     }
 
-    private fun saveBookingToFirestore(address: String, downpayment: Double, contractPrice: Double, lat: Double, lon: Double, bookedUserId: String, status: String) {
+    private fun saveBookingToFirestore(address: String, downpayment: Double, contractPrice: Double, lat: Double, lon: Double, bookedUserId: String, status: String,fullName: EditText,
+                                       contactNumber: EditText,
+                                       emailAddress: EditText,
+                                       tinNumber: EditText) {
 
         val db = FirebaseFirestore.getInstance()
         val bookingUserId = FirebaseAuth.getInstance().currentUser?.uid
@@ -294,19 +352,22 @@ class FragmentBooking : Fragment() {
             pdfRef.putFile(scannedPdfUri!!)
                 .addOnSuccessListener { taskSnapshot ->
                     taskSnapshot.metadata?.reference?.downloadUrl?.addOnSuccessListener { pdfDownloadUrl ->
-                        saveBookingWithPdf(address, downpayment, contractPrice, pdfDownloadUrl.toString(), lat, lon, bookedUserId, status)
+                        saveBookingWithPdf(address, downpayment, contractPrice, pdfDownloadUrl.toString(), lat, lon, bookedUserId, status, fullName, contactNumber, emailAddress, tinNumber)
                     }
                 }
                 .addOnFailureListener { e ->
                     showToast("Failed to upload PDF: ${e.message}")
                 }
         } else {
-            saveBookingWithPdf(address, downpayment, contractPrice, null, lat, lon, bookedUserId, status)
+            saveBookingWithPdf(address, downpayment, contractPrice, null, lat, lon, bookedUserId, status, fullName, contactNumber, emailAddress, tinNumber)
         }
     }
 
     private fun saveBookingWithPdf(
-        address: String, downpayment: Double, contractPrice: Double, pdfDownloadUrl: String?, lat: Double, lon: Double, bookedUserId: String, status: String
+        address: String, downpayment: Double, contractPrice: Double, pdfDownloadUrl: String?, lat: Double, lon: Double, bookedUserId: String, status: String, fullName: EditText,
+        contactNumber: EditText,
+        emailAddress: EditText,
+        tinNumber: EditText
     ) {
         val db = FirebaseFirestore.getInstance()
         val bookingUserId = FirebaseAuth.getInstance().currentUser?.uid
@@ -323,7 +384,11 @@ class FragmentBooking : Fragment() {
             "contractPrice" to contractPrice,
             "pdfUrl" to (pdfDownloadUrl ?: ""),
             "latitude" to lat,
-            "longitude" to lon
+            "longitude" to lon,
+            "fullName" to fullName,
+            "contactNumber" to contactNumber,
+            "emailAddress" to emailAddress,
+            "tinNumber" to tinNumber
         )
 
         db.collection("bookings")

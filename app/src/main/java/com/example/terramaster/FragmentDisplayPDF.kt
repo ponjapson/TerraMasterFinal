@@ -6,12 +6,18 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Button
+import android.widget.ImageView
 import android.widget.ProgressBar
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import androidx.viewpager.widget.ViewPager
+import com.example.terramaster.FragmentJobs
 import com.example.terramaster.MainActivity
 import com.example.terramaster.R
+import com.example.terramaster.RequestTabFragment
+import com.github.gcacace.signaturepad.views.SignaturePad
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
 import kotlinx.coroutines.Dispatchers
@@ -19,6 +25,7 @@ import kotlinx.coroutines.withContext
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.tasks.await
+import java.io.ByteArrayOutputStream
 import java.io.File
 
 class FragmentDisplayPDF : Fragment() {
@@ -27,6 +34,11 @@ class FragmentDisplayPDF : Fragment() {
     private lateinit var recyclerView: RecyclerView
     private var pdfAdapter: PDFAdapter? = null
     private lateinit var progressBar: ProgressBar // Reference to ProgressBar
+    private lateinit var signaturePad: SignaturePad
+    private lateinit var saveButton: Button
+    private lateinit var clearButton: Button
+   // private lateinit var signatureImageView: ImageView
+
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -43,10 +55,28 @@ class FragmentDisplayPDF : Fragment() {
         recyclerView.adapter = pdfAdapter
 
         val guideId = arguments?.getString("guideId")
-        val pdfUrl = arguments?.getString("pdfUrl")
+        val args = arguments
+        val pdfUrl = args?.getString("pdfUrl")
+        val userType = args?.getString("userType")
+        val bookingId = args?.getString("bookingId")
+        Log.d("PDF_FRAGMENT", "Received PDF URL: $pdfUrl, User Type: $userType") // Debugging log
+
+        signaturePad= view.findViewById(R.id.signature_pad)
+        saveButton = view.findViewById(R.id.btnSaveSignature)
+        clearButton = view.findViewById(R.id.btnClearSignature)
+
 
         if (!pdfUrl.isNullOrEmpty()) {
             Log.d("PDF", "Loading PDF directly from URL: $pdfUrl")
+            if(userType == "Processor") {
+                signaturePad.visibility = View.VISIBLE
+                saveButton.visibility = View.VISIBLE
+                clearButton.visibility = View.VISIBLE
+            }else{
+                signaturePad.visibility = View.INVISIBLE
+                saveButton.visibility = View.INVISIBLE
+                clearButton.visibility = View.INVISIBLE
+            }
             GlobalScope.launch(Dispatchers.Main) {
                 downloadPdfFromFirebase(pdfUrl)
             }
@@ -58,8 +88,108 @@ class FragmentDisplayPDF : Fragment() {
             progressBar.visibility = View.GONE
         }
 
+        clearButton.setOnClickListener {
+            signaturePad.clear()
+            //signatureImageView.setImageBitmap(null)
+        }
+
+        saveButton.setOnClickListener {
+            val signatureBitmap = signaturePad.signatureBitmap
+            if (signatureBitmap != null) {
+                // Compress and upload the signature in background thread
+                GlobalScope.launch(Dispatchers.Main) {
+                    try {
+                        val compressedData = compressBitmap(signatureBitmap)
+                        // Upload to Firebase after compression
+                        uploadSignatureToFirebase(compressedData, bookingId!!)
+                    } catch (e: Exception) {
+                        Log.e("Signature", "Error compressing signature", e)
+                    }
+                }
+            }
+        }
+
         return view
     }
+
+    private suspend fun compressBitmap(bitmap: Bitmap): ByteArray {
+        return withContext(Dispatchers.IO) {
+            val baos = ByteArrayOutputStream()
+            bitmap.compress(Bitmap.CompressFormat.PNG, 100, baos)
+            baos.toByteArray()
+        }
+    }
+    private suspend fun uploadSignatureToFirebase(compressedData: ByteArray, bookingId: String) {
+        val storageReference = FirebaseStorage.getInstance().reference
+        val signatureRef = storageReference.child("signatures/processed_signature.png")
+
+        withContext(Dispatchers.IO) {
+            try {
+                val uploadTask = signatureRef.putBytes(compressedData)
+                uploadTask.await()
+
+                // Retrieve the URL of the uploaded signature
+                val downloadUrl = signatureRef.downloadUrl.await()
+                Log.d("Signature", "Signature uploaded successfully. Download URL: $downloadUrl")
+
+                // Update the booking with signature URL
+                updateBookingWithSignature(downloadUrl.toString(), bookingId)
+
+            } catch (e: Exception) {
+                Log.e("Firebase", "Error uploading signature", e)
+            }
+        }
+    }
+
+    // Update booking with the signature URL in Firestore
+    private fun updateBookingWithSignature(signatureUrl: String, bookingId: String) {
+        val db = FirebaseFirestore.getInstance()
+
+        // Assuming 'bookingId' is available and it's used to identify the booking document
+        val bookingRef = db.collection("bookings").document(bookingId)
+
+        // Create a mutable map to store the updates
+        val updates = mutableMapOf<String, Any>(
+            "signatureUrl" to signatureUrl,
+            "signatureTimestamp" to System.currentTimeMillis(), // Optionally add a timestamp
+            "status" to "verified",
+            "stage" to "ongoing"
+        )
+
+        // Explicitly cast to the required type
+        val mutableUpdates: MutableMap<String, Any> = updates
+
+        // Perform the update
+        bookingRef.update(mutableUpdates)
+            .addOnSuccessListener {
+                Log.d("Booking", "Booking updated with signature URL: $signatureUrl")
+
+                // Navigate to RequestTabFragment if the update is successful
+                navigateToRequestTabFragment()
+            }
+            .addOnFailureListener { e ->
+                Log.e("Booking", "Error updating booking", e)
+            }
+    }
+
+    // Method to navigate to RequestTabFragment
+    private fun navigateToRequestTabFragment() {
+        val fragment = FragmentJobs().apply {
+            arguments = Bundle().apply {
+                putInt("selectedTab", 1)  // Pass tab index (0 for RequestTab)
+            }
+        }
+
+        val fragmentManager = requireActivity().supportFragmentManager
+        fragmentManager.beginTransaction()
+            .replace(R.id.fragment_container, fragment)
+            .addToBackStack(null)
+            .commit()
+
+
+    }
+
+
 
     private fun fetchPdfUrlFromFirestore(guideId: String) {
         val db = FirebaseFirestore.getInstance()

@@ -146,7 +146,7 @@ class RequestTabFragment : Fragment(), OnPaymentClickListener {
             stage = doc.getString("stage") ?: "",
             latitude = doc.getDouble("latitude") ?: 0.0,
             longitude = doc.getDouble("longitude") ?: 0.0,
-            address = "" // Address will be updated later
+            address = "", // Address will be updated later
         )
     }
 
