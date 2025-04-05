@@ -15,6 +15,8 @@ import android.view.ViewGroup
 import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageView
+import android.widget.RadioButton
+import android.widget.RadioGroup
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
@@ -39,8 +41,6 @@ class JobsAdapter(private val jobs: MutableList<Job>, private val context: Conte
     private val firestore = FirebaseFirestore.getInstance()
     private val auth = FirebaseAuth.getInstance()
     private var userType: String? = null
-
-
 
     class JobsViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val profileImage: ImageView = view.findViewById(R.id.profile_image)
@@ -71,6 +71,7 @@ class JobsAdapter(private val jobs: MutableList<Job>, private val context: Conte
         val esign: Button = view.findViewById(R.id.btn_esign)
         val btn_confirm_processor: Button = view.findViewById(R.id.btn_confirm_processor)
         val btn_revise_processor: Button = view.findViewById(R.id.btn_revise_processor)
+        val btn_quotation: Button = view.findViewById(R.id.btn_quotation)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): JobsViewHolder {
@@ -171,6 +172,13 @@ class JobsAdapter(private val jobs: MutableList<Job>, private val context: Conte
                 Log.e("BookingAdapter", "Error fetching user data: ${e.message}")
             }
 
+        if (currentUserId != null) {
+            // Proceed with your logic using currentUserId
+            updateButtonsBasedOnStatus(job, position, holder, currentUserId)
+        } else {
+            // Handle the case where the user is not signed in
+            Log.e("ConfirmBooking", "No user is currently signed in.")
+        }
         // Bind job details
 
         holder.startDate.text = "Start: ${formatTimestamp(job.startDateTime)}"
@@ -180,6 +188,10 @@ class JobsAdapter(private val jobs: MutableList<Job>, private val context: Conte
         holder.bookingDate.text = "Booking Date: ${formatTimestamp(job.timestamp)}"
         holder.contractPrice.text = job.contractPrice.toString()
         holder.status.text = job.status
+        holder.tin.text = job.tinNumber
+        holder.age.text = job.age.toString()
+        holder.purposeOfSurvey.text = job.purposeOfSurvey
+        holder.propertyTypeLabel.text = job.propertyType
         holder.address.text = job.address
         holder.address.setOnClickListener {
             val fragment = FragmentMap()
@@ -226,217 +238,45 @@ class JobsAdapter(private val jobs: MutableList<Job>, private val context: Conte
         }
 
 
-        when (bookingStatus) {
-            //Surveyor
-            "new surveyor request" -> {
-                if (currentUserId == bookingUserId) {
-                    //Current user is the one who booked, show Edit and Decline buttons
-                    holder.reviseButton.visibility = View.VISIBLE
-                    holder.declinedButton.visibility = View.VISIBLE
-                    holder.confirmButton.visibility = View.GONE
-                } else if (currentUserId == bookedUserId) {
-                    // Current user is the one being booked, show Confirm, Edit, and Decline buttons
-                    holder.reviseButton.visibility = View.VISIBLE
-                    holder.declinedButton.visibility = View.VISIBLE
-                    holder.confirmButton.visibility = View.VISIBLE
-                } else {
-                    // Hide all buttons if the current user is neither
-                    holder.reviseButton.visibility = View.GONE
-                    holder.declinedButton.visibility = View.GONE
-                    holder.confirmButton.visibility = View.GONE
-                }
-            }
 
-            "artist_approved" -> {
-                if (currentUserId == bookingUserId) {
-                    // Current user is the one who booked, show Edit and Decline buttons
-                    holder.reviseButton.visibility = View.VISIBLE
-                    holder.declinedButton.visibility = View.VISIBLE
-                    holder.confirmButton.visibility = View.VISIBLE
-                } else if (currentUserId == bookedUserId) {
-                    // Current user is the one being booked, show Confirm, Edit, and Decline buttons
-                    holder.reviseButton.visibility = View.VISIBLE
-                    holder.declinedButton.visibility = View.VISIBLE
-                    holder.confirmButton.visibility = View.GONE
-                } else {
-                    // Hide all buttons if the current user is neither
-                    holder.reviseButton.visibility = View.GONE
-                    holder.declinedButton.visibility = View.GONE
-                    holder.confirmButton.visibility = View.GONE
-                }
-            }
+        holder.btn_quotation.setOnClickListener {
+            // Create the Dialog
+            val dialogView = LayoutInflater.from(context).inflate(R.layout.dialog_contract_details, null)
 
-            "pending_payment" -> {
-                if (currentUserId == bookingUserId) {
-                    // Current user is the one who booked, show Edit and Decline buttons
-                    holder.reviseButton.visibility = View.GONE
-                    holder.declinedButton.visibility = View.VISIBLE
-                    holder.payButton.visibility = View.VISIBLE
-                    holder.confirmButton.visibility = View.GONE
-                } else if (currentUserId == bookedUserId) {
-                    // Current user is the one being booked, show Confirm, Edit, and Decline buttons
-                    holder.reviseButton.visibility = View.GONE
-                    holder.declinedButton.visibility = View.VISIBLE
-                    holder.confirmButton.visibility = View.GONE
-                } else {
-                    // Hide all buttons if the current user is neither
-                    holder.reviseButton.visibility = View.GONE
-                    holder.declinedButton.visibility = View.GONE
-                    holder.confirmButton.visibility = View.GONE
-                }
-            }
+            val contractPriceEditText = dialogView.findViewById<EditText>(R.id.edit_contract_price)
+            val downPaymentEditText = dialogView.findViewById<EditText>(R.id.edit_down_payment)
 
-            "payment_submitted" -> {
-                if (currentUserId == bookingUserId) {
-                    // Current user is the one who booked, show Edit and Decline buttons
-                    holder.reviseButton.visibility = View.GONE
-                    holder.declinedButton.visibility = View.GONE
-                    holder.payButton.visibility = View.GONE
-                    holder.confirmButton.visibility = View.GONE
-                } else if (currentUserId == bookedUserId) {
-                    // Current user is the one being booked, show Confirm, Edit, and Decline buttons
-                    holder.reviseButton.visibility = View.GONE
-                    holder.declinedButton.visibility = View.GONE
-                    holder.confirmButton.visibility = View.VISIBLE
-                } else {
-                    // Hide all buttons if the current user is neither
-                    holder.reviseButton.visibility = View.GONE
-                    holder.declinedButton.visibility = View.GONE
-                    holder.confirmButton.visibility = View.GONE
-                }
-            }
 
-            "accepted" -> {
-                if (currentUserId == bookingUserId) {
-                    // Current user is the one who booked, show Edit and Decline buttons
-                    holder.reviseButton.visibility = View.GONE
-                    holder.declinedButton.visibility = View.GONE
-                    holder.payButton.visibility = View.GONE
-                    holder.confirmButton.visibility = View.GONE
-                } else if (currentUserId == bookedUserId) {
-                    // Current user is the one being booked, show Confirm, Edit, and Decline buttons
-                    holder.reviseButton.visibility = View.GONE
-                    holder.declinedButton.visibility = View.GONE
-                    holder.confirmButton.visibility = View.GONE
-                } else {
-                    // Hide all buttons if the current user is neither
-                    holder.reviseButton.visibility = View.GONE
-                    holder.declinedButton.visibility = View.GONE
-                    holder.confirmButton.visibility = View.GONE
-                }
-            }
+            val builder = AlertDialog.Builder(context)
+                .setTitle("Enter Contract Details")
+                .setView(dialogView)
+                .setPositiveButton("Save") { dialog, _ ->
+                    val contractPrice = contractPriceEditText.text.toString().toDoubleOrNull()
+                    val downPayment = downPaymentEditText.text.toString().toDoubleOrNull()
 
-            "professional edit details" -> {
-                if (currentUserId == bookingUserId) {
-                    // Client (Booking User) sees Pay Now button
-                    holder.reviseButton.visibility = View.VISIBLE  // Optional: Client can revise the booking
-                    holder.declinedButton.visibility = View.VISIBLE  // Client can cancel the booking
-                    holder.payButton.visibility = View.GONE  // Pay Now button for client to pay
-                    holder.confirmButton.visibility = View.VISIBLE  // No confirm button for the client
-                } else if (currentUserId == bookedUserId) {
-                    // Artist (Booked User) sees only Decline and Revise buttons
-                    holder.reviseButton.visibility = View.VISIBLE  // Artist can revise the booking
-                    holder.declinedButton.visibility = View.VISIBLE  // Artist can decline the booking
-                    // Pay Now button is hidden for the artist
-                    holder.confirmButton.visibility = View.GONE  // No confirm button for the artist
-                } else {
-                    // Hide all buttons if current user is neither the artist nor client
-                    holder.reviseButton.visibility = View.GONE
-                    holder.declinedButton.visibility = View.GONE
-                    holder.confirmButton.visibility = View.GONE
-                }
-            }
+                    // Validate input
+                    if (contractPrice != null && downPayment != null) {
+                        if (currentUserId != null) {
+                            // Proceed with your logic using currentUserId
+                            updateBookingInDatabase(job.bookingId, contractPrice, downPayment, position, holder, currentUserId)
+                        } else {
+                            // Handle the case where the user is not signed in
+                            Log.e("ConfirmBooking", "No user is currently signed in.")
+                        }
 
-            "landowner edit details" -> {
-                if (currentUserId == bookingUserId) {
-                    // Client (Booking User) sees Pay Now button
-                    holder.reviseButton.visibility = View.VISIBLE  // Optional: Client can revise the booking
-                    holder.declinedButton.visibility = View.VISIBLE  // Client can cancel the booking
-                    holder.payButton.visibility = View.GONE  // Pay Now button for client to pay
-                    holder.confirmButton.visibility = View.GONE  // No confirm button for the client
-                } else if (currentUserId == bookedUserId) {
-                    // Artist (Booked User) sees only Decline and Revise buttons
-                    holder.reviseButton.visibility = View.VISIBLE  // Artist can revise the booking
-                    holder.declinedButton.visibility = View.VISIBLE
-                    holder.payButton.visibility = View.GONE// Artist can decline the booking
-                    // Pay Now button is hidden for the artist
-                    holder.confirmButton.visibility =
-                        View.VISIBLE  // No confirm button for the artist
-                } else {
-                    // Hide all buttons if current user is neither the artist nor client
-                    holder.reviseButton.visibility = View.GONE
-                    holder.declinedButton.visibility = View.GONE
-                    holder.confirmButton.visibility = View.GONE
-                }
-            }
+                    } else {
+                        Toast.makeText(context, "Please enter valid values", Toast.LENGTH_SHORT).show()
+                    }
 
-            //Processor
-            "new processor request" -> {
-                if (currentUserId == bookingUserId) {
-                    //Current user is the one who booked, show Edit and Decline buttons
-                    holder.btn_revise_processor.visibility = View.VISIBLE
-                    holder.declinedButton.visibility = View.VISIBLE
-                } else if (currentUserId == bookedUserId) {
-                    // Current user is the one being booked, show Confirm, Edit, and Decline buttons
-                    holder.btn_revise_processor.visibility = View.VISIBLE
-                    holder.btn_confirm_processor.visibility = View.VISIBLE
-                } else {
-                    // Hide all buttons if the current user is neither
-                    holder.reviseButton.visibility = View.GONE
-                    holder.declinedButton.visibility = View.GONE
-                    holder.confirmButton.visibility = View.GONE
+                    dialog.dismiss()
                 }
-            }
-            "Waiting for processor document verification" -> {
-                if (currentUserId == bookingUserId) {
-                    //Current user is the one who booked, show Edit and Decline buttons
-                    holder.btn_revise_processor.visibility = View.VISIBLE
-                    holder.declinedButton.visibility = View.VISIBLE
-                } else if (currentUserId == bookedUserId) {
-                    // Current user is the one being booked, show Confirm, Edit, and Decline buttons
-                    holder.esign.visibility = View.VISIBLE
-                } else {
-                    // Hide all buttons if the current user is neither
-                    holder.reviseButton.visibility = View.GONE
-                    holder.declinedButton.visibility = View.GONE
-                    holder.confirmButton.visibility = View.GONE
+                .setNegativeButton("Cancel") { dialog, _ ->
+                    dialog.dismiss()
                 }
-            }
 
-            "landowner edit detail" -> {
-                if (currentUserId == bookingUserId) {
-                    //Current user is the one who booked, show Edit and Decline buttons
-                    holder.btn_revise_processor.visibility = View.VISIBLE
-                    holder.declinedButton.visibility = View.VISIBLE
-                } else if (currentUserId == bookedUserId) {
-                    // Current user is the one being booked, show Confirm, Edit, and Decline buttons
-                    holder.btn_revise_processor.visibility = View.VISIBLE
-                    holder.btn_confirm_processor.visibility = View.VISIBLE
-                } else {
-                    // Hide all buttons if the current user is neither
-                    holder.reviseButton.visibility = View.GONE
-                    holder.declinedButton.visibility = View.GONE
-                    holder.confirmButton.visibility = View.GONE
-                }
-            }
-            "processor edit details" -> {
-                if (currentUserId == bookingUserId) {
-                    //Current user is the one who booked, show Edit and Decline buttons
-                    holder.btn_revise_processor.visibility = View.VISIBLE
-                    holder.btn_confirm_processor.visibility = View.VISIBLE
-
-                } else if (currentUserId == bookedUserId) {
-                    // Current user is the one being booked, show Confirm, Edit, and Decline buttons
-                    holder.btn_revise_processor.visibility = View.VISIBLE
-                    holder.declinedButton.visibility = View.VISIBLE
-                } else {
-                    // Hide all buttons if the current user is neither
-                    holder.reviseButton.visibility = View.GONE
-                    holder.declinedButton.visibility = View.GONE
-                    holder.confirmButton.visibility = View.GONE
-                }
-            }
+            builder.create().show()
         }
+
         // Accept button functionality with confirmation dialog
         holder.confirmButton.setOnClickListener {
             // Get the bookingId from your data model, e.g., a Booking object
@@ -447,7 +287,7 @@ class JobsAdapter(private val jobs: MutableList<Job>, private val context: Conte
 
             // Assuming you're using an adapter and have a booking list
             if (currentUserId != null) {
-                confirmBooking(bookingId, currentUserId, position)
+                confirmBooking(bookingId, currentUserId, position, holder, currentUserId)
             } else {
                 // Ensure context is available and show the toast
                 context?.let {
@@ -472,7 +312,7 @@ class JobsAdapter(private val jobs: MutableList<Job>, private val context: Conte
 
             // Assuming you're using an adapter and have a booking list
             if (currentUserId != null) {
-                confirmBookingProcessor(bookingId, currentUserId, position)
+                confirmBookingProcessor(bookingId, currentUserId, position, holder, currentUserId)
             } else {
                 // Ensure context is available and show the toast
                 context?.let {
@@ -490,12 +330,14 @@ class JobsAdapter(private val jobs: MutableList<Job>, private val context: Conte
 
 
         holder.reviseButton.setOnClickListener {
+
+
             val bookingId = jobs[position].bookingId
             val bookingRef = firestore.collection("bookings").document(bookingId)
 
             bookingRef.get().addOnSuccessListener { document ->
                 if (document.exists()) {
-                    val currentDownpayment = document.getDouble("downpayment") ?: 0.0
+                    val currentDownpayment = document.getDouble("downPayment") ?: 0.0
                     val currentContractPrice = document.getDouble("contractPrice") ?: 0.0
                     val currentStartDateTimeTimestamp = document.getTimestamp("startDateTime")
                     val currentStartDateTime = currentStartDateTimeTimestamp?.toDate()?.let {
@@ -503,18 +345,54 @@ class JobsAdapter(private val jobs: MutableList<Job>, private val context: Conte
                     } ?: ""
                     val lat = document.getDouble("latitude") ?: 0.0
                     val lon = document.getDouble("longitude") ?: 0.0
+                    val tinNumber = document.getString("tinNumber")
+                    val age = document.getLong("age")?.toInt()?.toString() ?: ""
+                    val propertyType = document.getString("propertyType") ?: ""
+                    val purposeOfSurvey = document.getString("purposeOfSurvey") ?: ""
+                    val emailAddress = document.getString("emailAddress")
+                    val contactNumber = document.getString("contactNumber")
 
                     val dialogView = LayoutInflater.from(context).inflate(R.layout.dialog_edit_booking, null)
-                    val addressEditText = dialogView.findViewById<EditText>(R.id.Address)
-
-                    convertCoordinatesToAddress(context, lat, lon) { address ->
-                        addressEditText.setText(address)
-                    }
 
                     val startDateTimeButton = dialogView.findViewById<Button>(R.id.startDateTimeButton)
                     val selectedStartDateTimeTextView = dialogView.findViewById<TextView>(R.id.selectedStartDateTimeTextView)
                     val downpaymentEditText = dialogView.findViewById<EditText>(R.id.downpaymentEditText)
                     val contractPriceEditText = dialogView.findViewById<EditText>(R.id.contractAmount)
+                    val contactNumberEditText = dialogView.findViewById<EditText>(R.id.contactNumber)
+                    val ageEditText = dialogView.findViewById<EditText>(R.id.age)
+                    val emailAddressEditText = dialogView.findViewById<EditText>(R.id.emailAddress)
+                    val tinNumberEditText = dialogView.findViewById<EditText>(R.id.tinNumber)
+                    val propertyTypeGroup = dialogView.findViewById<RadioGroup>(R.id.propertyTypeGroup)
+                    val purposeOfSurveyGroup = dialogView.findViewById<RadioGroup>(R.id.purposeOfSurveyGroup)
+                    val addressEditText = dialogView.findViewById<EditText>(R.id.Address)
+
+                    val residentialRadioButton = dialogView.findViewById<RadioButton>(R.id.residential)
+                    val commercialRadioButton = dialogView.findViewById<RadioButton>(R.id.commercial)
+                    val agriculturalRadioButton = dialogView.findViewById<RadioButton>(R.id.agricultural)
+                    val vacantLandRadioButton = dialogView.findViewById<RadioButton>(R.id.vacantLand)
+                    val otherPropertyRadioButton = dialogView.findViewById<RadioButton>(R.id.otherProperty)
+
+// Purpose of Survey RadioButtons
+                    val propertySaleRadioButton = dialogView.findViewById<RadioButton>(R.id.propertySale)
+                    val legalDisputeRadioButton = dialogView.findViewById<RadioButton>(R.id.legalDispute)
+                    val propertyDevelopmentRadioButton = dialogView.findViewById<RadioButton>(R.id.propertyDevelopment)
+                    val landSubdivisionRadioButton = dialogView.findViewById<RadioButton>(R.id.landSubdivision)
+                    val environmentalAssessmentRadioButton = dialogView.findViewById<RadioButton>(R.id.environmentalAssessment)
+                    val otherPurposeRadioButton = dialogView.findViewById<RadioButton>(R.id.otherPurpose)
+
+                    val ageLabel: TextView = dialogView.findViewById(R.id.ageLabel)
+                    val tinLabel: TextView = dialogView.findViewById(R.id.tinLabel)
+                    val propertyLabel: TextView = dialogView.findViewById(R.id.propertyLabel)
+                    val purposeLabel: TextView = dialogView.findViewById(R.id.purposeLabel)
+                    val contractLabel: TextView = dialogView.findViewById(R.id.contractLabel)
+                    val labelDown: TextView = dialogView.findViewById(R.id.labelDown)
+
+
+                    convertCoordinatesToAddress(context, lat, lon) { address ->
+                        addressEditText.setText(address)
+                    }
+
+
 
                     downpaymentEditText.setText(currentDownpayment.toString())
                     contractPriceEditText.setText(currentContractPrice.toString())
@@ -526,6 +404,86 @@ class JobsAdapter(private val jobs: MutableList<Job>, private val context: Conte
                         }
                     }
 
+                    contactNumberEditText.setText(contactNumber.toString())
+                    ageEditText.setText(age.toString())
+                    tinNumberEditText.setText(tinNumber.toString())
+                    emailAddressEditText.setText(emailAddress.toString())
+
+                    when (propertyType) {
+                        "Residential" -> residentialRadioButton.isChecked = true
+                        "Commercial" -> commercialRadioButton.isChecked = true
+                        "Agricultural" -> agriculturalRadioButton.isChecked = true
+                        "Vacant Land" -> vacantLandRadioButton.isChecked = true
+                        "Other" -> otherPropertyRadioButton.isChecked = true
+                        else -> {
+                            // Handle if propertyType doesn't match any known value
+                        }
+                    }
+
+
+                    when (purposeOfSurvey) {
+                        "Property sale or purchase" -> propertySaleRadioButton.isChecked = true
+                        "Legal dispute or boundary issue" -> legalDisputeRadioButton.isChecked = true
+                        "Property development or construction" -> propertyDevelopmentRadioButton.isChecked = true
+                        "Land subdivision" -> landSubdivisionRadioButton.isChecked = true
+                        "Environmental or flood assessment" -> environmentalAssessmentRadioButton.isChecked = true
+                        "Other" -> otherPurposeRadioButton.isChecked = true
+                        else -> {
+                            // Handle if purposeOfSurvey doesn't match any known value
+                        }
+                    }
+
+                    firestore.collection("users").document(bookedUserId)
+                        .get()
+                        .addOnSuccessListener { userSnapshot ->
+                            userType = userSnapshot.getString("user_type")
+
+                            // Check the userType and adjust the visibility accordingly
+                            when (userType) {
+                                "Processor" -> {
+                                    // If the user is a "Processor", hide contract price and downpayment
+                                    contactNumberEditText.visibility = View.GONE
+                                    downpaymentEditText.visibility = View.GONE
+                                    labelDown.visibility = View.GONE
+                                    contractLabel.visibility = View.GONE
+                                    ageLabel.visibility = View.VISIBLE
+                                    ageEditText.visibility = View.VISIBLE
+                                    tinLabel.visibility = View.VISIBLE
+                                    tinNumberEditText.visibility = View.VISIBLE
+                                    purposeLabel.visibility = View.GONE
+                                    purposeOfSurveyGroup.visibility = View.GONE
+                                    propertyTypeGroup.visibility = View.GONE
+                                    propertyLabel.visibility = View.GONE
+                                }
+                                "Surveyor" -> {
+                                    // If the user is a "Surveyor", show contract price and downpayment
+                                    contactNumberEditText.visibility = View.VISIBLE
+                                    downpaymentEditText.visibility = View.VISIBLE
+                                    labelDown.visibility = View.VISIBLE
+                                    contractLabel.visibility = View.VISIBLE
+                                    ageLabel.visibility = View.GONE
+                                    ageEditText.visibility = View.GONE
+                                    tinLabel.visibility = View.GONE
+                                    tinNumberEditText.visibility = View.GONE
+                                    purposeLabel.visibility = View.VISIBLE
+                                    purposeOfSurveyGroup.visibility = View.VISIBLE
+                                    propertyTypeGroup.visibility = View.VISIBLE
+                                    propertyLabel.visibility = View.VISIBLE
+                                    contractPriceEditText.visibility = View.VISIBLE
+                                }
+                                else -> {
+                                    // Default case if there is no specific userType
+                                   /* contractPrice.visibility = View.VISIBLE
+                                    downpayment.visibility = View.VISIBLE
+                                    labelDown.visibility = View.VISIBLE
+                                    labelPrice.visibility = View.VISIBLE*/
+                                }
+                            }
+                        }
+                        .addOnFailureListener { e ->
+                            // Handle the error if the user document can't be fetched
+                            Log.e("BookingAdapter", "Error fetching user data: ${e.message}")
+                        }
                     // 🔥 Check current user's type from Firestore
                     val currentUserId = FirebaseAuth.getInstance().currentUser?.uid ?: return@addOnSuccessListener
                     firestore.collection("users").document(currentUserId).get()
@@ -550,14 +508,31 @@ class JobsAdapter(private val jobs: MutableList<Job>, private val context: Conte
 
                                     val dateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault())
                                     val newStartDateTimeDate = dateFormat.parse(newStartDateTime)
+                                    // Retrieve the selected property type
+                                    val selectedPropertyTypeId = propertyTypeGroup.checkedRadioButtonId
+                                    val selectedPropertyType = if (selectedPropertyTypeId != -1) {
+                                        dialogView.findViewById<RadioButton>(selectedPropertyTypeId).text.toString()
+                                    } else {
+                                        ""
+                                    }
+                                    val selectedPurposeOfSurveyId = purposeOfSurveyGroup.checkedRadioButtonId
+                                    val selectedPurposeOfSurvey = if (selectedPurposeOfSurveyId != -1) {
+                                        dialogView.findViewById<RadioButton>(selectedPurposeOfSurveyId).text.toString()
+                                    } else {
+                                        ""
+                                    }
 
                                     updateBookingDetails(
                                         newAddress,
                                         newDownpayment,
                                         newStartDateTimeDate,
                                         bookingId,
-                                        newContractPrice
+                                        newContractPrice,
+                                        selectedPropertyType,
+                                        selectedPurposeOfSurvey,
+                                        position
                                     )
+
                                 }
                                 .setNegativeButton("Cancel", null)
                                 .create()
@@ -573,6 +548,8 @@ class JobsAdapter(private val jobs: MutableList<Job>, private val context: Conte
             }.addOnFailureListener { e ->
                 Toast.makeText(context, "Error fetching booking details: ${e.message}", Toast.LENGTH_SHORT).show()
             }
+
+
         }
 
 
@@ -757,6 +734,40 @@ class JobsAdapter(private val jobs: MutableList<Job>, private val context: Conte
         fun navigateToTab(tabIndex: Int)
     }
 
+    private fun updateBookingInDatabase(bookingId: String, contractPrice: Double, downPayment: Double, position: Int, holder: JobsViewHolder, currentUserId: String) {
+        val db = FirebaseFirestore.getInstance()
+
+        val bookingRef = db.collection("bookings").document(bookingId)
+
+        // Explicitly cast HashMap to Map<String, Any>
+        val updatedData = hashMapOf(
+            "contractPrice" to contractPrice,
+            "downPayment" to downPayment,
+            "status" to "Waiting for landowners confirmation"
+        ) as Map<String, Any> // Cast here
+
+        // Update the booking in Firestore
+        bookingRef.update(updatedData)
+            .addOnSuccessListener {
+                Toast.makeText(context, "Booking updated successfully", Toast.LENGTH_SHORT).show()
+                val job = jobs[position]
+                // Optionally update the local data if needed
+                job.contractPrice = contractPrice
+                job.downpayment = downPayment
+                job.status = "Waiting for landowners confirmation"
+
+                updateButtonsBasedOnStatus(job, position, holder, currentUserId)
+                // Notify the adapter that the data at that specific position has changed
+                notifyItemChanged(position)
+            }
+            .addOnFailureListener { e ->
+                Toast.makeText(context, "Error updating booking: ${e.message}", Toast.LENGTH_SHORT).show()
+            }
+    }
+
+
+
+
 
 
     // Function to display a DateTimePicker and return the selected date and time
@@ -812,7 +823,11 @@ class JobsAdapter(private val jobs: MutableList<Job>, private val context: Conte
         newDownpayment: Double,
         newStartDateTime: Date?,
         bookingId: String,
-        contractPrice: Double
+        contractPrice: Double,
+        selectedPropertyType: String,
+        selectedPurposeOfSurvey: String,
+        position: Int
+
     ) {
         val currentUserId = FirebaseAuth.getInstance().currentUser?.uid ?: return // Get current user ID
         val bookingRef = firestore.collection("bookings").document(bookingId)
@@ -854,13 +869,17 @@ class JobsAdapter(private val jobs: MutableList<Job>, private val context: Conte
                         "lastModifiedBy" to currentUserId,
                         "contractPrice" to contractPrice,
                         "latitude" to lat,
-                        "longitude" to lon
+                        "longitude" to lon,
+                        "propertyType" to selectedPropertyType,
+                        "purposeOfSurvey" to selectedPurposeOfSurvey
                     )
+
 
                     // Update the booking in Firestore
                     bookingRef.update(updatedBookingData)
                         .addOnSuccessListener {
                             Toast.makeText(context, "Booking updated successfully.", Toast.LENGTH_SHORT).show()
+                            notifyItemChanged(position)
                         }
                         .addOnFailureListener { e ->
                             Toast.makeText(context, "Error updating booking: ${e.message}", Toast.LENGTH_SHORT).show()
@@ -961,86 +980,131 @@ class JobsAdapter(private val jobs: MutableList<Job>, private val context: Conte
         } ?: "N/A"
     }
 
-    fun confirmBooking(bookingId: String, userId: String, position: Int) {
+    fun confirmBooking(bookingId: String, userId: String, position: Int, holder: JobsViewHolder, currentUserId: String) {
         val bookingRef = FirebaseFirestore.getInstance().collection("bookings").document(bookingId)
 
+        // Start Firestore transaction
         FirebaseFirestore.getInstance().runTransaction { transaction ->
             val document = transaction.get(bookingRef)
 
             if (document.exists()) {
-                val surveyorId = document.getString("bookedUserId")
-                val landownerId = document.getString("landOwnerUserId")
-                val bookingStatus = document.getString("status")
+                // Extract the relevant fields from Firestore
+                val artistId = document.getString("bookedUserId") ?: ""
+                val clientId = document.getString("landOwnerUserId") ?: ""
+                val bookingStatus = document.getString("status") ?: ""
 
+                // Prepare the updates to Firestore
                 val updatedBooking: MutableMap<String, Any> = HashMap()
 
                 when {
-                    userId == landownerId -> {
-                        val job = jobs[position] // Get current job object
+                    userId == clientId -> {
+                        val job = jobs[position]
+                        if (job.downpayment != 0.0) {
+                            listener.onPayNowClicked(bookingId)
+                            updatedBooking["status"] = "pending_payment"
+                            job.status = "pending_payment"
+                        } else {
+                            updatedBooking["status"] = "pending"
+                            job.status = "pending"
+                            updatedBooking["stage"] = "ongoing"
+                            job.stage = "ongoing"
+                        }
 
-                            Log.d("ConfirmBooking", "Client booking confirmed without downpayment.")
-                            updatedBooking["status"] = "Waiting for processor document verification"
-                            job.status = "Waiting for processor document verification"
-
+                        // Update the job status in the UI (main thread)
+                        Handler(Looper.getMainLooper()).post {
+                            // Pass the holder to update buttons based on the status
+                            updateButtonsBasedOnStatus(job, position, holder, currentUserId)
+                            notifyItemChanged(position)
+                        }
                     }
 
-                    userId == surveyorId -> {
-                        Log.d("ConfirmBooking", "Surveyor confirmed booking. Current Status: $bookingStatus")
-
+                    userId == artistId -> {
+                        val job = jobs[position]
                         when (bookingStatus) {
-                            "new processor request" -> {
-                                Log.d("ConfirmBooking", "Payment is submitted, moving to ongoing")
-                                updatedBooking["status"] = "Waiting for processor document verification"
-                                jobs[position].status = "Waiting for processor document verification"
+                            "payment_submitted" -> {
+                                updatedBooking["status"] = "pending"
+                                updatedBooking["stage"] = "ongoing"
+                                job.stage = "ongoing"
+                                job.status = "pending"
                             }
-
+                            "landowner edit details" -> {
+                                updatedBooking["status"] = "Surveyor Confirmed"
+                                job.status = "Surveyor Confirmed"
+                            }
                             else -> {
-                                Log.d("ConfirmBooking", "Booking status not payment_submitted, setting artist_approved")
-
+                                updatedBooking["status"] = "Surveyor Confirmed Waiting for quotation"
+                                job.status = "Surveyor Confirmed Waiting for quotation"
                             }
+                        }
+
+                        // Update the job status in the UI (main thread)
+                        Handler(Looper.getMainLooper()).post {
+                            // Pass the holder to update buttons based on the status
+                            updateButtonsBasedOnStatus(job, position, holder, currentUserId)
+                            notifyItemChanged(position)
                         }
                     }
 
                     else -> {
-                        Log.e("ConfirmBooking", "Neither landowner nor surveyor matched. UserId: $userId")
+                        Log.w("ConfirmBooking", "User is neither client nor artist. No action taken.")
                     }
                 }
 
+                // Only apply update if changes were made
                 if (updatedBooking.isNotEmpty()) {
                     transaction.update(bookingRef, updatedBooking)
                 }
+
             } else {
                 Log.e("ConfirmBooking", "Booking document not found.")
             }
-            return@runTransaction null
+
+            null // Must return null to complete transaction
         }
             .addOnSuccessListener {
-                Log.d("ConfirmBooking", "Booking $bookingId status updated.")
-
-                // ✅ Remove item from list if it is now "ongoing"
+                // After successful transaction, handle UI updates on the main thread
+                Log.d("ConfirmBooking", "Booking $bookingId status successfully updated.")
                 Handler(Looper.getMainLooper()).post {
-                    if (jobs[position].stage == "ongoing") {
+                    val job = jobs[position]
+                    if (job.stage == "ongoing") {
+                        // Job is ongoing, remove from the list
                         jobs.removeAt(position)
                         notifyItemRemoved(position)
 
-                        // Now use the context to navigate
                         val fragmentTransaction = (context as? AppCompatActivity)?.supportFragmentManager?.beginTransaction()
-                        val ongoingFragment = OnGoingFragment() // Your target fragment
 
-                        fragmentTransaction?.replace(R.id.fragment_container, ongoingFragment) // Replace with your container ID
-                        fragmentTransaction?.addToBackStack(null) // Optional: if you want back navigation
+                        // Switch to Ongoing tab in FragmentJobs
+                        val fragmentJobs = FragmentJobs().apply {
+                            arguments = Bundle().apply {
+                                putInt("selectedTab", 1) // Ongoing tab index
+                            }
+                        }
+
+                        fragmentTransaction?.replace(R.id.fragment_container, fragmentJobs)
+                        fragmentTransaction?.addToBackStack(null)
                         fragmentTransaction?.commit()
                     } else {
+                        // Job not ongoing, refresh item at position
+                        updateButtonsBasedOnStatus(job, position, holder, currentUserId)
                         notifyItemChanged(position)
                     }
                 }
             }
             .addOnFailureListener { e ->
+                // Handle failure by logging and possibly reverting UI changes if necessary
                 Log.e("ConfirmBooking", "Error updating booking: ", e)
             }
     }
 
-    fun confirmBookingProcessor(bookingId: String, userId: String, position: Int) {
+
+
+    fun confirmBookingProcessor(
+        bookingId: String,
+        userId: String,
+        position: Int,
+        holder: JobsViewHolder,
+        currentUserId: String
+    ) {
         val bookingRef = FirebaseFirestore.getInstance().collection("bookings").document(bookingId)
 
         FirebaseFirestore.getInstance().runTransaction { transaction ->
@@ -1057,10 +1121,10 @@ class JobsAdapter(private val jobs: MutableList<Job>, private val context: Conte
                     userId == landownerId -> {
                         val job = jobs[position] // Get current job object
 
-                            Log.d("ConfirmBooking", "Client booking confirmed without downpayment.")
-                            updatedBooking["status"] = "Waiting for processor document verification"
-                            job.status = "Waiting for processor document verification"
-
+                        Log.d("ConfirmBooking", "Client booking confirmed without downpayment.")
+                        updatedBooking["status"] = "Waiting for processor document verification"
+                        job.status = "Waiting for processor document verification"
+                        updateButtonsBasedOnStatus(job, position, holder, currentUserId) // Update button status
                     }
 
                     userId == surveyorId -> {
@@ -1071,12 +1135,14 @@ class JobsAdapter(private val jobs: MutableList<Job>, private val context: Conte
                                 Log.d("ConfirmBooking", "Payment is submitted, moving to ongoing")
                                 updatedBooking["status"] = "Waiting for processor document verification"
                                 jobs[position].status = "Waiting for processor document verification"
+                                updateButtonsBasedOnStatus(jobs[position], position, holder, currentUserId) // Update button status
                             }
 
                             else -> {
                                 Log.d("ConfirmBooking", "Booking status not payment_submitted, setting artist_approved")
                                 updatedBooking["status"] = "Waiting for processor document verification"
                                 jobs[position].status = "Waiting for processor document verification"
+                                updateButtonsBasedOnStatus(jobs[position], position, holder, currentUserId) // Update button status
                             }
                         }
                     }
@@ -1113,6 +1179,9 @@ class JobsAdapter(private val jobs: MutableList<Job>, private val context: Conte
                     } else {
                         notifyItemChanged(position)
                     }
+
+                    // Notify that the dataset has changed (to ensure the UI is updated)
+                    notifyDataSetChanged() // Notify RecyclerView to refresh the UI
                 }
             }
             .addOnFailureListener { e ->
@@ -1160,6 +1229,252 @@ class JobsAdapter(private val jobs: MutableList<Job>, private val context: Conte
                 callback(address ?: "Unknown Address")
             }
         }
+    }
+
+    private fun updateButtonsBasedOnStatus(job: Job, position: Int,  holder: JobsViewHolder, currentUserId: String) {
+        val bookingUserId = job.landOwnerUserId
+        val bookedUserId = job.bookedUserId
+        when (job.status) {
+            //Surveyor
+            "new surveyor request" -> {
+                if (currentUserId == bookingUserId) {
+                    //Current user is the one who booked, show Edit and Decline buttons
+                    holder.reviseButton.visibility = View.VISIBLE
+                    holder.declinedButton.visibility = View.VISIBLE
+                    holder.confirmButton.visibility = View.GONE
+                } else if (currentUserId == bookedUserId) {
+                    // Current user is the one being booked, show Confirm, Edit, and Decline buttons
+                    holder.reviseButton.visibility = View.VISIBLE
+                    holder.declinedButton.visibility = View.VISIBLE
+                    holder.confirmButton.visibility = View.VISIBLE
+                } else {
+                    // Hide all buttons if the current user is neither
+                    holder.reviseButton.visibility = View.GONE
+                    holder.declinedButton.visibility = View.GONE
+                    holder.confirmButton.visibility = View.GONE
+                }
+            }
+            "Surveyor Confirmed Waiting for quotation" -> {
+                if (currentUserId == bookingUserId) {
+                    // Current user is the one who booked, show Edit and Decline buttons
+                    holder.reviseButton.visibility = View.VISIBLE
+                    holder.declinedButton.visibility = View.VISIBLE
+                } else if (currentUserId == bookedUserId) {
+                    // Current user is the one being booked, show Confirm, Edit, and Decline buttons
+                    holder.btn_quotation.visibility = View.VISIBLE
+                    holder.reviseButton.visibility = View.GONE
+                    holder.declinedButton.visibility = View.GONE
+                    holder.confirmButton.visibility = View.GONE
+                } else {
+                    // Hide all buttons if the current user is neither
+                    holder.reviseButton.visibility = View.GONE
+                    holder.declinedButton.visibility = View.GONE
+                    holder.confirmButton.visibility = View.GONE
+                }
+            }
+            "Waiting for landowners confirmation" -> {
+                if (currentUserId == bookingUserId) {
+                    // Current user is the one who booked, show Edit and Decline buttons
+                    holder.reviseButton.visibility = View.VISIBLE
+                    holder.declinedButton.visibility = View.VISIBLE
+                    holder.confirmButton.visibility = View.VISIBLE
+                } else if (currentUserId == bookedUserId) {
+                    holder.reviseButton.visibility = View.VISIBLE
+                    holder.declinedButton.visibility = View.VISIBLE
+                } else {
+                    // Hide all buttons if the current user is neither
+                    holder.reviseButton.visibility = View.GONE
+                    holder.declinedButton.visibility = View.GONE
+                    holder.confirmButton.visibility = View.GONE
+                }
+            }
+            "pending_payment" -> {
+                if (currentUserId == bookingUserId) {
+                    // Current user is the one who booked, show Edit and Decline buttons
+                    holder.reviseButton.visibility = View.GONE
+                    holder.declinedButton.visibility = View.VISIBLE
+                    holder.payButton.visibility = View.VISIBLE
+                    holder.confirmButton.visibility = View.GONE
+                } else if (currentUserId == bookedUserId) {
+                    // Current user is the one being booked, show Confirm, Edit, and Decline buttons
+                    holder.reviseButton.visibility = View.GONE
+                    holder.declinedButton.visibility = View.VISIBLE
+                    holder.confirmButton.visibility = View.GONE
+                } else {
+                    // Hide all buttons if the current user is neither
+                    holder.reviseButton.visibility = View.GONE
+                    holder.declinedButton.visibility = View.GONE
+                    holder.confirmButton.visibility = View.GONE
+                }
+            }
+            "payment_submitted" -> {
+                if (currentUserId == bookingUserId) {
+                    // Current user is the one who booked, show Edit and Decline buttons
+                    holder.reviseButton.visibility = View.GONE
+                    holder.declinedButton.visibility = View.GONE
+                    holder.payButton.visibility = View.GONE
+                    holder.confirmButton.visibility = View.GONE
+                } else if (currentUserId == bookedUserId) {
+                    // Current user is the one being booked, show Confirm, Edit, and Decline buttons
+                    holder.reviseButton.visibility = View.GONE
+                    holder.declinedButton.visibility = View.GONE
+                    holder.confirmButton.visibility = View.VISIBLE
+                } else {
+                    // Hide all buttons if the current user is neither
+                    holder.reviseButton.visibility = View.GONE
+                    holder.declinedButton.visibility = View.GONE
+                    holder.confirmButton.visibility = View.GONE
+                }
+            }
+
+            "accepted" -> {
+                if (currentUserId == bookingUserId) {
+                    // Current user is the one who booked, show Edit and Decline buttons
+                    holder.reviseButton.visibility = View.GONE
+                    holder.declinedButton.visibility = View.GONE
+                    holder.payButton.visibility = View.GONE
+                    holder.confirmButton.visibility = View.GONE
+                } else if (currentUserId == bookedUserId) {
+                    // Current user is the one being booked, show Confirm, Edit, and Decline buttons
+                    holder.reviseButton.visibility = View.GONE
+                    holder.declinedButton.visibility = View.GONE
+                    holder.confirmButton.visibility = View.GONE
+                } else {
+                    // Hide all buttons if the current user is neither
+                    holder.reviseButton.visibility = View.GONE
+                    holder.declinedButton.visibility = View.GONE
+                    holder.confirmButton.visibility = View.GONE
+                }
+            }
+
+            "professional edit details" -> {
+                if (currentUserId == bookingUserId) {
+                    // Client (Booking User) sees Pay Now button
+                    holder.reviseButton.visibility = View.VISIBLE  // Optional: Client can revise the booking
+                    holder.declinedButton.visibility = View.VISIBLE  // Client can cancel the booking
+                    holder.payButton.visibility = View.GONE  // Pay Now button for client to pay
+                    holder.confirmButton.visibility = View.VISIBLE  // No confirm button for the client
+                } else if (currentUserId == bookedUserId) {
+                    // Artist (Booked User) sees only Decline and Revise buttons
+                    holder.reviseButton.visibility = View.VISIBLE  // Artist can revise the booking
+                    holder.declinedButton.visibility = View.VISIBLE  // Artist can decline the booking
+                    // Pay Now button is hidden for the artist
+                    holder.confirmButton.visibility = View.GONE  // No confirm button for the artist
+                } else {
+                    // Hide all buttons if current user is neither the artist nor client
+                    holder.reviseButton.visibility = View.GONE
+                    holder.declinedButton.visibility = View.GONE
+                    holder.confirmButton.visibility = View.GONE
+                }
+            }
+
+            "landowner edit details" -> {
+                if (currentUserId == bookingUserId) {
+                    // Client (Booking User) sees Pay Now button
+                    holder.reviseButton.visibility = View.VISIBLE  // Optional: Client can revise the booking
+                    holder.declinedButton.visibility = View.VISIBLE  // Client can cancel the booking
+                    holder.payButton.visibility = View.GONE  // Pay Now button for client to pay
+                    holder.confirmButton.visibility = View.GONE  // No confirm button for the client
+                } else if (currentUserId == bookedUserId) {
+                    // Artist (Booked User) sees only Decline and Revise buttons
+                    holder.reviseButton.visibility = View.VISIBLE  // Artist can revise the booking
+                    holder.declinedButton.visibility = View.VISIBLE
+                    holder.payButton.visibility = View.GONE// Artist can decline the booking
+                    // Pay Now button is hidden for the artist
+                    holder.confirmButton.visibility = View.VISIBLE  // No confirm button for the artist
+                } else {
+                    // Hide all buttons if current user is neither the artist nor client
+                    holder.reviseButton.visibility = View.GONE
+                    holder.declinedButton.visibility = View.GONE
+                    holder.confirmButton.visibility = View.GONE
+                }
+            }
+            "Surveyor Confirmed" -> {
+                if (currentUserId == bookingUserId) {
+                    // Current user is the one who booked, show Edit and Decline buttons
+                    holder.reviseButton.visibility = View.VISIBLE
+                    holder.declinedButton.visibility = View.VISIBLE
+                    holder.confirmButton.visibility = View.VISIBLE
+                } else if (currentUserId == bookedUserId) {
+                    // Current user is the one being booked, show Confirm, Edit, and Decline buttons
+                    holder.reviseButton.visibility = View.VISIBLE
+                    holder.declinedButton.visibility = View.VISIBLE
+                } else {
+                    // Hide all buttons if the current user is neither
+                    holder.reviseButton.visibility = View.GONE
+                    holder.declinedButton.visibility = View.GONE
+                    holder.confirmButton.visibility = View.GONE
+                }
+            }
+
+            //Processor
+            "new processor request" -> {
+                if (currentUserId == bookingUserId) {
+                    //Current user is the one who booked, show Edit and Decline buttons
+                    holder.btn_revise_processor.visibility = View.VISIBLE
+                    holder.declinedButton.visibility = View.VISIBLE
+                } else if (currentUserId == bookedUserId) {
+                    // Current user is the one being booked, show Confirm, Edit, and Decline buttons
+                    holder.btn_revise_processor.visibility = View.VISIBLE
+                    holder.btn_confirm_processor.visibility = View.VISIBLE
+                } else {
+                    // Hide all buttons if the current user is neither
+                    holder.reviseButton.visibility = View.GONE
+                    holder.declinedButton.visibility = View.GONE
+                    holder.confirmButton.visibility = View.GONE
+                }
+            }
+            "Waiting for processor document verification" -> {
+                if (currentUserId == bookingUserId) {
+                    //Current user is the one who booked, show Edit and Decline buttons
+                    holder.btn_revise_processor.visibility = View.VISIBLE
+                    holder.declinedButton.visibility = View.VISIBLE
+                } else if (currentUserId == bookedUserId) {
+                    // Current user is the one being booked, show Confirm, Edit, and Decline buttons
+                    holder.esign.visibility = View.VISIBLE
+                } else {
+                    // Hide all buttons if the current user is neither
+                    holder.reviseButton.visibility = View.GONE
+                    holder.declinedButton.visibility = View.GONE
+                    holder.confirmButton.visibility = View.GONE
+                }
+            }
+
+            "landowner edit detail" -> {
+                if (currentUserId == bookingUserId) {
+                    //Current user is the one who booked, show Edit and Decline buttons
+                    holder.btn_revise_processor.visibility = View.VISIBLE
+                    holder.declinedButton.visibility = View.VISIBLE
+                } else if (currentUserId == bookedUserId) {
+                    // Current user is the one being booked, show Confirm, Edit, and Decline buttons
+                    holder.btn_revise_processor.visibility = View.VISIBLE
+                    holder.btn_confirm_processor.visibility = View.VISIBLE
+                } else {
+                    // Hide all buttons if the current user is neither
+                    holder.reviseButton.visibility = View.GONE
+                    holder.declinedButton.visibility = View.GONE
+                    holder.confirmButton.visibility = View.GONE
+                }
+            }
+            "processor edit details" -> {
+                if (currentUserId == bookingUserId) {
+                    //Current user is the one who booked, show Edit and Decline buttons
+                    holder.btn_revise_processor.visibility = View.VISIBLE
+                    holder.btn_confirm_processor.visibility = View.VISIBLE
+
+                } else if (currentUserId == bookedUserId) {
+                    // Current user is the one being booked, show Confirm, Edit, and Decline buttons
+                    holder.btn_revise_processor.visibility = View.VISIBLE
+                    holder.declinedButton.visibility = View.VISIBLE
+                } else {
+                    // Hide all buttons if the current user is neither
+                    holder.reviseButton.visibility = View.GONE
+                    holder.declinedButton.visibility = View.GONE
+                    holder.confirmButton.visibility = View.GONE
+                }
+            }
+        }
+
     }
 
 }

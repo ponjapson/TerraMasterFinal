@@ -130,16 +130,13 @@ class RequestTabFragment : Fragment(), OnPaymentClickListener {
                 }
             }
     }
-
-
-
     private fun createJobFromDocument(doc: DocumentSnapshot): Job {
         return Job(
             bookingId = doc.id,
             bookedUserId = doc.getString("bookedUserId") ?: "",
             landOwnerUserId = doc.getString("landOwnerUserId") ?: "",
             contractPrice = doc.getDouble("contractPrice") ?: 0.0,
-            downpayment = doc.getDouble("downpayment") ?: 0.0,
+            downpayment = doc.getDouble("downPayment") ?: 0.0,
             startDateTime = doc.getTimestamp("startDateTime"),
             status = doc.getString("status") ?: "",
             timestamp = doc.getTimestamp("timestamp"),
@@ -147,6 +144,10 @@ class RequestTabFragment : Fragment(), OnPaymentClickListener {
             latitude = doc.getDouble("latitude") ?: 0.0,
             longitude = doc.getDouble("longitude") ?: 0.0,
             address = "", // Address will be updated later
+            tinNumber = doc.getString("tinNumber") ?: "",
+            age = doc.getLong("age")?.toInt()?.toString() ?: "",
+            propertyType = doc.getString("propertyType") ?: "",
+            purposeOfSurvey = doc.getString("purposeOfSurvey") ?: ""
         )
     }
 
@@ -177,72 +178,6 @@ class RequestTabFragment : Fragment(), OnPaymentClickListener {
             }
         }
     }
-
-
-
-
-
-
-    /*private fun loadPendingJobs(userId: String) {
-        val pendingJobs = mutableListOf<Job>() // Reset list each time
-
-        firestore.collection("bookings")
-            .whereEqualTo("bookedUserId", userId)
-            .whereEqualTo("stage", "request")
-            .orderBy("timestamp", Query.Direction.DESCENDING)
-            .addSnapshotListener { bookedUserSnapshots, error ->
-                if (error != null) {
-                    Log.e("RequestTabFragment", "Error listening for artist requests: ${error.message}")
-                    return@addSnapshotListener
-                }
-
-                // Clear previous data to prevent duplication
-                pendingJobs.clear()
-
-                bookedUserSnapshots?.let {
-                    // Add jobs only if they are not already in the list
-                    it.documents.forEach { doc ->
-                        val job = doc.toObject(Job::class.java)?.copy(bookingId = doc.id)
-                        if (job != null && !pendingJobs.any { it.bookingId == job.bookingId }) {
-                            pendingJobs.add(job)
-                        }
-                    }
-                }
-
-                // Fetch booking user jobs and update adapter
-                fetchBookingUserJobs(userId, pendingJobs)
-            }
-    }
-
-    private fun fetchBookingUserJobs(userId: String, pendingJobs: MutableList<Job>) {
-        firestore.collection("bookings")
-            .whereEqualTo("landOwnerUserId", userId)
-            .whereEqualTo("stage", "request")
-            .orderBy("timestamp", Query.Direction.DESCENDING)
-            .addSnapshotListener { bookingUserSnapshots, clientError ->
-                if (clientError != null) {
-                    Log.e("RequestTabFragment", "Error listening for client requests: ${clientError.message}")
-                    return@addSnapshotListener
-                }
-
-                bookingUserSnapshots?.let {
-                    // Add jobs only if they are not already in the list
-                    it.documents.forEach { doc ->
-                        val job = doc.toObject(Job::class.java)?.copy(bookingId = doc.id)
-                        if (job != null && !pendingJobs.any { it.bookingId == job.bookingId }) {
-                            pendingJobs.add(job)
-                        }
-                    }
-                }
-
-                Log.d("RequestTabFragment", "Total Pending Jobs: ${pendingJobs.size}")
-                // Update the adapter with the new job list
-                pendingAdapter?.updateJobs(pendingJobs)
-                pendingAdapter?.notifyDataSetChanged() // Notify adapter to refresh the data
-            }
-    }*/
-
-
 
     override fun onPayNowClicked(bookingId: String) {
         // Open the PaymentFragment and pass the bookingId as an argument

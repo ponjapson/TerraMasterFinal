@@ -84,7 +84,7 @@ class PaymentFragment : Fragment() {
             .get()
             .addOnSuccessListener { documentSnapshot ->
                 if (documentSnapshot.exists()) {
-                    downPaymentAmount = documentSnapshot.getLong("downpayment")?.toInt()
+                    downPaymentAmount = documentSnapshot.getLong("downPayment")?.toInt()
                     if (downPaymentAmount != null) {
                         fetchPaymentIntent(downPaymentAmount!!) // Pass down payment amount to fetch payment intent
                     } else {
@@ -210,6 +210,7 @@ class PaymentFragment : Fragment() {
                     val lat = documentSnapshot.getDouble("latitude") ?: 0.0
                     val lon = documentSnapshot.getDouble("longitude") ?: 0.0
                     val pdfUrl = documentSnapshot.getString("pdfUrl")
+                    val downpayment = documentSnapshot.getDouble("downPayment") ?: 0.0
 
                     val fileName = extractFileNameFromUrl(pdfUrl)
                     convertCoordinatesToAddress(lat, lon) { address ->
@@ -221,7 +222,7 @@ class PaymentFragment : Fragment() {
 
 
                     view?.findViewById<TextView>(R.id.pdfFileName)?.text = fileName
-
+                    view?.findViewById<TextView>(R.id.booking_downpayment)?.text = "PHP $downpayment"
                     val dateFormatter = SimpleDateFormat("MMM dd, yyyy HH:mm", Locale.getDefault())
                     val formattedStartDate = startDateTime?.let { dateFormatter.format(it) } ?: "N/A"
 

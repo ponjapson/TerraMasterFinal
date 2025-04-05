@@ -6,8 +6,8 @@ data class Job(
     val bookingId: String = "",
     val bookedUserId: String = "",
     val landOwnerUserId: String = "",
-    val contractPrice: Double = 0.0,
-    val downpayment: Double = 0.0,
+    var contractPrice: Double = 0.0,
+    var downpayment: Double = 0.0,
     val startDateTime: Timestamp? = null,
     var status: String = "",
     val timestamp: Timestamp? = null,
@@ -16,5 +16,10 @@ data class Job(
     val longitude: Double = 0.0,
     var address: String = "",
     var pdfFileName: String? = null,
-    var pdfUrl: String = ""
+    var pdfUrl: String = "",
+    var age: String = "",
+    var tinNumber: String = "",
+    var propertyType: String = "",
+    var purposeOfSurvey: String = ""
+
 )

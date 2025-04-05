@@ -325,6 +325,7 @@ class FragmentBooking : Fragment() {
             val address = addressEditText.text.toString()
             val tinNumber = tinNumber.text.toString()
             val age = age.text.toString()
+            val ageInt = if (age.isNotBlank()) age.toIntOrNull() ?: 0 else 0
 
 
 
@@ -335,7 +336,7 @@ class FragmentBooking : Fragment() {
                     showLoadingToast()
                     saveBookingToFirestoreProcessor(
                         address, lat, lon, bookedUserId, status, fullName,
-                        contactNumber, emailAddress, tinNumber, age
+                        contactNumber, emailAddress, tinNumber, ageInt
                     )
                 }
             }
@@ -458,7 +459,7 @@ class FragmentBooking : Fragment() {
         contactNumber: String,  // Same here
         emailAddress: String,  // Same here
         tinNumber: String,
-        age: String
+        age: Int
     ) {
         val db = FirebaseFirestore.getInstance()
         val bookingUserId = FirebaseAuth.getInstance().currentUser?.uid
@@ -486,7 +487,7 @@ class FragmentBooking : Fragment() {
                     showToast("Failed to upload PDF: ${e.message}")
                 }
         } else {
-            saveBookingWithPdf(
+            saveBookingWithPdfProcessor(
                 address, null, lat, lon, bookedUserId, status, fullName, contactNumber,
                 emailAddress, tinNumber, age
             )
@@ -551,7 +552,7 @@ class FragmentBooking : Fragment() {
         contactNumber: String,  // Receive contactNumber as String
         emailAddress: String,  // Receive emailAddress as String
         tinNumber: String,
-        age: String
+        age: Int
     ) {
         val db = FirebaseFirestore.getInstance()
         val bookingUserId = FirebaseAuth.getInstance().currentUser?.uid

@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="14sp"
+        android:textColor="@color/black"
+        android:paddingTop="20dp"
+        android:paddingBottom="10dp"
+        android:text="Contract Price"
+        android:paddingStart="15dp"/>
+
+    <EditText
+        android:id="@+id/edit_contract_price"
+        android:layout_width="match_parent"
+        android:layout_height="42dp"
+        android:background="@drawable/custom_edit_text"
+        android:hint="Enter Contract Price"
+        android:paddingStart="15dp"
+        android:gravity="center_vertical"
+        android:textColor="@android:color/black"
+        android:textColorHint="@color/black"
+        android:textSize="14sp"
+        android:fontFamily="@font/poppinsreg"
+        android:layout_marginStart="10dp"
+        android:layout_marginEnd="10dp"/>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="14sp"
+        android:textColor="@color/black"
+        android:paddingTop="20dp"
+        android:paddingBottom="10dp"
+        android:text="Downpayment"
+        android:paddingStart="15dp"/>
+
+    <!-- Downpayment Input -->
+    <EditText
+        android:id="@+id/edit_down_payment"
+        android:layout_width="match_parent"
+        android:layout_height="42dp"
+        android:layout_marginStart="10dp"
+        android:layout_marginEnd="10dp"
+        android:background="@drawable/custom_edit_text"
+        android:fontFamily="@font/poppinsreg"
+        android:gravity="center_vertical"
+        android:hint="Enter Contact Number"
+        android:inputType="numberDecimal"
+        android:paddingStart="15dp"
+        android:textColor="@android:color/black"
+        android:textColorHint="@color/black"
+        android:textSize="14sp" />
+
+</LinearLayout>

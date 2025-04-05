@@ -118,24 +118,6 @@
                 android:textSize="14sp"
                 android:layout_marginTop="4dp"
                 android:textColor="@color/black" />
-
-            <TextView
-                android:id="@+id/labelPrice"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Contract Price"
-                android:textSize="12sp"
-                android:layout_marginTop="4dp"
-                android:textColor="@color/black" />
-
-            <TextView
-                android:id="@+id/contractPrice"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Contract Price"
-                android:textSize="14sp"
-                android:layout_marginTop="4dp"
-                android:textColor="@color/black" />
             <TextView
                 android:id="@+id/labelAge"
                 android:layout_width="match_parent"
@@ -215,7 +197,8 @@
                 android:text="Downpayment"
                 android:textSize="12sp"
                 android:layout_marginTop="4dp"
-                android:textColor="@color/black" />
+                android:textColor="@color/black"
+                android:visibility="gone"/>
 
             <TextView
                 android:id="@+id/booking_downpayment"
@@ -224,7 +207,27 @@
                 android:text="Amount"
                 android:textSize="14sp"
                 android:layout_marginTop="4dp"
-                android:textColor="@color/black" />
+                android:textColor="@color/black"
+                android:visibility="gone"/>
+            <TextView
+                android:id="@+id/labelPrice"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Contract Price"
+                android:textSize="12sp"
+                android:layout_marginTop="4dp"
+                android:textColor="@color/black"
+                android:visibility="gone"/>
+
+            <TextView
+                android:id="@+id/contractPrice"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Contract Price"
+                android:textSize="14sp"
+                android:layout_marginTop="4dp"
+                android:textColor="@color/black"
+                android:visibility="gone"/>
         </LinearLayout>
     </LinearLayout>
     <LinearLayout
@@ -380,6 +383,14 @@
             android:layout_marginStart="8dp"
             android:textColor="@color/white"
             android:background="#FFA200"
+            android:visibility="gone"/>
+        <Button
+            android:id="@+id/btn_quotation"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Quotation"
+            android:textColor="@color/white"
+            android:background="#4CAF50"
             android:visibility="gone"/>
     </LinearLayout>
 </LinearLayout>

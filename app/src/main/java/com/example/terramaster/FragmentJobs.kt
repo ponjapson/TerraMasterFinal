@@ -13,9 +13,11 @@ import com.google.android.material.tabs.TabLayout
 import com.google.android.material.tabs.TabLayoutMediator
 
 class FragmentJobs : Fragment() {
+
+    private lateinit var viewPager: ViewPager2
+
     override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
+        inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
         val view = inflater.inflate(R.layout.fragment_jobs, container, false)
@@ -27,12 +29,11 @@ class FragmentJobs : Fragment() {
         // Enable options menu in Fragment
         setHasOptionsMenu(true)
 
+        // Get references to TabLayout and ViewPager2
         val tabLayout = view.findViewById<TabLayout>(R.id.tabLayout)
-        val viewPager = view.findViewById<ViewPager2>(R.id.viewPager)
+        viewPager = view.findViewById(R.id.viewPager)
 
-
-
-        // Set up the adapter
+        // Set up the adapter for ViewPager
         val adapter = JobsTabAdapter(requireActivity())
         viewPager.adapter = adapter
 
@@ -46,20 +47,22 @@ class FragmentJobs : Fragment() {
             }
         }.attach()
 
-        // Get the selected tab index passed from the parent activity or fragment
-        val selectedTab = arguments?.getInt("selectedTab") // no need for default value
+        // Get the selected tab index passed from the parent fragment
+        val selectedTab = arguments?.getInt("selectedTab", 0) // Default to 0 if not passed
 
         // If a valid tab index is passed, set the current tab in the ViewPager
-        selectedTab?.let {
-            viewPager.setCurrentItem(it, true)
+
+
+// If a valid tab index is passed, set the current tab in the ViewPager
+        if (selectedTab != null) {
+            viewPager.setCurrentItem(selectedTab, true)
+        } else {
+            // Ensure the first tab is selected by default if no tab index is passed
+            viewPager.setCurrentItem(0, true)
         }
 
-        navigateToTab0(viewPager)
-        return view
-    }
 
-    private fun navigateToTab0(viewPager: ViewPager2) {
-        viewPager.setCurrentItem(0, true)
+        return view
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
@@ -70,14 +73,14 @@ class FragmentJobs : Fragment() {
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
             R.id.action_search -> {
-                // Navigate using FragmentTransaction
+                // Navigate to the SearchFragment
                 val fragment = SearchFragment()
                 val transaction = requireActivity().supportFragmentManager.beginTransaction()
                 transaction.replace(R.id.fragment_container, fragment)
                 transaction.addToBackStack(null)
                 transaction.commit()
 
-                // Show bottom navigation bar (if needed)
+                // Optionally show bottom navigation bar (if needed)
                 (requireActivity() as MainActivity).showBottomNavigationBar()
 
                 true
