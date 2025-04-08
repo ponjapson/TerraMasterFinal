@@ -9,6 +9,7 @@ import android.net.Uri
 import android.os.Bundle
 import android.os.Environment
 import android.util.Log
+import android.util.Patterns
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -293,7 +294,7 @@ class FragmentBooking : Fragment() {
             val purposeOfSurvey = purposeOfSurveyRadioButton?.text.toString()
 
             // Validate input and convert address to coordinates
-            if (validateInput(address)) {
+            if (validateInput(fullName, contactNumber, emailAddress, address, propertyType, purposeOfSurvey)) {
                 convertLocationToCoordinates(address) { lat: Double, lon: Double ->
                     // Show loading toast and save booking to Firestore
                     showLoadingToast()
@@ -330,7 +331,7 @@ class FragmentBooking : Fragment() {
 
 
             // Validate input and convert address to coordinates
-            if (validateInput(address)) {
+            if (validateInputProcessor(fullName, contactNumber, emailAddress, address, tinNumber, age)) {
                 convertLocationToCoordinates(address) { lat: Double, lon: Double ->
                     // Show loading toast and save booking to Firestore
                     showLoadingToast()
@@ -342,6 +343,110 @@ class FragmentBooking : Fragment() {
             }
         }
     }
+
+    private fun validateInput(
+        fullName: String,
+        contactNumber: String,
+        emailAddress: String,
+        address: String,
+        propertyType: String,
+        purposeOfSurvey: String
+    ): Boolean {
+        return when {
+            startDateTime == null -> {
+                showToast("Please select start and end times.")
+                false
+            }
+            fullName.isBlank() -> {
+                showToast("Please enter your full name.")
+                false
+            }
+            contactNumber.isBlank() -> {
+                showToast("Please enter your contact number.")
+                false
+            }
+            !contactNumber.matches(Regex("^\\d{7,15}$")) -> {
+                showToast("Contact number must be between 7 to 15 digits.")
+                false
+            }
+            emailAddress.isBlank() -> {
+                showToast("Please enter your email address.")
+                false
+            }
+            !Patterns.EMAIL_ADDRESS.matcher(emailAddress).matches() -> {
+                showToast("Please enter a valid email address.")
+                false
+            }
+            address.isBlank() -> {
+                showToast("Please provide an address.")
+                false
+            }
+            propertyType.isBlank() -> {
+                showToast("Please select a property type.")
+                false
+            }
+            purposeOfSurvey.isBlank() -> {
+                showToast("Please select a purpose of survey.")
+                false
+            }
+            else -> true
+        }
+    }
+
+    private fun validateInputProcessor(
+        fullName: String,
+        contactNumber: String,
+        emailAddress: String,
+        address: String,
+        tinNumber: String,
+        age: String
+    ): Boolean {
+        return when {
+            fullName.isBlank() -> {
+                showToast("Please enter your full name.")
+                false
+            }
+            contactNumber.isBlank() -> {
+                showToast("Please enter your contact number.")
+                false
+            }
+            !contactNumber.matches(Regex("^\\d{7,15}$")) -> {
+                showToast("Contact number must be between 7 to 15 digits.")
+                false
+            }
+            emailAddress.isBlank() -> {
+                showToast("Please enter your email address.")
+                false
+            }
+            !Patterns.EMAIL_ADDRESS.matcher(emailAddress).matches() -> {
+                showToast("Please enter a valid email address.")
+                false
+            }
+            address.isBlank() -> {
+                showToast("Please provide an address.")
+                false
+            }
+            tinNumber.isBlank() -> {
+                showToast("Please enter your TIN number.")
+                false
+            }
+            age.isBlank() -> {
+                showToast("Please enter your age.")
+                false
+            }
+            age.toIntOrNull() == null -> {
+                showToast("Age must be a number.")
+                false
+            }
+            age.toInt() < 18 -> {
+                showToast("You must be at least 18 years old.")
+                false
+            }
+            else -> true
+        }
+    }
+
+
 
     private fun convertLocationToCoordinates(locationName: String, callback: (Double, Double) -> Unit) {
         val geocoder = OpenStreetMapGeocoder(requireContext())
@@ -386,20 +491,7 @@ class FragmentBooking : Fragment() {
         datePickerDialog.show()
     }
 
-    private fun validateInput(address: String): Boolean {
-        return when {
-            startDateTime == null -> {
-                showToast("Please select start and end times.")
-                false
-            }
-            address.isEmpty() -> {
-                showToast("Please provide an address.")
-                false
-            }
 
-            else -> true
-        }
-    }
 
     private fun showLoadingToast() {
         showToast("Booking in progress...")

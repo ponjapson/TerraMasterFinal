@@ -74,6 +74,36 @@
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:text="Contact Number"
+                android:textSize="12sp"
+                android:layout_marginTop="4dp"
+                android:textColor="@color/black" />
+
+            <TextView
+                android:id="@+id/contactNumber"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Contact Number"
+                android:textSize="14sp"
+                android:textColor="@color/black"
+                android:layout_marginTop="4dp" />
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Email Address"
+                android:textSize="12sp"
+                android:layout_marginTop="4dp"
+                android:textColor="@color/black" />
+
+            <TextView
+                android:id="@+id/emailAddress"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Email Address"
+                android:textSize="14sp"/>
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
                 android:text="Address"
                 android:textSize="12sp"
                 android:layout_marginTop="4dp"
@@ -140,7 +170,7 @@
                 android:id="@+id/labelTin"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Tax Payer Number"
+                android:text="Tax Identification Number"
                 android:textSize="12sp"
                 android:layout_marginTop="4dp"
                 android:textColor="@color/black" />
@@ -149,7 +179,7 @@
                 android:id="@+id/Tin"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Tax Payer Number"
+                android:text="Tax Identification Number"
                 android:textSize="14sp"
                 android:layout_marginTop="4dp"
                 android:textColor="@color/black" />

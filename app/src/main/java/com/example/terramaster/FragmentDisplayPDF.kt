@@ -34,9 +34,9 @@ class FragmentDisplayPDF : Fragment() {
     private lateinit var recyclerView: RecyclerView
     private var pdfAdapter: PDFAdapter? = null
     private lateinit var progressBar: ProgressBar // Reference to ProgressBar
-    private lateinit var signaturePad: SignaturePad
+  /*  private lateinit var signaturePad: SignaturePad
     private lateinit var saveButton: Button
-    private lateinit var clearButton: Button
+    private lateinit var clearButton: Button*/
    // private lateinit var signatureImageView: ImageView
 
 
@@ -61,14 +61,29 @@ class FragmentDisplayPDF : Fragment() {
         val bookingId = args?.getString("bookingId")
         Log.d("PDF_FRAGMENT", "Received PDF URL: $pdfUrl, User Type: $userType") // Debugging log
 
-        signaturePad= view.findViewById(R.id.signature_pad)
+       /* signaturePad= view.findViewById(R.id.signature_pad)
         saveButton = view.findViewById(R.id.btnSaveSignature)
-        clearButton = view.findViewById(R.id.btnClearSignature)
+        clearButton = view.findViewById(R.id.btnClearSignature)*/
+
+      /*  bookingId?.let {
+            checkForPdfSignature(it) { isSignature ->
+                if (isSignature && userType == "Processor") {
+                    signaturePad.visibility = View.INVISIBLE
+                    saveButton.visibility = View.INVISIBLE
+                    clearButton.visibility = View.INVISIBLE
+                } else if(!isSignature && userType == "Processor") {
+                    signaturePad.visibility = View.VISIBLE
+                    saveButton.visibility = View.VISIBLE
+                    clearButton.visibility = View.VISIBLE
+                }
+            }
+        }
+*/
 
 
         if (!pdfUrl.isNullOrEmpty()) {
             Log.d("PDF", "Loading PDF directly from URL: $pdfUrl")
-            if(userType == "Processor") {
+            /*if(userType == "Processor") {
                 signaturePad.visibility = View.VISIBLE
                 saveButton.visibility = View.VISIBLE
                 clearButton.visibility = View.VISIBLE
@@ -76,19 +91,22 @@ class FragmentDisplayPDF : Fragment() {
                 signaturePad.visibility = View.INVISIBLE
                 saveButton.visibility = View.INVISIBLE
                 clearButton.visibility = View.INVISIBLE
-            }
+            }*/
             GlobalScope.launch(Dispatchers.Main) {
                 downloadPdfFromFirebase(pdfUrl)
             }
         } else if (!guideId.isNullOrEmpty()) {
             Log.d("PDF", "Fetching PDF URL using guideId: $guideId")
+           /* signaturePad.visibility = View.INVISIBLE
+            saveButton.visibility = View.INVISIBLE
+            clearButton.visibility = View.INVISIBLE*/
             fetchPdfUrlFromFirestore(guideId)
         } else {
             Log.e("PDF", "No valid PDF source provided")
             progressBar.visibility = View.GONE
         }
 
-        clearButton.setOnClickListener {
+       /* clearButton.setOnClickListener {
             signaturePad.clear()
             //signatureImageView.setImageBitmap(null)
         }
@@ -108,7 +126,7 @@ class FragmentDisplayPDF : Fragment() {
                 }
             }
         }
-
+*/
         return view
     }
 
@@ -171,6 +189,24 @@ class FragmentDisplayPDF : Fragment() {
                 Log.e("Booking", "Error updating booking", e)
             }
     }
+    fun checkForPdfSignature(bookingId: String, callback: (Boolean) -> Unit) {
+        val bookingRef = FirebaseFirestore.getInstance().collection("bookings").document(bookingId)
+
+        bookingRef.get()
+            .addOnSuccessListener { document ->
+                if (document.exists()) {
+                    val signatureUrl = document.getString("signatureUrl")
+                    // Return true if signatureUrl is not null or empty
+                    callback(!signatureUrl.isNullOrEmpty())
+                } else {
+                    callback(false) // Booking doesn't exist
+                }
+            }
+            .addOnFailureListener { e ->
+                Log.e("SignatureCheck", "Failed to check signature: ${e.message}")
+                callback(false) // Error occurred
+            }
+    }
 
     // Method to navigate to RequestTabFragment
     private fun navigateToRequestTabFragment() {
@@ -188,9 +224,6 @@ class FragmentDisplayPDF : Fragment() {
 
 
     }
-
-
-
     private fun fetchPdfUrlFromFirestore(guideId: String) {
         val db = FirebaseFirestore.getInstance()
         val docRef = db.collection("knowledge_guide").document(guideId)

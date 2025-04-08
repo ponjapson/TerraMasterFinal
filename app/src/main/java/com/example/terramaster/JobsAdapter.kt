@@ -5,6 +5,7 @@ import android.app.DatePickerDialog
 import android.app.TimePickerDialog
 import android.content.Context
 import android.content.Intent
+import android.graphics.Bitmap
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -15,6 +16,7 @@ import android.view.ViewGroup
 import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageView
+import android.widget.ProgressBar
 import android.widget.RadioButton
 import android.widget.RadioGroup
 import android.widget.TextView
@@ -25,10 +27,17 @@ import androidx.core.content.ContentProviderCompat.requireContext
 import androidx.fragment.app.FragmentActivity
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
+import com.github.gcacace.signaturepad.views.SignaturePad
 import com.google.firebase.Timestamp
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
+import kotlinx.coroutines.withContext
+import java.io.ByteArrayOutputStream
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
@@ -62,6 +71,8 @@ class JobsAdapter(private val jobs: MutableList<Job>, private val context: Conte
         val purposeOfSurvey: TextView = view.findViewById(R.id.purposeOfSuurvey)
         val propertyTypeLabel: TextView = view.findViewById(R.id.propertyTypeLabel)
         val propertyLabel: TextView = view.findViewById(R.id.propertyLabel)
+        val contactNumber: TextView = view.findViewById(R.id.contactNumber)
+        val emailAddress: TextView = view.findViewById(R.id.emailAddress)
 
 
         val confirmButton: Button = view.findViewById(R.id.btn_confirm)
@@ -192,6 +203,8 @@ class JobsAdapter(private val jobs: MutableList<Job>, private val context: Conte
         holder.age.text = job.age.toString()
         holder.purposeOfSurvey.text = job.purposeOfSurvey
         holder.propertyTypeLabel.text = job.propertyType
+        holder.emailAddress.text = job.emailAddress
+        holder.contactNumber.text = job.contactNumber
         holder.address.text = job.address
         holder.address.setOnClickListener {
             val fragment = FragmentMap()
@@ -330,7 +343,6 @@ class JobsAdapter(private val jobs: MutableList<Job>, private val context: Conte
 
 
         holder.reviseButton.setOnClickListener {
-
 
             val bookingId = jobs[position].bookingId
             val bookingRef = firestore.collection("bookings").document(bookingId)
@@ -522,6 +534,8 @@ class JobsAdapter(private val jobs: MutableList<Job>, private val context: Conte
                                         ""
                                     }
 
+                                    val contactNumber = contactNumberEditText.text.toString()
+                                    val emailAddressEditText = emailAddressEditText.text.toString()
                                     updateBookingDetails(
                                         newAddress,
                                         newDownpayment,
@@ -530,7 +544,12 @@ class JobsAdapter(private val jobs: MutableList<Job>, private val context: Conte
                                         newContractPrice,
                                         selectedPropertyType,
                                         selectedPurposeOfSurvey,
-                                        position
+                                        position,
+                                        holder,
+                                        currentUserId,
+                                        contactNumber,
+                                        emailAddressEditText
+
                                     )
 
                                 }
@@ -559,29 +578,65 @@ class JobsAdapter(private val jobs: MutableList<Job>, private val context: Conte
 
             bookingRef.get().addOnSuccessListener { document ->
                 if (document.exists()) {
+                    val currentDownpayment = document.getDouble("downPayment") ?: 0.0
+                    val currentContractPrice = document.getDouble("contractPrice") ?: 0.0
                     val currentStartDateTimeTimestamp = document.getTimestamp("startDateTime")
                     val currentStartDateTime = currentStartDateTimeTimestamp?.toDate()?.let {
                         SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault()).format(it)
                     } ?: ""
-
                     val lat = document.getDouble("latitude") ?: 0.0
                     val lon = document.getDouble("longitude") ?: 0.0
+                    val tinNumber = document.getString("tinNumber")
+                    val age = document.getLong("age")?.toInt()
+                    val propertyType = document.getString("propertyType") ?: ""
+                    val purposeOfSurvey = document.getString("purposeOfSurvey") ?: ""
+                    val emailAddress = document.getString("emailAddress")
+                    val contactNumber = document.getString("contactNumber")
 
                     val dialogView = LayoutInflater.from(context).inflate(R.layout.dialog_edit_booking, null)
-                    val addressEditText = dialogView.findViewById<EditText>(R.id.Address)
-
-                    convertCoordinatesToAddress(context, lat, lon) { address ->
-                        addressEditText.setText(address)
-                    }
 
                     val startDateTimeButton = dialogView.findViewById<Button>(R.id.startDateTimeButton)
                     val selectedStartDateTimeTextView = dialogView.findViewById<TextView>(R.id.selectedStartDateTimeTextView)
                     val downpaymentEditText = dialogView.findViewById<EditText>(R.id.downpaymentEditText)
                     val contractPriceEditText = dialogView.findViewById<EditText>(R.id.contractAmount)
+                    val contactNumberEditText = dialogView.findViewById<EditText>(R.id.contactNumber)
+                    val ageEditText = dialogView.findViewById<EditText>(R.id.age)
+                    val emailAddressEditText = dialogView.findViewById<EditText>(R.id.emailAddress)
+                    val tinNumberEditText = dialogView.findViewById<EditText>(R.id.tinNumber)
+                    val propertyTypeGroup = dialogView.findViewById<RadioGroup>(R.id.propertyTypeGroup)
+                    val purposeOfSurveyGroup = dialogView.findViewById<RadioGroup>(R.id.purposeOfSurveyGroup)
+                    val addressEditText = dialogView.findViewById<EditText>(R.id.Address)
 
-                    downpaymentEditText.visibility = View.GONE
-                    contractPriceEditText.visibility = View.GONE
+                    val residentialRadioButton = dialogView.findViewById<RadioButton>(R.id.residential)
+                    val commercialRadioButton = dialogView.findViewById<RadioButton>(R.id.commercial)
+                    val agriculturalRadioButton = dialogView.findViewById<RadioButton>(R.id.agricultural)
+                    val vacantLandRadioButton = dialogView.findViewById<RadioButton>(R.id.vacantLand)
+                    val otherPropertyRadioButton = dialogView.findViewById<RadioButton>(R.id.otherProperty)
 
+// Purpose of Survey RadioButtons
+                    val propertySaleRadioButton = dialogView.findViewById<RadioButton>(R.id.propertySale)
+                    val legalDisputeRadioButton = dialogView.findViewById<RadioButton>(R.id.legalDispute)
+                    val propertyDevelopmentRadioButton = dialogView.findViewById<RadioButton>(R.id.propertyDevelopment)
+                    val landSubdivisionRadioButton = dialogView.findViewById<RadioButton>(R.id.landSubdivision)
+                    val environmentalAssessmentRadioButton = dialogView.findViewById<RadioButton>(R.id.environmentalAssessment)
+                    val otherPurposeRadioButton = dialogView.findViewById<RadioButton>(R.id.otherPurpose)
+
+                    val ageLabel: TextView = dialogView.findViewById(R.id.ageLabel)
+                    val tinLabel: TextView = dialogView.findViewById(R.id.tinLabel)
+                    val propertyLabel: TextView = dialogView.findViewById(R.id.propertyLabel)
+                    val purposeLabel: TextView = dialogView.findViewById(R.id.purposeLabel)
+                    val contractLabel: TextView = dialogView.findViewById(R.id.contractLabel)
+                    val labelDown: TextView = dialogView.findViewById(R.id.labelDown)
+
+
+                    convertCoordinatesToAddress(context, lat, lon) { address ->
+                        addressEditText.setText(address)
+                    }
+
+
+
+                    downpaymentEditText.setText(currentDownpayment.toString())
+                    contractPriceEditText.setText(currentContractPrice.toString())
                     selectedStartDateTimeTextView.text = "Start Date and Time: $currentStartDateTime"
 
                     startDateTimeButton.setOnClickListener {
@@ -590,34 +645,148 @@ class JobsAdapter(private val jobs: MutableList<Job>, private val context: Conte
                         }
                     }
 
+                    contactNumberEditText.setText(contactNumber.toString())
+                    ageEditText.setText(age.toString())
+                    tinNumberEditText.setText(tinNumber.toString())
+                    emailAddressEditText.setText(emailAddress.toString())
+
+                    when (propertyType) {
+                        "Residential" -> residentialRadioButton.isChecked = true
+                        "Commercial" -> commercialRadioButton.isChecked = true
+                        "Agricultural" -> agriculturalRadioButton.isChecked = true
+                        "Vacant Land" -> vacantLandRadioButton.isChecked = true
+                        "Other" -> otherPropertyRadioButton.isChecked = true
+                        else -> {
+                            // Handle if propertyType doesn't match any known value
+                        }
+                    }
+
+
+                    when (purposeOfSurvey) {
+                        "Property sale or purchase" -> propertySaleRadioButton.isChecked = true
+                        "Legal dispute or boundary issue" -> legalDisputeRadioButton.isChecked = true
+                        "Property development or construction" -> propertyDevelopmentRadioButton.isChecked = true
+                        "Land subdivision" -> landSubdivisionRadioButton.isChecked = true
+                        "Environmental or flood assessment" -> environmentalAssessmentRadioButton.isChecked = true
+                        "Other" -> otherPurposeRadioButton.isChecked = true
+                        else -> {
+                            // Handle if purposeOfSurvey doesn't match any known value
+                        }
+                    }
+
+                    firestore.collection("users").document(bookedUserId)
+                        .get()
+                        .addOnSuccessListener { userSnapshot ->
+                            userType = userSnapshot.getString("user_type")
+
+                            // Check the userType and adjust the visibility accordingly
+                            when (userType) {
+                                "Processor" -> {
+                                    // If the user is a "Processor", hide contract price and downpayment
+                                    contactNumberEditText.visibility = View.VISIBLE
+                                    downpaymentEditText.visibility = View.GONE
+                                    labelDown.visibility = View.GONE
+                                    contractLabel.visibility = View.GONE
+                                    ageLabel.visibility = View.VISIBLE
+                                    ageEditText.visibility = View.VISIBLE
+                                    tinLabel.visibility = View.VISIBLE
+                                    tinNumberEditText.visibility = View.VISIBLE
+                                    purposeLabel.visibility = View.GONE
+                                    purposeOfSurveyGroup.visibility = View.GONE
+                                    propertyTypeGroup.visibility = View.GONE
+                                    propertyLabel.visibility = View.GONE
+                                }
+                                "Surveyor" -> {
+                                    // If the user is a "Surveyor", show contract price and downpayment
+                                    contactNumberEditText.visibility = View.VISIBLE
+                                    downpaymentEditText.visibility = View.VISIBLE
+                                    labelDown.visibility = View.VISIBLE
+                                    contractLabel.visibility = View.VISIBLE
+                                    ageLabel.visibility = View.GONE
+                                    ageEditText.visibility = View.GONE
+                                    tinLabel.visibility = View.GONE
+                                    tinNumberEditText.visibility = View.GONE
+                                    purposeLabel.visibility = View.VISIBLE
+                                    purposeOfSurveyGroup.visibility = View.VISIBLE
+                                    propertyTypeGroup.visibility = View.VISIBLE
+                                    propertyLabel.visibility = View.VISIBLE
+                                    contractPriceEditText.visibility = View.VISIBLE
+                                }
+                                else -> {
+                                    // Default case if there is no specific userType
+                                    /* contractPrice.visibility = View.VISIBLE
+                                     downpayment.visibility = View.VISIBLE
+                                     labelDown.visibility = View.VISIBLE
+                                     labelPrice.visibility = View.VISIBLE*/
+                                }
+                            }
+                        }
+                        .addOnFailureListener { e ->
+                            // Handle the error if the user document can't be fetched
+                            Log.e("BookingAdapter", "Error fetching user data: ${e.message}")
+                        }
                     // 🔥 Check current user's type from Firestore
                     val currentUserId = FirebaseAuth.getInstance().currentUser?.uid ?: return@addOnSuccessListener
                     firestore.collection("users").document(currentUserId).get()
                         .addOnSuccessListener { userDoc ->
                             val userType = userDoc.getString("user_type") ?: ""
-                            val isProcessor = userType.equals("Processor", ignoreCase = true)
+                            val isSurveyor = userType.equals("Surveyor", ignoreCase = true)
 
-                            // Disable address field if the user is a Processor
-                            addressEditText.isEnabled = !isProcessor
-                            addressEditText.isFocusable = !isProcessor
-                            addressEditText.isFocusableInTouchMode = !isProcessor
+                            // Disable address editing if user is Surveyor
+                            addressEditText.isEnabled = !isSurveyor
+                            addressEditText.isFocusable = !isSurveyor
+                            addressEditText.isFocusableInTouchMode = !isSurveyor
 
                             val dialog = AlertDialog.Builder(context)
                                 .setTitle("Edit Booking Details")
                                 .setView(dialogView)
                                 .setPositiveButton("Save") { _, _ ->
                                     val newAddress = addressEditText.text.toString()
+                                    val newDownpayment = downpaymentEditText.text.toString().toDoubleOrNull() ?: 0.0
+                                    val newContractPrice = contractPriceEditText.text.toString().toDoubleOrNull() ?: 0.0
                                     val newStartDateTime = selectedStartDateTimeTextView.text.toString()
                                         .replace("Start Date and Time: ", "")
+
                                     val dateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault())
                                     val newStartDateTimeDate = dateFormat.parse(newStartDateTime)
+                                    // Retrieve the selected property type
+                                    val selectedPropertyTypeId = propertyTypeGroup.checkedRadioButtonId
+                                    val selectedPropertyType = if (selectedPropertyTypeId != -1) {
+                                        dialogView.findViewById<RadioButton>(selectedPropertyTypeId).text.toString()
+                                    } else {
+                                        ""
+                                    }
+                                    val selectedPurposeOfSurveyId = purposeOfSurveyGroup.checkedRadioButtonId
+                                    val selectedPurposeOfSurvey = if (selectedPurposeOfSurveyId != -1) {
+                                        dialogView.findViewById<RadioButton>(selectedPurposeOfSurveyId).text.toString()
+                                    } else {
+                                        ""
+                                    }
+
+                                    val contactNumber = contactNumberEditText.text.toString()
+                                    val emailAddressEditText = emailAddressEditText.text.toString()
+                                    val newTinNumber = tinNumberEditText.text.toString()
+                                    val newAge = ageEditText.text.toString()
+
+                                    val ageInt = if (newAge.isNotBlank()) newAge.toIntOrNull() ?: 0 else 0
+                                    Log.d("Debug", "Age input: $newAge")
 
                                     updateBookingDetailsProcessor(
                                         newAddress,
                                         newStartDateTimeDate,
                                         bookingId,
+                                        ageInt,
+                                        newTinNumber,
+                                        position,
+                                        holder,
+                                        currentUserId,
+                                        contactNumber,
+                                        emailAddressEditText
+
                                     )
+
                                 }
+
                                 .setNegativeButton("Cancel", null)
                                 .create()
 
@@ -632,6 +801,7 @@ class JobsAdapter(private val jobs: MutableList<Job>, private val context: Conte
             }.addOnFailureListener { e ->
                 Toast.makeText(context, "Error fetching booking details: ${e.message}", Toast.LENGTH_SHORT).show()
             }
+
         }
 
         holder.declinedButton.setOnClickListener {
@@ -697,31 +867,53 @@ class JobsAdapter(private val jobs: MutableList<Job>, private val context: Conte
         holder.itemView.setOnClickListener {
             onItemClickListener?.invoke(job.bookingId) // Pass bookingId to the listener
         }
-        holder.esign.setOnClickListener {
-            val pdfUrl = jobs[position].pdfUrl
 
-            if (pdfUrl.isNullOrEmpty()) {
-                Log.e("PDF_ERROR", "Invalid PDF URL: $pdfUrl") // Log error if URL is empty
-                Toast.makeText(holder.itemView.context, "PDF not available", Toast.LENGTH_SHORT).show()
-                return@setOnClickListener // Stop execution if PDF URL is invalid
+        holder.esign.setOnClickListener {
+            val dialogView = LayoutInflater.from(context).inflate(R.layout.dialog_signature, null)
+            val signaturePad = dialogView.findViewById<SignaturePad>(R.id.signature_pad)
+            val btnClear = dialogView.findViewById<Button>(R.id.btnClearSignature)
+            val btnSave = dialogView.findViewById<Button>(R.id.btnSaveSignature)
+            val progressBar = dialogView.findViewById<ProgressBar>(R.id.progressBar)
+            val bookingId = job.bookingId
+
+            val dialog = AlertDialog.Builder(context)
+                .setView(dialogView)
+                .setCancelable(true)
+                .create()
+
+            // Show the dialog
+            dialog.show()
+
+            // Clear the signature pad
+            btnClear.setOnClickListener {
+                signaturePad.clear()
             }
 
-            Log.d("PDF_DEBUG", "Opening PDF with URL: $pdfUrl") // Log valid PDF URL
+            // Save the signature
+            btnSave.setOnClickListener {
+                val signatureBitmap = signaturePad.signatureBitmap
+                if (signatureBitmap != null) {
+                    // Show the progress bar before starting the upload
+                    progressBar.visibility = View.VISIBLE
 
-            val fragment = FragmentDisplayPDF().apply {
-                arguments = Bundle().apply {
-                    putString("pdfUrl", pdfUrl)
-                    putString("userType", userType)
-                    putString("bookingId", job.bookingId)
+                    // Compress and upload the signature in the background
+                    GlobalScope.launch(Dispatchers.Main) {
+                        try {
+                            val compressedData = compressBitmap(signatureBitmap)
+                            // Upload the signature to Firebase
+                            uploadSignatureToFirebase(compressedData, bookingId, progressBar)
+
+                            // Dismiss the dialog after upload starts
+                            dialog.dismiss()
+
+                        } catch (e: Exception) {
+                            Log.e("Signature", "Error compressing signature", e)
+                        }
+                    }
                 }
             }
-
-            val fragmentManager = (holder.itemView.context as AppCompatActivity).supportFragmentManager
-            fragmentManager.beginTransaction()
-                .replace(R.id.fragment_container, fragment)
-                .addToBackStack(null)
-                .commit()
         }
+
     }
 
     override fun getItemCount(): Int = jobs.size
@@ -732,6 +924,99 @@ class JobsAdapter(private val jobs: MutableList<Job>, private val context: Conte
 
     interface OnTabNavigationListener {
         fun navigateToTab(tabIndex: Int)
+    }
+
+
+    private suspend fun compressBitmap(bitmap: Bitmap): ByteArray {
+        return withContext(Dispatchers.IO) {
+            val baos = ByteArrayOutputStream()
+            bitmap.compress(Bitmap.CompressFormat.PNG, 100, baos)
+            baos.toByteArray()
+        }
+    }
+
+    private suspend fun uploadSignatureToFirebase(compressedData: ByteArray, bookingId: String, progressBar: ProgressBar) {
+        val storageReference = FirebaseStorage.getInstance().reference
+        val signatureRef = storageReference.child("signatures/processed_signature.png")
+
+        // Ensure the code runs within the coroutine scope
+        withContext(Dispatchers.IO) {
+            try {
+                // Show the progress bar during the upload
+                val uploadTask = signatureRef.putBytes(compressedData)
+
+                // Monitor the upload progress
+                uploadTask.addOnProgressListener { snapshot ->
+                    val progress = (100.0 * snapshot.bytesTransferred / snapshot.totalByteCount).toInt()
+
+                    // Update the progress bar on the main thread
+                    GlobalScope.launch(Dispatchers.Main) {
+                        progressBar.progress = progress
+                    }
+                }
+
+                // Await the completion of the upload
+                uploadTask.await()
+
+                // Retrieve the URL of the uploaded signature
+                val downloadUrl = signatureRef.downloadUrl.await()
+                Log.d("Signature", "Signature uploaded successfully. Download URL: $downloadUrl")
+
+                // Update the booking with the signature URL
+                updateBookingWithSignature(downloadUrl.toString(), bookingId)
+
+            } catch (e: Exception) {
+                Log.e("Firebase", "Error uploading signature", e)
+            } finally {
+                // Hide the progress bar once upload completes or fails
+                withContext(Dispatchers.Main) {
+                    progressBar.visibility = View.GONE
+                }
+            }
+        }
+    }
+
+    // Update the booking with the signature URL and other details
+    private fun updateBookingWithSignature(signatureUrl: String, bookingId: String) {
+        val db = FirebaseFirestore.getInstance()
+
+        // Reference to the booking document
+        val bookingRef = db.collection("bookings").document(bookingId)
+
+        // Create a map for the updates
+        val updates = mutableMapOf<String, Any>(
+            "signatureUrl" to signatureUrl,
+            "signatureTimestamp" to System.currentTimeMillis(), // Optionally add a timestamp
+            "status" to "verified",
+            "stage" to "ongoing"
+        )
+
+        // Perform the update in Firestore
+        bookingRef.update(updates)
+            .addOnSuccessListener {
+                Log.d("Booking", "Booking updated with signature URL: $signatureUrl")
+
+                // Navigate to the "Request" tab (Tab 1) after a successful update
+                navigateToRequestTabFragment()
+            }
+            .addOnFailureListener { e ->
+                Log.e("Booking", "Error updating booking", e)
+            }
+    }
+
+    // Navigate to the "Request" tab (Tab 1)
+    private fun navigateToRequestTabFragment() {
+        val fragment = FragmentJobs().apply {
+            arguments = Bundle().apply {
+                putInt("selectedTab", 1) // Pass tab index for "Request" tab
+            }
+        }
+
+        // Replace the current fragment with the "Request" tab fragment
+        fragmentActivity.supportFragmentManager.beginTransaction()
+            .replace(R.id.fragment_container, fragment)
+            .addToBackStack(null)
+            .commit()
     }
 
     private fun updateBookingInDatabase(bookingId: String, contractPrice: Double, downPayment: Double, position: Int, holder: JobsViewHolder, currentUserId: String) {
@@ -764,9 +1049,6 @@ class JobsAdapter(private val jobs: MutableList<Job>, private val context: Conte
                 Toast.makeText(context, "Error updating booking: ${e.message}", Toast.LENGTH_SHORT).show()
             }
     }
-
-
-
 
 
 
@@ -826,24 +1108,26 @@ class JobsAdapter(private val jobs: MutableList<Job>, private val context: Conte
         contractPrice: Double,
         selectedPropertyType: String,
         selectedPurposeOfSurvey: String,
-        position: Int
-
+        position: Int,
+        holder: JobsViewHolder,
+        currentUserId: String,
+        contactNumber: String,
+        emailAddress: String
     ) {
-        val currentUserId = FirebaseAuth.getInstance().currentUser?.uid ?: return // Get current user ID
-        val bookingRef = firestore.collection("bookings").document(bookingId)
 
-        // Fetch the booking document to determine the user role
+        val bookingRef = firestore.collection("bookings").document(bookingId)
+        val job = jobs[position]
+
         bookingRef.get().addOnSuccessListener { document ->
             if (document.exists()) {
-                val bookedUserId = document.getString("bookedUserId") // The artist
-                val bookingUserId = document.getString("landOwnerUserId") // The client
+                val bookedUserId = document.getString("bookedUserId")
+                val bookingUserId = document.getString("landOwnerUserId")
 
                 if (bookedUserId == null || bookingUserId == null) {
                     Toast.makeText(context, "Error: Missing user data in booking document.", Toast.LENGTH_SHORT).show()
                     return@addOnSuccessListener
                 }
 
-                // Determine status based on the current user
                 val updatedStatus = when (currentUserId) {
                     bookedUserId -> "professional edit details"
                     bookingUserId -> "landowner edit details"
@@ -853,32 +1137,45 @@ class JobsAdapter(private val jobs: MutableList<Job>, private val context: Conte
                     }
                 }
 
-                // Geocode the address and get coordinates
                 convertLocationToCoordinates(newAddress) { lat, lon ->
                     if (lat == 0.0 || lon == 0.0) {
                         Toast.makeText(context, "Failed to get location coordinates.", Toast.LENGTH_SHORT).show()
                         return@convertLocationToCoordinates
                     }
 
-                    // Prepare the data to update
+                    // Prepare Firestore update
                     val updatedBookingData = mapOf(
                         "address" to newAddress,
-                        "downpayment" to newDownpayment,
-                        "startDateTime" to newStartDateTime,
+                        "downPayment" to newDownpayment,
+                        "startDateTime" to newStartDateTime?.let { Timestamp(it) },
                         "status" to updatedStatus,
                         "lastModifiedBy" to currentUserId,
                         "contractPrice" to contractPrice,
                         "latitude" to lat,
                         "longitude" to lon,
                         "propertyType" to selectedPropertyType,
-                        "purposeOfSurvey" to selectedPurposeOfSurvey
+                        "purposeOfSurvey" to selectedPurposeOfSurvey,
+                        "contactNumber" to contactNumber,
+                        "emailAddress" to emailAddress
                     )
 
-
-                    // Update the booking in Firestore
                     bookingRef.update(updatedBookingData)
                         .addOnSuccessListener {
+                            // ✅ Update the local job object
+                            job.address = newAddress
+                            job.downpayment = newDownpayment
+                            job.startDateTime = newStartDateTime?.let { Timestamp(it) }
+                            job.status = updatedStatus
+                            job.contractPrice = contractPrice
+                            job.latitude = lat
+                            job.longitude = lon
+                            job.propertyType = selectedPropertyType
+                            job.purposeOfSurvey = selectedPurposeOfSurvey
+                            job.contactNumber = contactNumber
+                            job.emailAddress = emailAddress
+
                             Toast.makeText(context, "Booking updated successfully.", Toast.LENGTH_SHORT).show()
+                            updateButtonsBasedOnStatus(job, position, holder, currentUserId)
                             notifyItemChanged(position)
                         }
                         .addOnFailureListener { e ->
@@ -893,26 +1190,33 @@ class JobsAdapter(private val jobs: MutableList<Job>, private val context: Conte
         }
     }
 
+
     fun updateBookingDetailsProcessor(
         newAddress: String,
         newStartDateTime: Date?,
         bookingId: String,
+        age: Int,
+        tinNumber: String,
+        position: Int,
+        holder: JobsViewHolder,
+        currentUserId: String,
+        contactNumber: String,
+        emailAddress: String
     ) {
-        val currentUserId = FirebaseAuth.getInstance().currentUser?.uid ?: return // Get current user ID
-        val bookingRef = firestore.collection("bookings").document(bookingId)
 
-        // Fetch the booking document to determine the user role
+        val bookingRef = firestore.collection("bookings").document(bookingId)
+        val job = jobs[position]
+
         bookingRef.get().addOnSuccessListener { document ->
             if (document.exists()) {
-                val bookedUserId = document.getString("bookedUserId") // The artist
-                val bookingUserId = document.getString("landOwnerUserId") // The client
+                val bookedUserId = document.getString("bookedUserId")
+                val bookingUserId = document.getString("landOwnerUserId")
 
                 if (bookedUserId == null || bookingUserId == null) {
                     Toast.makeText(context, "Error: Missing user data in booking document.", Toast.LENGTH_SHORT).show()
                     return@addOnSuccessListener
                 }
 
-                // Determine status based on the current user
                 val updatedStatus = when (currentUserId) {
                     bookedUserId -> "processor edit details"
                     bookingUserId -> "landowner edit detail"
@@ -922,27 +1226,42 @@ class JobsAdapter(private val jobs: MutableList<Job>, private val context: Conte
                     }
                 }
 
-                // Geocode the address and get coordinates
                 convertLocationToCoordinates(newAddress) { lat, lon ->
                     if (lat == 0.0 || lon == 0.0) {
                         Toast.makeText(context, "Failed to get location coordinates.", Toast.LENGTH_SHORT).show()
                         return@convertLocationToCoordinates
                     }
 
-                    // Prepare the data to update
+                    // Prepare Firestore update
                     val updatedBookingData = mapOf(
                         "address" to newAddress,
-                        "startDateTime" to newStartDateTime,
+                        "startDateTime" to newStartDateTime?.let { Timestamp(it) },
                         "status" to updatedStatus,
                         "lastModifiedBy" to currentUserId,
                         "latitude" to lat,
-                        "longitude" to lon
+                        "longitude" to lon,
+                        "contactNumber" to contactNumber,
+                        "emailAddress" to emailAddress,
+                        "age" to age,
+                        "tinNumber" to tinNumber
                     )
 
-                    // Update the booking in Firestore
                     bookingRef.update(updatedBookingData)
                         .addOnSuccessListener {
+                            // ✅ Update the local job object
+                            job.address = newAddress
+                            job.startDateTime = newStartDateTime?.let { Timestamp(it) }
+                            job.status = updatedStatus
+                            job.latitude = lat
+                            job.longitude = lon
+                            job.contactNumber = contactNumber
+                            job.emailAddress = emailAddress
+                            job.age = age.toString()
+                            job.tinNumber = tinNumber
+
                             Toast.makeText(context, "Booking updated successfully.", Toast.LENGTH_SHORT).show()
+                            updateButtonsBasedOnStatus(job, position, holder, currentUserId)
+                            notifyItemChanged(position)
                         }
                         .addOnFailureListener { e ->
                             Toast.makeText(context, "Error updating booking: ${e.message}", Toast.LENGTH_SHORT).show()
@@ -1132,17 +1451,18 @@ class JobsAdapter(private val jobs: MutableList<Job>, private val context: Conte
 
                         when (bookingStatus) {
                             "new processor request" -> {
-                                Log.d("ConfirmBooking", "Payment is submitted, moving to ongoing")
                                 updatedBooking["status"] = "Waiting for processor document verification"
                                 jobs[position].status = "Waiting for processor document verification"
-                                updateButtonsBasedOnStatus(jobs[position], position, holder, currentUserId) // Update button status
+                            }
+
+                            "landowner edit detail" -> {
+                                updatedBooking["status"] = "Waiting for processor document verification"
+                                jobs[position].status = "Waiting for processor document verification"
                             }
 
                             else -> {
-                                Log.d("ConfirmBooking", "Booking status not payment_submitted, setting artist_approved")
                                 updatedBooking["status"] = "Waiting for processor document verification"
                                 jobs[position].status = "Waiting for processor document verification"
-                                updateButtonsBasedOnStatus(jobs[position], position, holder, currentUserId) // Update button status
                             }
                         }
                     }
@@ -1163,31 +1483,33 @@ class JobsAdapter(private val jobs: MutableList<Job>, private val context: Conte
             .addOnSuccessListener {
                 Log.d("ConfirmBooking", "Booking $bookingId status updated.")
 
-                // ✅ Remove item from list if it is now "ongoing"
+                // UI update after Firestore transaction completes
                 Handler(Looper.getMainLooper()).post {
-                    if (jobs[position].stage == "ongoing") {
+                    val job = jobs[position]
+                    job.status = "Waiting for processor document verification"  // Update status in the job object
+
+                    // Call notifyItemChanged to update the RecyclerView item
+                    notifyItemChanged(position)
+
+                    // If the job is "ongoing", remove it from the list and navigate
+                    if (job.stage == "ongoing") {
                         jobs.removeAt(position)
                         notifyItemRemoved(position)
 
-                        // Now use the context to navigate
                         val fragmentTransaction = (context as? AppCompatActivity)?.supportFragmentManager?.beginTransaction()
                         val ongoingFragment = OnGoingFragment() // Your target fragment
 
-                        fragmentTransaction?.replace(R.id.fragment_container, ongoingFragment) // Replace with your container ID
-                        fragmentTransaction?.addToBackStack(null) // Optional: if you want back navigation
+                        fragmentTransaction?.replace(R.id.fragment_container, ongoingFragment)
+                        fragmentTransaction?.addToBackStack(null)
                         fragmentTransaction?.commit()
-                    } else {
-                        notifyItemChanged(position)
                     }
-
-                    // Notify that the dataset has changed (to ensure the UI is updated)
-                    notifyDataSetChanged() // Notify RecyclerView to refresh the UI
                 }
             }
             .addOnFailureListener { e ->
                 Log.e("ConfirmBooking", "Error updating booking: ", e)
             }
     }
+
 
     private fun fetchUserTypeForStatus(bookedUserId: String, callback: (String?) -> Unit) {
         val db = FirebaseFirestore.getInstance()

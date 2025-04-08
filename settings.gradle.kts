@@ -3,6 +3,7 @@ pluginManagement {
         google()
         mavenCentral()
         gradlePluginPortal()
+        jcenter()
 
     }
 }
@@ -15,6 +16,8 @@ dependencyResolutionManagement {
     }
 
 }
+
+
 
 rootProject.name = "Terramaster"
 include(":app")

@@ -2,6 +2,7 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical"
     android:padding="8dp"
     android:layout_marginBottom="10dp">
@@ -74,6 +75,36 @@
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:text="Contact Number"
+                android:textSize="12sp"
+                android:layout_marginTop="4dp"
+                android:textColor="@color/black" />
+
+            <TextView
+                android:id="@+id/contactNumber"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Contact Number"
+                android:textSize="14sp"
+                android:textColor="@color/black"
+                android:layout_marginTop="4dp" />
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Email Address"
+                android:textSize="12sp"
+                android:layout_marginTop="4dp"
+                android:textColor="@color/black" />
+
+            <TextView
+                android:id="@+id/emailAddress"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Email Address"
+                android:textSize="14sp"/>
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
                 android:text="Address"
                 android:textSize="12sp"
                 android:layout_marginTop="4dp"
@@ -118,21 +149,74 @@
                 android:textSize="14sp"
                 android:layout_marginTop="4dp"
                 android:textColor="@color/black" />
-
             <TextView
-                android:id="@+id/labelPrice"
+                android:id="@+id/labelAge"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Contract Price"
+                android:text="Age"
                 android:textSize="12sp"
                 android:layout_marginTop="4dp"
                 android:textColor="@color/black" />
 
             <TextView
-                android:id="@+id/contractPrice"
+                android:id="@+id/age"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Contract Price"
+                android:text="Age"
+                android:textSize="14sp"
+                android:layout_marginTop="4dp"
+                android:textColor="@color/black" />
+
+            <TextView
+                android:id="@+id/labelTin"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Tax Identification Number"
+                android:textSize="12sp"
+                android:layout_marginTop="4dp"
+                android:textColor="@color/black" />
+
+            <TextView
+                android:id="@+id/Tin"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Tax Identification Number"
+                android:textSize="14sp"
+                android:layout_marginTop="4dp"
+                android:textColor="@color/black" />
+
+            <TextView
+                android:id="@+id/purposeLabel"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Purpose of survey"
+                android:textSize="12sp"
+                android:layout_marginTop="4dp"
+                android:textColor="@color/black" />
+
+            <TextView
+                android:id="@+id/purposeOfSuurvey"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Purpose of survey"
+                android:textSize="14sp"
+                android:layout_marginTop="4dp"
+                android:textColor="@color/black" />
+
+            <TextView
+                android:id="@+id/propertyLabel"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Property Type"
+                android:textSize="12sp"
+                android:layout_marginTop="4dp"
+                android:textColor="@color/black" />
+
+            <TextView
+                android:id="@+id/propertyTypeLabel"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Property Type"
                 android:textSize="14sp"
                 android:layout_marginTop="4dp"
                 android:textColor="@color/black" />
@@ -144,7 +228,8 @@
                 android:text="Downpayment"
                 android:textSize="12sp"
                 android:layout_marginTop="4dp"
-                android:textColor="@color/black" />
+                android:textColor="@color/black"
+                android:visibility="gone"/>
 
             <TextView
                 android:id="@+id/booking_downpayment"
@@ -153,16 +238,66 @@
                 android:text="Amount"
                 android:textSize="14sp"
                 android:layout_marginTop="4dp"
-                android:textColor="@color/black" />
+                android:textColor="@color/black"
+                android:visibility="gone"/>
+            <TextView
+                android:id="@+id/labelPrice"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Contract Price"
+                android:textSize="12sp"
+                android:layout_marginTop="4dp"
+                android:textColor="@color/black"
+                android:visibility="gone"/>
+
+            <TextView
+                android:id="@+id/contractPrice"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Contract Price"
+                android:textSize="14sp"
+                android:layout_marginTop="4dp"
+                android:textColor="@color/black"
+                android:visibility="gone"/>
         </LinearLayout>
     </LinearLayout>
+
     <LinearLayout
+        android:id="@+id/stepProgressLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:gravity="center"
-        android:layout_marginTop="8dp"
-        android:padding="10dp">
+        android:gravity="center">
 
+        <!-- Example for Step 1 -->
+        <View
+            android:id="@+id/step1"
+            android:layout_width="0dp"
+            android:layout_height="10dp"
+            android:layout_weight="1"
+            android:background="@color/black"
+            android:layout_marginEnd="4dp"/>
+
+        <!-- Example for Step 2 -->
+        <View
+            android:id="@+id/step2"
+            android:layout_width="0dp"
+            android:layout_height="10dp"
+            android:layout_weight="1"
+            android:background="@color/black"
+            android:layout_marginEnd="4dp"/>
+
+        <!-- Example for Step 3 -->
+        <View
+            android:id="@+id/step3"
+            android:layout_width="0dp"
+            android:layout_height="10dp"
+            android:layout_weight="1"
+            android:layout_marginEnd="4dp"
+            android:background="@color/black"/>
+
+        <!-- Add more steps as necessary -->
     </LinearLayout>
+
+
 </LinearLayout>
