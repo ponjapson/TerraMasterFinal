@@ -22,5 +22,6 @@ data class OnGoingJobs(
     var propertyType: String = "",
     var purposeOfSurvey: String = "",
     var contactNumber: String = "",
-    var emailAddress: String = ""
+    var emailAddress: String = "",
+    var documentStatus: String = "",
 )

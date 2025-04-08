@@ -313,7 +313,7 @@
                         android:layout_height="10dp"
                         android:background="@color/YellowGreen"
                         android:layout_marginBottom="4dp"
-                       />
+                        />
 
                     <TextView
                         android:layout_width="wrap_content"
@@ -332,7 +332,7 @@
                     android:orientation="vertical"
                     android:gravity="center_horizontal"
                     android:layout_marginEnd="2dp"
-                   >
+                    >
 
                     <View
                         android:id="@+id/step2"
@@ -359,7 +359,7 @@
                     android:orientation="vertical"
                     android:gravity="center_horizontal"
                     android:layout_marginEnd="2dp"
-                  >
+                    >
 
                     <View
                         android:id="@+id/step3"
@@ -553,7 +553,7 @@
                         android:layout_height="10dp"
                         android:layout_marginBottom="4dp"
                         android:background="@color/DarkYellow"
-                       />
+                        />
 
                     <TextView
                         android:layout_width="wrap_content"

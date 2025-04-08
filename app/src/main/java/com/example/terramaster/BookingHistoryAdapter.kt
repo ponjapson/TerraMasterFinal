@@ -46,8 +46,8 @@ import java.util.Calendar
 import java.util.Date
 import java.util.Locale
 
-class OnGoingAdapter(private val jobs: MutableList<OnGoingJobs>, private val context: Context,    private val listener: OnPaymentClickListener, private val fragmentActivity: FragmentActivity) :
-    RecyclerView.Adapter<OnGoingAdapter.JobsViewHolder>() {
+class BookingHistoryAdapter(private val jobs: MutableList<OnGoingJobs>, private val context: Context,    private val listener: OnPaymentClickListener, private val fragmentActivity: FragmentActivity) :
+    RecyclerView.Adapter<BookingHistoryAdapter.JobsViewHolder>() {
 
     private var onItemClickListener: ((String) -> Unit)? = null
     private val firestore = FirebaseFirestore.getInstance()
@@ -100,7 +100,7 @@ class OnGoingAdapter(private val jobs: MutableList<OnGoingJobs>, private val con
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): JobsViewHolder {
         val view = LayoutInflater.from(parent.context)
-            .inflate(R.layout.ongoing_booking_item, parent, false)
+            .inflate(R.layout.booking_history, parent, false)
         return JobsViewHolder(view)
     }
 
@@ -203,35 +203,6 @@ class OnGoingAdapter(private val jobs: MutableList<OnGoingJobs>, private val con
                 Log.e("BookingAdapter", "Error fetching user data: ${e.message}")
             }
 
-        firestore.collection("users").document(loggedInUserId)
-            .get()
-            .addOnSuccessListener { userSnapshot ->
-                userType = userSnapshot.getString("user_type")
-
-                // Check the userType and adjust the visibility accordingly
-                when (userType) {
-                    "Landowner" -> {
-
-                        holder.btnNextProcessor.visibility = View.GONE
-                        holder.btnPreviousProcessor.visibility = View.GONE
-                    }
-
-
-
-                    else -> {
-                        // Default case if there is no specific userType
-                        holder.contractPrice.visibility = View.VISIBLE
-                        holder.downpayment.visibility = View.VISIBLE
-                        holder.labelDown.visibility = View.VISIBLE
-                        holder.labelPrice.visibility = View.VISIBLE
-                    }
-                }
-            }
-            .addOnFailureListener { e ->
-                // Handle the error if the user document can't be fetched
-                Log.e("BookingAdapter", "Error fetching user data: ${e.message}")
-            }
-
         if (currentUserId != null) {
             // Proceed with your logic using currentUserId
             //updateButtonsBasedOnStatus(job, position, holder, currentUserId)
@@ -318,9 +289,7 @@ class OnGoingAdapter(private val jobs: MutableList<OnGoingJobs>, private val con
             // Also update the step color immediately for the next status
             updateStepColor(nextStatus, holder, position)
         }
-
         updateStepColor(job.documentStatus, holder, position)
-
         holder.btnPreviousSurveyor.setOnClickListener {
             val bookingId = jobs[position].bookingId
             var currentStatus = jobs[position].documentStatus
@@ -426,7 +395,7 @@ class OnGoingAdapter(private val jobs: MutableList<OnGoingJobs>, private val con
             }
     }
 
-    private fun updateStepColorProcessor(status: String, holder: JobsViewHolder, position: Int) {
+    private fun updateStepColor(status: String, holder: JobsViewHolder, position: Int) {
         val defaultColor = ContextCompat.getColor(context, R.color.DarkYellow)
         val activeColor = ContextCompat.getColor(context, R.color.YellowGreen)
 
@@ -487,8 +456,8 @@ class OnGoingAdapter(private val jobs: MutableList<OnGoingJobs>, private val con
                 }
             }
         }
-        }
-    private fun updateStepColor(status: String, holder: JobsViewHolder, position: Int) {
+    }
+    private fun updateStepColorProcessor(status: String, holder: JobsViewHolder, position: Int) {
         val defaultColor = ContextCompat.getColor(context, R.color.DarkYellow)
         val activeColor = ContextCompat.getColor(context, R.color.YellowGreen)
 
