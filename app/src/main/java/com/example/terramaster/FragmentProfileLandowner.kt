@@ -5,6 +5,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
+import android.widget.ImageButton
 import android.widget.TextView
 import android.widget.Toast
 import androidx.fragment.app.Fragment
@@ -36,6 +37,12 @@ class FragmentProfileLandowner: Fragment() {
         firstNameTextView = view.findViewById(R.id.first_name)
         lastNameTextView = view.findViewById(R.id.last_name)
         usertypeTextView = view.findViewById(R.id.userType)
+
+        val btnShowMenu = view.findViewById<ImageButton>(R.id.menuBurger)
+        btnShowMenu.setOnClickListener {
+            val dialogFragment = FragmentMenu()
+            dialogFragment.show(childFragmentManager, "menu_dialog")
+        }
 
         if (userId != null) {
             db.collection("users").document(userId)

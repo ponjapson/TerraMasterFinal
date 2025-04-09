@@ -13,6 +13,7 @@ import android.util.Patterns
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.WindowManager
 import android.widget.Button
 import android.widget.EditText
 import android.widget.RadioButton
@@ -54,6 +55,7 @@ class FragmentBooking : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View? {
         return inflater.inflate(R.layout.fragment_booking, container, false)
+
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -65,6 +67,10 @@ class FragmentBooking : Fragment() {
             requireActivity().onBackPressed()
             return
         }
+        requireActivity().window.setFlags(
+            WindowManager.LayoutParams.FLAG_SECURE,
+            WindowManager.LayoutParams.FLAG_SECURE
+        )
 
         // Initialize the views
 
@@ -697,7 +703,7 @@ class FragmentBooking : Fragment() {
     private fun launchScanner() {
         val options = GmsDocumentScannerOptions.Builder()
             .setGalleryImportAllowed(true)  // Allow importing from gallery
-            .setPageLimit(2)               // Max 2 pages
+            .setPageLimit(10)               // Max 2 pages
             .setResultFormats(GmsDocumentScannerOptions.RESULT_FORMAT_PDF) // Only PDF format
             .setScannerMode(GmsDocumentScannerOptions.SCANNER_MODE_FULL)
             .build()
@@ -733,4 +739,13 @@ class FragmentBooking : Fragment() {
         val timeStamp = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(Date())
         return "booking_scan_$timeStamp.pdf"
     }
+
+    override fun onResume() {
+        super.onResume()
+        requireActivity().window.setFlags(
+            WindowManager.LayoutParams.FLAG_SECURE,
+            WindowManager.LayoutParams.FLAG_SECURE
+        )
+    }
+
 }

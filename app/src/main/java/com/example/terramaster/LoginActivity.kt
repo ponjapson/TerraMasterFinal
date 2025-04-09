@@ -92,10 +92,7 @@ class LoginActivity : AppCompatActivity() {
                     val userType = document.getString("user_type") ?: ""
                     val currentStatus = document.getString("status") ?: ""
 
-                    if (userType == "Landowner") {
-                        // Directly update to Active for Landowner
-                        updateStatusAndToken(userId, "Active")
-                    } else if (userType == "Surveyor" || userType == "Processor") {
+                   if (userType == "Surveyor" || userType == "Processor" || userType == "Landowner") {
                         if (currentStatus == "Verified" || currentStatus == "Active") {
                             // Update to Active only if already Verified
                             updateStatusAndToken(userId, "Active")

@@ -7,17 +7,28 @@ import android.os.Bundle
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
+import android.graphics.ImageDecoder
+import android.graphics.drawable.BitmapDrawable
 import android.location.Geocoder
+import android.os.Build
 import android.provider.MediaStore
 import android.util.Log
 import android.view.View
 import android.widget.*
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.IntentSenderRequest
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.app.ActivityCompat
+import androidx.core.content.ContentProviderCompat.requireContext
 import androidx.core.content.ContextCompat
+import com.bumptech.glide.Glide
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.messaging.FirebaseMessaging
+import com.google.mlkit.vision.documentscanner.GmsDocumentScannerOptions
+import com.google.mlkit.vision.documentscanner.GmsDocumentScanning
+import com.google.mlkit.vision.documentscanner.GmsDocumentScanningResult
 import org.json.JSONArray
 import java.io.ByteArrayOutputStream
 import java.lang.StringBuilder
@@ -55,13 +66,16 @@ class RegisterActivity : AppCompatActivity() {
 
     private val REQUEST_IMAGE_CAPTURE_FRONT = 1
     private val REQUEST_IMAGE_CAPTURE_BACK = 2
+    private val REQUEST_DOCUMENT_SCAN = 1001
     private val CAMERA_PERMISSION_CODE = 100
     private val DEFAULT_PROFILE_PICTURE_URL =
         "https://static.vecteezy.com/system/resources/thumbnails/020/765/399/small/default-profile-account-unknown-icon-black-silhouette-free-vector.jpg"
-
+    private lateinit var scanButton: Button
+    private lateinit var scannedImageView: ImageView
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_register)
+
 
         auth = FirebaseAuth.getInstance()
         db = FirebaseFirestore.getInstance()
@@ -85,6 +99,12 @@ class RegisterActivity : AppCompatActivity() {
         province = findViewById(R.id.etProvince)
         etBarangay = findViewById(R.id.etBarangay)
 
+        scanButton = findViewById(R.id.scanButton)
+        scannedImageView = findViewById(R.id.scannedImageView)
+        scanButton.setOnClickListener {
+            launchScanner()
+        }
+
         val tvSignIn: TextView = findViewById(R.id.tvSignIn)
 
         tvSignIn.setOnClickListener {
@@ -104,17 +124,14 @@ class RegisterActivity : AppCompatActivity() {
 
         rgUserType.setOnCheckedChangeListener { _, checkedId ->
             when (findViewById<RadioButton>(checkedId).text.toString()) {
-                "Landowner" -> {
-                    btnUploadFront.visibility = View.GONE
-                    btnUploadBack.visibility = View.GONE
-                    ivFrontID.visibility = View.GONE
-                    ivBackID.visibility = View.GONE
+
+                "Surveyor" -> {
+                    scanButton.visibility = View.VISIBLE
+                    scannedImageView.visibility = View.VISIBLE
                 }
-                "Processor", "Surveyor" -> {
-                    btnUploadFront.visibility = View.VISIBLE
-                    btnUploadBack.visibility = View.VISIBLE
-                    ivFrontID.visibility = View.VISIBLE
-                    ivBackID.visibility = View.VISIBLE
+                "Landowner", "Processor" -> {
+                    scanButton.visibility = View.GONE
+                    scannedImageView.visibility = View.GONE
                 }
             }
         }
@@ -123,6 +140,61 @@ class RegisterActivity : AppCompatActivity() {
             validateAndRegisterUser()
         }
     }
+
+    private fun launchScanner() {
+        val options = GmsDocumentScannerOptions.Builder()
+            .setGalleryImportAllowed(true)
+            .setPageLimit(1)
+            .setResultFormats(GmsDocumentScannerOptions.RESULT_FORMAT_JPEG) // Use JPEG instead
+            .setScannerMode(GmsDocumentScannerOptions.SCANNER_MODE_FULL)
+            .build()
+
+        val scanner = GmsDocumentScanning.getClient(options)
+
+        scanner.getStartScanIntent(this) // or `requireActivity()` if in Fragment
+            .addOnSuccessListener { intentSender ->
+                scannerLauncher.launch(IntentSenderRequest.Builder(intentSender).build())
+            }
+            .addOnFailureListener { e ->
+                Toast.makeText(this, "Failed to start scanner: ${e.message}", Toast.LENGTH_LONG).show()
+            }
+    }
+
+    private val scannerLauncher: ActivityResultLauncher<IntentSenderRequest> =
+        registerForActivityResult(ActivityResultContracts.StartIntentSenderForResult()) { result ->
+            if (result.resultCode == Activity.RESULT_OK) {
+                val data: Intent? = result.data
+                val scanningResult = GmsDocumentScanningResult.fromActivityResultIntent(data)
+
+                // Log the scanning result
+                Log.d("ScannerResult", "Scanning result: $scanningResult")
+
+                // Check if scanning result contains pages and extract image URI
+                val imageUri = scanningResult?.pages?.firstOrNull()?.imageUri
+
+                // Log the image URI to check if it is null
+                Log.d("ImageUri", "Scanned image URI: $imageUri")
+
+                if (imageUri != null) {
+                    try {
+                        // Use Glide to load the image URI into the ImageView
+                        Glide.with(this)
+                            .load(imageUri)
+                            .into(scannedImageView) // The ImageView where the image should be displayed
+                    } catch (e: Exception) {
+                        Log.e("ImageLoadingError", "Failed to load image: ${e.message}")
+                        e.printStackTrace()
+                        Toast.makeText(this, "Failed to load image: ${e.message}", Toast.LENGTH_LONG).show()
+                    }
+                } else {
+                    Log.w("NoImageUri", "No image URI found in scanning result.")
+                    Toast.makeText(this, "No image found in the scanned result.", Toast.LENGTH_SHORT).show()
+                }
+            } else {
+                Toast.makeText(this, "Scanning canceled", Toast.LENGTH_SHORT).show()
+            }
+        }
+
 
     private fun getCoordinatesFromAddress(address: String, callback: (Double?, Double?) -> Unit){
         val urlString = "https://nominatim.openstreetmap.org/search?q=${address.replace(" ", "+")}&format=json"
@@ -187,19 +259,45 @@ class RegisterActivity : AppCompatActivity() {
         super.onActivityResult(requestCode, resultCode, data)
 
         if (resultCode == Activity.RESULT_OK && data != null) {
-            val imageBitmap = data.extras?.get("data") as Bitmap
-            when (requestCode) {
-                REQUEST_IMAGE_CAPTURE_FRONT -> {
-                    frontIDBitmap = imageBitmap
-                    ivFrontID.setImageBitmap(imageBitmap)
-                }
-                REQUEST_IMAGE_CAPTURE_BACK -> {
-                    backIDBitmap = imageBitmap
-                    ivBackID.setImageBitmap(imageBitmap)
+            // Handle the camera result (Bitmap expected)
+            if (requestCode == REQUEST_IMAGE_CAPTURE_FRONT || requestCode == REQUEST_IMAGE_CAPTURE_BACK) {
+                val imageBitmap = data.extras?.get("data") as? Bitmap
+                if (imageBitmap != null) {
+                    when (requestCode) {
+                        REQUEST_IMAGE_CAPTURE_FRONT -> {
+                            frontIDBitmap = imageBitmap
+                            ivFrontID.setImageBitmap(imageBitmap)
+                        }
+                        REQUEST_IMAGE_CAPTURE_BACK -> {
+                            backIDBitmap = imageBitmap
+                            ivBackID.setImageBitmap(imageBitmap)
+                        }
+                    }
+                } else {
+                    Log.e("CameraResult", "Failed to retrieve Bitmap from the camera result.")
                 }
             }
+
+            // Handle the document scanner result (image URI expected)
+            if (requestCode == REQUEST_DOCUMENT_SCAN) {
+                val scanningResult = GmsDocumentScanningResult.fromActivityResultIntent(data)
+                val imageUri = scanningResult?.pages?.firstOrNull()?.imageUri
+
+                if (imageUri != null) {
+                    // Use Glide to load the image URI into the ImageView
+                    Glide.with(this)
+                        .load(imageUri)
+                        .into(scannedImageView)
+                } else {
+                    Log.e("ScannerResult", "No image URI found in scanning result.")
+                    Toast.makeText(this, "No image found in the scanned result.", Toast.LENGTH_SHORT).show()
+                }
+            }
+        } else {
+            Log.e("ActivityResult", "Activity result failed or data is null.")
         }
     }
+
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
@@ -278,7 +376,7 @@ class RegisterActivity : AppCompatActivity() {
 
         val userType = findViewById<RadioButton>(selectedUserTypeId).text.toString()
 
-        if ((userType == "Processor" || userType == "Surveyor") && (frontIDBitmap == null || backIDBitmap == null)) {
+        if ((userType == "Processor" || userType == "Surveyor" || userType == "Landowner") && (frontIDBitmap == null || backIDBitmap == null)) {
             Toast.makeText(this, "Please upload both front and back ID images", Toast.LENGTH_SHORT).show()
             return
         }
@@ -303,9 +401,6 @@ class RegisterActivity : AppCompatActivity() {
 
 
     }
-
-   
-
     private fun uploadIDImagesAndRegister(
         firstName: String,
         lastName: String,
@@ -319,54 +414,80 @@ class RegisterActivity : AppCompatActivity() {
         userType: String,
         latitude: Double,
         longitude: Double,
-
     ) {
         FirebaseMessaging.getInstance().token.addOnCompleteListener { tokenTask ->
             if (tokenTask.isSuccessful) {
                 val fcmToken = tokenTask.result
                 val storageRef = storage.reference
 
-                val frontIDRef = storageRef.child("id_images/${UUID.randomUUID()}_front.jpg")
-                val backIDRef = storageRef.child("id_images/${UUID.randomUUID()}_back.jpg")
+                val scannedDrawable = scannedImageView.drawable
+                if (scannedDrawable != null && scannedDrawable is BitmapDrawable) {
+                    val scannedBitmap = scannedDrawable.bitmap
+                    val scannedIDRef = storageRef.child("id_images/${UUID.randomUUID()}_scanned.jpg")
 
-                val frontIDStream = ByteArrayOutputStream()
-                frontIDBitmap?.compress(Bitmap.CompressFormat.JPEG, 100, frontIDStream)
-                val frontIDData = frontIDStream.toByteArray()
+                    val scannedStream = ByteArrayOutputStream()
+                    scannedBitmap.compress(Bitmap.CompressFormat.JPEG, 100, scannedStream)
+                    val scannedData = scannedStream.toByteArray()
 
-                val backIDStream = ByteArrayOutputStream()
-                backIDBitmap?.compress(Bitmap.CompressFormat.JPEG, 100, backIDStream)
-                val backIDData = backIDStream.toByteArray()
+                    scannedIDRef.putBytes(scannedData)
+                        .addOnSuccessListener {
+                            scannedIDRef.downloadUrl.addOnSuccessListener { scannedUrl ->
 
-                frontIDRef.putBytes(frontIDData).addOnSuccessListener { frontTask ->
-                    frontIDRef.downloadUrl.addOnSuccessListener { frontUri ->
-                        backIDRef.putBytes(backIDData).addOnSuccessListener { backTask ->
-                            backIDRef.downloadUrl.addOnSuccessListener { backUri ->
-                                registerUserWithFirebase(
-                                    firstName,
-                                    lastName,
-                                    email,
-                                    password,
-                                    barangay,
-                                    StreetAddress,
-                                    City,
-                                    Province,
-                                    PostalCode,
-                                    userType,
-                                    fcmToken,
-                                    frontUri.toString(),
-                                    backUri.toString(),
-                                    latitude,
-                                    longitude
+                                // Proceed with front & back ID upload AFTER scanned success
+                                val frontIDRef = storageRef.child("id_images/${UUID.randomUUID()}_front.jpg")
+                                val backIDRef = storageRef.child("id_images/${UUID.randomUUID()}_back.jpg")
 
-                                )
+                                val frontIDStream = ByteArrayOutputStream()
+                                frontIDBitmap?.compress(Bitmap.CompressFormat.JPEG, 100, frontIDStream)
+                                val frontIDData = frontIDStream.toByteArray()
+
+                                val backIDStream = ByteArrayOutputStream()
+                                backIDBitmap?.compress(Bitmap.CompressFormat.JPEG, 100, backIDStream)
+                                val backIDData = backIDStream.toByteArray()
+
+                                frontIDRef.putBytes(frontIDData).addOnSuccessListener {
+                                    frontIDRef.downloadUrl.addOnSuccessListener { frontUri ->
+                                        backIDRef.putBytes(backIDData).addOnSuccessListener {
+                                            backIDRef.downloadUrl.addOnSuccessListener { backUri ->
+
+                                                registerUserWithFirebase(
+                                                    firstName,
+                                                    lastName,
+                                                    email,
+                                                    password,
+                                                    barangay,
+                                                    StreetAddress,
+                                                    City,
+                                                    Province,
+                                                    PostalCode,
+                                                    userType,
+                                                    fcmToken,
+                                                    frontUri.toString(),
+                                                    backUri.toString(),
+                                                    latitude,
+                                                    longitude,
+                                                    scannedUrl.toString() // ➕ add this!
+                                                )
+
+                                            }
+                                        }.addOnFailureListener { e ->
+                                            handleFailure("Error uploading back ID: ${e.message}")
+                                        }
+                                    }
+                                }.addOnFailureListener { e ->
+                                    handleFailure("Error uploading front ID: ${e.message}")
+                                }
+
                             }
-                        }.addOnFailureListener { e ->
-                            handleFailure("Error uploading back ID: ${e.message}")
                         }
-                    }
-                }.addOnFailureListener { e ->
-                    handleFailure("Error uploading front ID: ${e.message}")
+                        .addOnFailureListener { e ->
+                            handleFailure("Error uploading scanned ID: ${e.message}")
+                        }
+
+                } else {
+                    handleFailure("Scanned image is missing or not a valid image.")
                 }
+
             } else {
                 handleFailure("Error fetching FCM token: ${tokenTask.exception?.message}")
             }
@@ -388,7 +509,8 @@ class RegisterActivity : AppCompatActivity() {
         frontIDUrl: String?,
         backIDUrl: String?,
         latitude: Double,
-        longitude: Double
+        longitude: Double,
+        scannedUrl: String?,
     ) {
         auth.createUserWithEmailAndPassword(email, password)
             .addOnCompleteListener { task ->
@@ -414,7 +536,8 @@ class RegisterActivity : AppCompatActivity() {
                         "backIDUrl" to backIDUrl,
                         "longitude" to longitude,
                         "latitude" to latitude,
-                        "status" to "email_not_verified"
+                        "status" to "email_not_verified",
+                        "scannedUrl" to scannedUrl
                     )
 
                     // Add ratings if user type is Surveyor or Processor

@@ -4,28 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@drawable/custom_edit_text"
-    android:orientation="vertical"
-    android:paddingStart="16dp"
-    android:paddingEnd="16dp">
-
-    <!-- Container for the Burger Menu button and profile image (positioned together) -->
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:gravity="end"
-        android:layout_marginTop="16dp">
-
-        <!-- Menu Burger Button (in the top right corner) -->
-        <ImageButton
-            android:id="@+id/menuBurger"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
-            android:src="@drawable/menu"
-            android:background="?attr/selectableItemBackgroundBorderless"
-            android:contentDescription="Menu" />
-
-    </LinearLayout>
+    android:orientation="vertical">
 
     <!-- Profile Image -->
     <de.hdodenhof.circleimageview.CircleImageView
@@ -77,44 +56,13 @@
         android:textSize="18sp"
         android:fontFamily="@font/poppinssb"
         android:textColor="@color/black" />
-
-    <!-- Rating Bar -->
-    <RatingBar
-        android:id="@+id/ratingBar"
-        style="@android:attr/ratingBarStyleSmall"
-        android:layout_width="wrap_content"
-        android:layout_height="29dp"
-        android:layout_gravity="center_horizontal"
-        android:max="5"
-        android:numStars="5"
-        android:rating="2.1"
-        android:progressDrawable="@drawable/custom_rating_bar"
-        android:stepSize="0.1"
-        android:isIndicator="true"
-        />
-
     <Button
-        android:id="@+id/editProfile"
+        android:id="@+id/Message"
         android:layout_width="200dp"
         android:layout_height="40dp"
-        android:text="Edit Profile"
+        android:text="Message"
         android:layout_marginTop="20dp"
         android:layout_gravity="center_horizontal"/>
 
-    <TextView
-        android:id="@+id/reviews"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center_horizontal"
-        android:text="Reviews"
-        android:textSize="20sp"
-        android:textColor="@color/black"
-        android:layout_marginTop="50dp"/>
 
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/recyclerView"
-        android:layout_width="350dp"
-        android:layout_height="match_parent"
-        android:layout_gravity="center"
-        android:nestedScrollingEnabled="false" />
 </LinearLayout>

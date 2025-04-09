@@ -60,9 +60,6 @@ class SearchFragment : Fragment() {
     private var currentUser: FirebaseUser? = null
     private var userType: String? = null   // ✅ Avoids crashes
 
-
-
-
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -134,7 +131,7 @@ class SearchFragment : Fragment() {
 
         displayedAdapter = DisplayedSearchAdapter(requireContext(), displayedItems, object : OnItemClickListener {
             override fun onItemClick(userId: String) {
-                navigateToProfileFragment(userId)
+                fetchUserTypeAndNavigate(userId)
             }
         })
 
@@ -281,6 +278,22 @@ class SearchFragment : Fragment() {
         return view
     }
 
+    private fun fetchUserTypeAndNavigate(userId: String) {
+        val db = FirebaseFirestore.getInstance()
+
+        db.collection("users").document(userId)
+            .get()
+            .addOnSuccessListener { document ->
+                if (document != null) {
+                    val userType = document.getString("user_type") ?: "defaultType"
+                    navigateToProfileFragment(userId, userType)
+                }
+            }
+            .addOnFailureListener { exception ->
+                // Handle failure (e.g., show a message or log it)
+                Log.e("Error", "Failed to fetch userType: $exception")
+            }
+    }
 
 
     private fun fetchLandownerLocationAndRecommendSurveyors(selectedSort: String) {
@@ -730,6 +743,16 @@ class SearchFragment : Fragment() {
             }
     }
 
+    // Helper function to get the userType of a user based on their userId
+    private fun getUserType(userId: String): String {
+        var userType = ""
+        firestore.collection("users").document(userId).get()
+            .addOnSuccessListener { document ->
+                userType = document.getString("user_type") ?: ""
+            }
+        return userType
+    }
+
     private fun loadRecentSearches() {
         val recentSearches = sharedPreferences.getStringSet("recent_searches", LinkedHashSet()) ?: emptySet()
         recentItems.clear()
@@ -778,12 +801,16 @@ class SearchFragment : Fragment() {
         listenerRegistration?.remove() // Detach the listener to prevent memory leaks
     }
 
-    private fun navigateToProfileFragment(userId: String){
+    private fun navigateToProfileFragment(userId: String, userType: String){
 
             val currentUser = FirebaseAuth.getInstance().currentUser
-            val fragment = if (currentUser != null && userId == currentUser.uid) {
+            val fragment = if (currentUser != null && userId == currentUser.uid && userType == "Landowner") {
+                FragmentProfileLandowner()
+            } else if(currentUser != null && userId == currentUser.uid && userType == "Surveyor" || userType == "Processor"){
                 FragmentProfile()
-            } else {
+            } else if(currentUser != null && userId != currentUser.uid && userType == "Landowner"){
+                FragmentUserProfileLandowner()
+            }else{
                 FragmentUserProfile()
             }
             val bundle = Bundle().apply { putString("userId", userId) }

@@ -30,8 +30,8 @@ class FeedbackAdapter(private val feedbackList: List<Feedback>) : RecyclerView.A
         holder.textUsername.text = "${feedback.first_name} ${feedback.last_name}"
 
         // Set comment and rating
-        holder.textComment.text = feedback.comment
-        holder.ratingBar.rating = feedback.ratings
+        holder.textComment.text = feedback.feedback
+        holder.ratingBar.rating = feedback.rating
 
         // Load profile picture using Glide
         Glide.with(holder.imageProfile.context)

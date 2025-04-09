@@ -20,6 +20,7 @@ import android.widget.LinearLayout
 import android.widget.ProgressBar
 import android.widget.RadioButton
 import android.widget.RadioGroup
+import android.widget.RatingBar
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
@@ -46,7 +47,7 @@ import java.util.Calendar
 import java.util.Date
 import java.util.Locale
 
-class BookingHistoryAdapter(private val jobs: MutableList<OnGoingJobs>, private val context: Context,    private val listener: OnPaymentClickListener, private val fragmentActivity: FragmentActivity) :
+class BookingHistoryAdapter(private val jobs: MutableList<BookingHistory>, private val context: Context,    private val listener: OnPaymentClickListener, private val fragmentActivity: FragmentActivity) :
     RecyclerView.Adapter<BookingHistoryAdapter.JobsViewHolder>() {
 
     private var onItemClickListener: ((String) -> Unit)? = null
@@ -76,26 +77,23 @@ class BookingHistoryAdapter(private val jobs: MutableList<OnGoingJobs>, private 
         val propertyLabel: TextView = view.findViewById(R.id.propertyLabel)
         val contactNumber: TextView = view.findViewById(R.id.contactNumber)
         val emailAddress: TextView = view.findViewById(R.id.emailAddress)
-        val cardViewSurveyor: CardView = view.findViewById(R.id.cardViewSurveyor)
-        val progressLabel: TextView = view.findViewById(R.id.progressLabel)
-        val stepProgressLayout: LinearLayout = view.findViewById(R.id.stepProgressLayout)
+
         val step1: View = view.findViewById(R.id.step1)
         val step2: View = view.findViewById(R.id.step2)
         val step3: View = view.findViewById(R.id.step3)
         val step4: View = view.findViewById(R.id.step4)
         val step5: View = view.findViewById(R.id.step5)
-        val btnPreviousSurveyor: Button = view.findViewById(R.id.btnPreviousSurveyor)
-        val btnNextSurveyor: Button = view.findViewById(R.id.btnNextSurveyor)
-
         val cardViewProcessor: CardView = view.findViewById(R.id.cardViewProcessor)
-        val progressLabelProcessor: TextView = view.findViewById(R.id.progressLabelProcessor)
-        val stepProgressLayoutProcessor: LinearLayout = view.findViewById(R.id.stepProgressLayoutProcessor)
+        val cardViewSurveyor: CardView = view.findViewById(R.id.cardViewSurveyor)
+
         val step1Processor: View = view.findViewById(R.id.step1Processor)
         val step2Processor: View = view.findViewById(R.id.step2Processor)
         val step3Processor: View = view.findViewById(R.id.step3Processor)
         val step4Processor: View = view.findViewById(R.id.step4Processor)
-        val btnPreviousProcessor: Button = view.findViewById(R.id.btnPreviousProcessor)
-        val btnNextProcessor: Button = view.findViewById(R.id.btnNextProcessor)
+
+        val btnFeedbackProcessor: Button = view.findViewById(R.id.btnFeedbackProcessor)
+        val btnFeedbackSurveyor: Button = view.findViewById(R.id.btnFeedbackSurveyor)
+
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): JobsViewHolder {
@@ -165,8 +163,6 @@ class BookingHistoryAdapter(private val jobs: MutableList<OnGoingJobs>, private 
                         holder.propertyTypeLabel.visibility = View.GONE
                         holder.propertyLabel.visibility = View.GONE
                         holder.cardViewProcessor.visibility = View.VISIBLE
-                        holder.btnNextProcessor.visibility = View.VISIBLE
-                        holder.btnPreviousProcessor.visibility = View.VISIBLE
                     }
 
                     "Surveyor" -> {
@@ -184,8 +180,6 @@ class BookingHistoryAdapter(private val jobs: MutableList<OnGoingJobs>, private 
                         holder.propertyTypeLabel.visibility = View.VISIBLE
                         holder.propertyLabel.visibility = View.VISIBLE
                         holder.cardViewSurveyor.visibility = View.VISIBLE
-                        holder.btnPreviousSurveyor.visibility = View.VISIBLE
-                        holder.btnNextSurveyor.visibility = View.VISIBLE
 
                     }
 
@@ -204,12 +198,70 @@ class BookingHistoryAdapter(private val jobs: MutableList<OnGoingJobs>, private 
             }
 
         if (currentUserId != null) {
-            // Proceed with your logic using currentUserId
-            //updateButtonsBasedOnStatus(job, position, holder, currentUserId)
+            firestore.collection("users").document(currentUserId)
+                .get()
+                .addOnSuccessListener { userSnapshot ->
+                    userType = userSnapshot.getString("user_type")
+
+                    // Check the userType and adjust the visibility accordingly
+                    when (userType) {
+                        "Processor" -> {
+                            // If the user is a "Processor", hide contract price and downpayment
+                            holder.contractPrice.visibility = View.GONE
+                            holder.downpayment.visibility = View.GONE
+                            holder.labelDown.visibility = View.GONE
+                            holder.labelPrice.visibility = View.GONE
+                            holder.labelAge.visibility = View.VISIBLE
+                            holder.age.visibility = View.VISIBLE
+                            holder.labelTin.visibility = View.VISIBLE
+                            holder.tin.visibility = View.VISIBLE
+                            holder.purposeLabel.visibility = View.GONE
+                            holder.purposeOfSurvey.visibility = View.GONE
+                            holder.propertyTypeLabel.visibility = View.GONE
+                            holder.propertyLabel.visibility = View.GONE
+                            holder.cardViewProcessor.visibility = View.VISIBLE
+                        }
+
+                        "Surveyor" -> {
+                            // If the user is a "Surveyor", show contract price and downpayment
+                            holder.contractPrice.visibility = View.VISIBLE
+                            holder.downpayment.visibility = View.VISIBLE
+                            holder.labelDown.visibility = View.VISIBLE
+                            holder.labelPrice.visibility = View.VISIBLE
+                            holder.labelAge.visibility = View.GONE
+                            holder.age.visibility = View.GONE
+                            holder.labelTin.visibility = View.GONE
+                            holder.tin.visibility = View.GONE
+                            holder.purposeLabel.visibility = View.VISIBLE
+                            holder.purposeOfSurvey.visibility = View.VISIBLE
+                            holder.propertyTypeLabel.visibility = View.VISIBLE
+                            holder.propertyLabel.visibility = View.VISIBLE
+                            holder.cardViewSurveyor.visibility = View.VISIBLE
+
+                        }
+                        "Landowner" -> {
+                           holder.btnFeedbackProcessor.visibility = View.VISIBLE
+                            holder.btnFeedbackSurveyor.visibility = View.VISIBLE
+                        }
+
+                        else -> {
+                            // Default case if there is no specific userType
+                            holder.contractPrice.visibility = View.VISIBLE
+                            holder.downpayment.visibility = View.VISIBLE
+                            holder.labelDown.visibility = View.VISIBLE
+                            holder.labelPrice.visibility = View.VISIBLE
+                        }
+                    }
+                }
+                .addOnFailureListener { e ->
+                    // Handle the error if the user document can't be fetched
+                    Log.e("BookingAdapter", "Error fetching user data: ${e.message}")
+                }
         } else {
             // Handle the case where the user is not signed in
             Log.e("ConfirmBooking", "No user is currently signed in.")
         }
+
         // Bind job details
 
         holder.startDate.text = "Start: ${formatTimestamp(job.startDateTime)}"
@@ -274,59 +326,226 @@ class BookingHistoryAdapter(private val jobs: MutableList<OnGoingJobs>, private 
                 .addToBackStack(null)
                 .commit()
         }
-        holder.btnNextSurveyor.setOnClickListener {
-            val bookingId = jobs[position].bookingId
-            var currentStatus = jobs[position].documentStatus // Get current status from the list
 
-            val nextStatus = getNextStep(currentStatus)
-
-            // Save the new status to Firestore and update the UI immediately
-            saveDocumentStatus(bookingId, nextStatus, holder, position)
-
-            // Update the current status in the local list immediately
-            jobs[position].documentStatus = nextStatus
-
-            // Also update the step color immediately for the next status
-            updateStepColor(nextStatus, holder, position)
-        }
         updateStepColor(job.documentStatus, holder, position)
-        holder.btnPreviousSurveyor.setOnClickListener {
-            val bookingId = jobs[position].bookingId
-            var currentStatus = jobs[position].documentStatus
+        updateStepColorProcessor(job.documentStatus, holder, position)
 
-            val previousStatus = getPreviousStep(currentStatus)
+        holder.btnFeedbackProcessor.setOnClickListener {
+            val context = it.context
+            val dialogView = LayoutInflater.from(context).inflate(R.layout.dialog_feedback, null)
 
-            // Save to Firestore
-            saveDocumentStatus(bookingId, previousStatus, holder, position)
+            val ratingBar = dialogView.findViewById<RatingBar>(R.id.ratingBar)
+            val feedbackEditText = dialogView.findViewById<EditText>(R.id.feedbackEditText)
 
-            // Update local data immediately
-            jobs[position].documentStatus = previousStatus
+            AlertDialog.Builder(context)
+                .setTitle("Leave Feedback")
+                .setView(dialogView)
+                .setPositiveButton("Submit") { dialog, _ ->
+                    val rating = ratingBar.rating
+                    val feedbackText = feedbackEditText.text.toString()
 
-            // Update UI colors immediately
-            updateStepColor(previousStatus, holder, position)
+                    val userId = FirebaseAuth.getInstance().currentUser?.uid
+                    val bookingId = job.bookingId
+                    val bookedUserId = job.bookedUserId
+                    val landOwnerUserId = job.landOwnerUserId
+
+                    if (userId != null && bookingId.isNotEmpty()) {
+                        val feedbackData = hashMapOf(
+                            "userId" to userId,
+                            "bookedUserId" to bookedUserId,
+                            "landOwnerUserId" to landOwnerUserId,
+                            "bookingId" to bookingId,
+                            "rating" to rating,
+                            "feedback" to feedbackText,
+                            "timestamp" to com.google.firebase.Timestamp.now()
+                        )
+
+                        val db = FirebaseFirestore.getInstance()
+
+                        db.collection("Feedback")
+                            .add(feedbackData)
+                            .addOnSuccessListener {
+                                Toast.makeText(context, "Feedback submitted!", Toast.LENGTH_SHORT).show()
+                                holder.btnFeedbackProcessor.visibility = View.GONE
+                                // ✅ Calculate average rating
+                                db.collection("Feedback")
+                                    .whereEqualTo("bookedUserId", bookedUserId)
+                                    .get()
+                                    .addOnSuccessListener { snapshot ->
+                                        var totalRating = 0f
+                                        val count = snapshot.size()
+
+                                        for (doc in snapshot) {
+                                            val r = doc.getDouble("rating")?.toFloat() ?: 0f
+                                            totalRating += r
+                                        }
+
+                                        if (count > 0) {
+                                            val averageRating = totalRating / count
+
+                                            // ✅ Update user's ratings
+                                            db.collection("users")
+                                                .document(bookedUserId)
+                                                .update("ratings", averageRating)
+                                                .addOnSuccessListener {
+                                                    Log.d("RatingUpdate", "User rating updated to $averageRating")
+                                                }
+                                                .addOnFailureListener { e ->
+                                                    Log.e("RatingUpdate", "Rating update failed: ${e.message}")
+                                                }
+                                        }
+                                    }
+                                    .addOnFailureListener { e ->
+                                        Log.e("RatingQuery", "Failed to fetch feedbacks: ${e.message}")
+                                    }
+                            }
+                            .addOnFailureListener { e ->
+                                Toast.makeText(context, "Failed: ${e.message}", Toast.LENGTH_SHORT).show()
+                            }
+                    }
+
+                    dialog.dismiss()
+                }
+                .setNegativeButton("Cancel") { dialog, _ ->
+                    dialog.dismiss()
+                }
+                .show()
         }
 
-        holder.btnNextProcessor.setOnClickListener {
-            val bookingId = jobs[position].bookingId
-            var currentStatus = jobs[position].documentStatus // Get current status from the list
 
-            val nextStatus = getNextStepProcessor(currentStatus)
+        val bookingId = job.bookingId
 
-            // Save the new status to Firestore and update the UI immediately
-            saveDocumentStatusProcessor(bookingId, nextStatus, holder, position)
+        if (currentUserId != null && bookingId.isNotEmpty()) {
+            FirebaseFirestore.getInstance()
+                .collection("Feedback")
+                .whereEqualTo("landOwnerUserId", currentUserId)
+                .whereEqualTo("bookingId", bookingId)
+                .get()
+                .addOnSuccessListener { snapshot ->
+                    if (!snapshot.isEmpty) {
+                        // ✅ Feedback already exists for this booking — hide button
+                        holder.btnFeedbackSurveyor.visibility = View.GONE
+                    } else {
+                        // ✅ No feedback yet — show button
+                        holder.btnFeedbackSurveyor.visibility = View.VISIBLE
+                    }
+                }
+                .addOnFailureListener {
+                    // Optional: log error
+                    holder.btnFeedbackSurveyor.visibility = View.VISIBLE // Default to visible on error
+                }
+        }
 
-            // Update the current status in the local list immediately
-            jobs[position].documentStatus = nextStatus
 
-            // Also update the step color immediately for the next status
-            updateStepColorProcessor(nextStatus, holder, position)
+        if (currentUserId != null && bookingId.isNotEmpty()) {
+            FirebaseFirestore.getInstance()
+                .collection("Feedback")
+                .whereEqualTo("landOwnerUserId", currentUserId)
+                .whereEqualTo("bookingId", bookingId)
+                .get()
+                .addOnSuccessListener { snapshot ->
+                    if (!snapshot.isEmpty) {
+                        // ✅ Feedback already exists for this booking — hide button
+                        holder.btnFeedbackProcessor.visibility = View.GONE
+                    } else {
+                        // ✅ No feedback yet — show button
+                        holder.btnFeedbackProcessor.visibility = View.VISIBLE
+                    }
+                }
+                .addOnFailureListener {
+                    // Optional: log error
+                    holder.btnFeedbackProcessor.visibility = View.VISIBLE // Default to visible on error
+                }
         }
 
 
 
+        holder.btnFeedbackSurveyor.setOnClickListener {
+            val context = it.context
+            val dialogView = LayoutInflater.from(context).inflate(R.layout.dialog_feedback, null)
 
+            val ratingBar = dialogView.findViewById<RatingBar>(R.id.ratingBar)
+            val feedbackEditText = dialogView.findViewById<EditText>(R.id.feedbackEditText)
 
+            AlertDialog.Builder(context)
+                .setTitle("Leave Feedback")
+                .setView(dialogView)
+                .setPositiveButton("Submit") { dialog, _ ->
+                    val rating = ratingBar.rating
+                    val feedbackText = feedbackEditText.text.toString()
+
+                    val userId = FirebaseAuth.getInstance().currentUser?.uid
+                    val bookingId = job.bookingId
+                    val bookedUserId = job.bookedUserId
+                    val landOwnerUserId = job.landOwnerUserId
+
+                    if (userId != null && bookingId.isNotEmpty()) {
+                        val feedbackData = hashMapOf(
+                            "userId" to userId,
+                            "bookedUserId" to bookedUserId,
+                            "landOwnerUserId" to landOwnerUserId,
+                            "bookingId" to bookingId,
+                            "rating" to rating,
+                            "feedback" to feedbackText,
+                            "timestamp" to com.google.firebase.Timestamp.now()
+                        )
+
+                        val db = FirebaseFirestore.getInstance()
+
+                        db.collection("Feedback")
+                            .add(feedbackData)
+                            .addOnSuccessListener {
+                                Toast.makeText(context, "Feedback submitted!", Toast.LENGTH_SHORT).show()
+                                holder.btnFeedbackSurveyor.visibility = View.GONE
+
+                                // ✅ Calculate average rating
+                                db.collection("Feedback")
+                                    .whereEqualTo("bookedUserId", bookedUserId)
+                                    .get()
+                                    .addOnSuccessListener { snapshot ->
+                                        var totalRating = 0f
+                                        val count = snapshot.size()
+
+                                        for (doc in snapshot) {
+                                            val r = doc.getDouble("rating")?.toFloat() ?: 0f
+                                            totalRating += r
+                                        }
+
+                                        if (count > 0) {
+                                            val averageRating = totalRating / count
+
+                                            // ✅ Update user's ratings
+                                            db.collection("users")
+                                                .document(bookedUserId)
+                                                .update("ratings", averageRating)
+                                                .addOnSuccessListener {
+                                                    Log.d("RatingUpdate", "User rating updated to $averageRating")
+                                                }
+                                                .addOnFailureListener { e ->
+                                                    Log.e("RatingUpdate", "Rating update failed: ${e.message}")
+                                                }
+                                        }
+                                    }
+                                    .addOnFailureListener { e ->
+                                        Log.e("RatingQuery", "Failed to fetch feedbacks: ${e.message}")
+                                    }
+                            }
+                            .addOnFailureListener { e ->
+                                Toast.makeText(context, "Failed: ${e.message}", Toast.LENGTH_SHORT).show()
+                            }
+                    }
+
+                    dialog.dismiss()
+                }
+                .setNegativeButton("Cancel") { dialog, _ ->
+                    dialog.dismiss()
+                }
+                .show()
+        }
     }
+
+
+
 
     override fun getItemCount(): Int = jobs.size
 
@@ -337,127 +556,7 @@ class BookingHistoryAdapter(private val jobs: MutableList<OnGoingJobs>, private 
     interface OnTabNavigationListener {
         fun navigateToTab(tabIndex: Int)
     }
-    private fun getPreviousStep(currentStatus: String): String {
-        return when (currentStatus) {
-            "Submit Blueprint" -> "Prepare Blueprint"
-            "Follow-up Approval" -> "Submit Blueprint"
-            "Ready to Claim" -> "Follow-up Approval"
-            "Completed" -> "Ready to Claim"
-            else -> "Prepare Blueprint" // If it's the first step or unknown, keep it the same
-        }
-    }
-
-    private fun getNextStep(currentStatus: String): String {
-        return when (currentStatus) {
-            "Prepare Blueprint" -> "Submit Blueprint"
-            "Submit Blueprint" -> "Follow-up Approval"
-            "Follow-up Approval" -> "Ready to Claim"
-            "Ready to Claim" -> "Completed"
-            else -> "Prepare Blueprint"
-        }
-    }
-    private fun getNextStepProcessor(currentStatus: String): String {
-        return when (currentStatus) {
-            "Prepare the Tax Declaration" -> "Approval Department Head"
-            "Approval Department Head" -> "Ready to Claim"
-            "Ready to Claim" -> "Completed"
-            else -> "Prepare the Tax Declaration"
-        }
-    }
-
-
-    private fun saveDocumentStatus(bookingId: String, newStatus: String, holder: JobsViewHolder, position: Int) {
-        val db = FirebaseFirestore.getInstance()
-        val bookingRef = db.collection("bookings").document(bookingId)
-
-        // Update Firestore with the new document status
-        bookingRef.update("documentStatus", newStatus)
-            .addOnSuccessListener {
-                // Update the color of the steps based on the new status
-                updateStepColor(newStatus, holder, position)
-            }
-            .addOnFailureListener { e ->
-                Log.e("Firestore", "Error updating document status", e)
-            }
-    }
-    private fun saveDocumentStatusProcessor(bookingId: String, newStatus: String, holder: JobsViewHolder, position: Int) {
-        val db = FirebaseFirestore.getInstance()
-        val bookingRef = db.collection("bookings").document(bookingId)
-
-        // Update Firestore with the new document status
-        bookingRef.update("documentStatus", newStatus)
-            .addOnSuccessListener {
-                // Update the color of the steps based on the new status
-                updateStepColor(newStatus, holder, position)
-            }
-            .addOnFailureListener { e ->
-                Log.e("Firestore", "Error updating document status", e)
-            }
-    }
-
-    private fun updateStepColor(status: String, holder: JobsViewHolder, position: Int) {
-        val defaultColor = ContextCompat.getColor(context, R.color.DarkYellow)
-        val activeColor = ContextCompat.getColor(context, R.color.YellowGreen)
-
-        // Reset all to default color first
-        holder.step1Processor.setBackgroundColor(defaultColor)
-        holder.step2Processor.setBackgroundColor(defaultColor)
-        holder.step3Processor.setBackgroundColor(defaultColor)
-        holder.step4Processor.setBackgroundColor(defaultColor)
-
-        // Set progress based on current status
-        when (status) {
-            "Prepare the Tax Declaration" -> {
-                holder.step1Processor.setBackgroundColor(activeColor)
-            }
-
-            "Approval Department Head" -> {
-                holder.step1Processor.setBackgroundColor(activeColor)
-                holder.step2Processor.setBackgroundColor(activeColor)
-            }
-
-            "Ready to Claim" -> {
-                holder.step1Processor.setBackgroundColor(activeColor)
-                holder.step2Processor.setBackgroundColor(activeColor)
-                holder.step3Processor.setBackgroundColor(activeColor)
-            }
-
-            "Completed" -> {
-                // Update all steps to active color
-                holder.step1Processor.setBackgroundColor(activeColor)
-                holder.step2Processor.setBackgroundColor(activeColor)
-                holder.step3Processor.setBackgroundColor(activeColor)
-                holder.step4Processor.setBackgroundColor(activeColor)
-
-                // Ensure the jobs list is not empty before accessing the position
-                if (position >= 0 && position < jobs.size) {
-                    val bookingId = jobs[position].bookingId
-
-                    // Proceed with updating Firestore document
-                    val db = FirebaseFirestore.getInstance()
-                    val updates = mapOf(
-                        "stage" to "Completed",
-                        "status" to "Completed"
-                    )
-
-                    db.collection("bookings")
-                        .document(bookingId)
-                        .update(updates)
-                        .addOnSuccessListener {
-                            // Successfully updated Firestore, navigate to the history fragment
-                            navigateToHistoryFragment()
-                        }
-                        .addOnFailureListener { e ->
-                            Log.e("Firestore", "Error updating booking status", e)
-                        }
-                } else {
-                    // Handle the case where the jobs list is empty or position is invalid
-                    Log.e("OnGoingAdapter", "Invalid position or jobs list is empty")
-                }
-            }
-        }
-    }
-    private fun updateStepColorProcessor(status: String, holder: JobsViewHolder, position: Int) {
+    private fun updateStepColor(status: String, holder: BookingHistoryAdapter.JobsViewHolder, position: Int) {
         val defaultColor = ContextCompat.getColor(context, R.color.DarkYellow)
         val activeColor = ContextCompat.getColor(context, R.color.YellowGreen)
 
@@ -499,35 +598,77 @@ class BookingHistoryAdapter(private val jobs: MutableList<OnGoingJobs>, private 
                 holder.step3.setBackgroundColor(activeColor)
                 holder.step4.setBackgroundColor(activeColor)
                 holder.step5.setBackgroundColor(activeColor)
-
-                // Ensure the jobs list is not empty before accessing the position
-                if (position >= 0 && position < jobs.size) {
-                    val bookingId = jobs[position].bookingId
-
-                    // Proceed with updating Firestore document
-                    val db = FirebaseFirestore.getInstance()
-                    val updates = mapOf(
-                        "stage" to "Completed",
-                        "status" to "Completed"
-                    )
-
-                    db.collection("bookings")
-                        .document(bookingId)
-                        .update(updates)
-                        .addOnSuccessListener {
-                            // Successfully updated Firestore, navigate to the history fragment
-                            navigateToHistoryFragment()
-                        }
-                        .addOnFailureListener { e ->
-                            Log.e("Firestore", "Error updating booking status", e)
-                        }
-                } else {
-                    // Handle the case where the jobs list is empty or position is invalid
-                    Log.e("OnGoingAdapter", "Invalid position or jobs list is empty")
-                }
             }
         }
     }
+    private fun updateStepColorProcessor(status: String, holder: BookingHistoryAdapter.JobsViewHolder, position: Int) {
+        val defaultColor = ContextCompat.getColor(context, R.color.DarkYellow)
+        val activeColor = ContextCompat.getColor(context, R.color.YellowGreen)
+
+        // Reset all to default color first
+        holder.step1Processor.setBackgroundColor(defaultColor)
+        holder.step2Processor.setBackgroundColor(defaultColor)
+        holder.step3Processor.setBackgroundColor(defaultColor)
+        holder.step4Processor.setBackgroundColor(defaultColor)
+
+        // Set progress based on current status
+        when (status) {
+            "Prepare the Tax Declaration" -> {
+                holder.step1Processor.setBackgroundColor(activeColor)
+            }
+
+            "Approval Department Head" -> {
+                holder.step1Processor.setBackgroundColor(activeColor)
+                holder.step2Processor.setBackgroundColor(activeColor)
+            }
+
+            "Ready to Claim" -> {
+                holder.step1Processor.setBackgroundColor(activeColor)
+                holder.step2Processor.setBackgroundColor(activeColor)
+                holder.step3Processor.setBackgroundColor(activeColor)
+            }
+
+            "Completed" -> {
+                // Update all steps to active color
+                holder.step1Processor.setBackgroundColor(activeColor)
+                holder.step2Processor.setBackgroundColor(activeColor)
+                holder.step3Processor.setBackgroundColor(activeColor)
+                holder.step4Processor.setBackgroundColor(activeColor)
+
+
+            }
+        }
+    }
+    private fun getPreviousStep(currentStatus: String): String {
+        return when (currentStatus) {
+            "Submit Blueprint" -> "Prepare Blueprint"
+            "Follow-up Approval" -> "Submit Blueprint"
+            "Ready to Claim" -> "Follow-up Approval"
+            "Completed" -> "Ready to Claim"
+            else -> "Prepare Blueprint" // If it's the first step or unknown, keep it the same
+        }
+    }
+
+    private fun getNextStep(currentStatus: String): String {
+        return when (currentStatus) {
+            "Prepare Blueprint" -> "Submit Blueprint"
+            "Submit Blueprint" -> "Follow-up Approval"
+            "Follow-up Approval" -> "Ready to Claim"
+            "Ready to Claim" -> "Completed"
+            else -> "Prepare Blueprint"
+        }
+    }
+    private fun getNextStepProcessor(currentStatus: String): String {
+        return when (currentStatus) {
+            "Prepare the Tax Declaration" -> "Approval Department Head"
+            "Approval Department Head" -> "Ready to Claim"
+            "Ready to Claim" -> "Completed"
+            else -> "Prepare the Tax Declaration"
+        }
+    }
+
+
+
 
     private fun navigateToHistoryFragment(){
         val fragmentTransaction = (context as? AppCompatActivity)?.supportFragmentManager?.beginTransaction()
@@ -557,7 +698,7 @@ class BookingHistoryAdapter(private val jobs: MutableList<OnGoingJobs>, private 
         }
     }
 
-    fun updateJobs(newJobs: List<OnGoingJobs>) {
+    fun updateJobs(newJobs: List<BookingHistory>) {
         jobs.clear()
         jobs.addAll(newJobs)
         notifyDataSetChanged()

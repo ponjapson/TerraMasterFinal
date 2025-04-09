@@ -203,35 +203,76 @@ class OnGoingAdapter(private val jobs: MutableList<OnGoingJobs>, private val con
                 Log.e("BookingAdapter", "Error fetching user data: ${e.message}")
             }
 
-        firestore.collection("users").document(loggedInUserId)
-            .get()
-            .addOnSuccessListener { userSnapshot ->
-                userType = userSnapshot.getString("user_type")
+        if (currentUserId != null) {
+            firestore.collection("users").document(currentUserId)
+                .get()
+                .addOnSuccessListener { userSnapshot ->
+                    userType = userSnapshot.getString("user_type")
 
-                // Check the userType and adjust the visibility accordingly
-                when (userType) {
-                    "Landowner" -> {
+                    // Check the userType and adjust the visibility accordingly
+                    when (userType) {
+                        "Processor" -> {
+                            // If the user is a "Processor", hide contract price and downpayment
+                            holder.contractPrice.visibility = View.GONE
+                            holder.downpayment.visibility = View.GONE
+                            holder.labelDown.visibility = View.GONE
+                            holder.labelPrice.visibility = View.GONE
+                            holder.labelAge.visibility = View.VISIBLE
+                            holder.age.visibility = View.VISIBLE
+                            holder.labelTin.visibility = View.VISIBLE
+                            holder.tin.visibility = View.VISIBLE
+                            holder.purposeLabel.visibility = View.GONE
+                            holder.purposeOfSurvey.visibility = View.GONE
+                            holder.propertyTypeLabel.visibility = View.GONE
+                            holder.propertyLabel.visibility = View.GONE
+                            holder.cardViewProcessor.visibility = View.VISIBLE
+                            holder.btnNextProcessor.visibility = View.VISIBLE
+                            holder.btnPreviousProcessor.visibility = View.VISIBLE
+                        }
 
-                        holder.btnNextProcessor.visibility = View.GONE
-                        holder.btnPreviousProcessor.visibility = View.GONE
-                    }
+                        "Surveyor" -> {
+                            // If the user is a "Surveyor", show contract price and downpayment
+                            holder.contractPrice.visibility = View.VISIBLE
+                            holder.downpayment.visibility = View.VISIBLE
+                            holder.labelDown.visibility = View.VISIBLE
+                            holder.labelPrice.visibility = View.VISIBLE
+                            holder.labelAge.visibility = View.GONE
+                            holder.age.visibility = View.GONE
+                            holder.labelTin.visibility = View.GONE
+                            holder.tin.visibility = View.GONE
+                            holder.purposeLabel.visibility = View.VISIBLE
+                            holder.purposeOfSurvey.visibility = View.VISIBLE
+                            holder.propertyTypeLabel.visibility = View.VISIBLE
+                            holder.propertyLabel.visibility = View.VISIBLE
+                            holder.cardViewSurveyor.visibility = View.VISIBLE
+                            holder.btnPreviousSurveyor.visibility = View.VISIBLE
+                            holder.btnNextSurveyor.visibility = View.VISIBLE
 
+                        }
+                        "Landowner" -> {
+                            holder.btnPreviousSurveyor.visibility = View.GONE
+                            holder.btnNextSurveyor.visibility = View.GONE
+                            holder.btnNextProcessor.visibility = View.GONE
+                            holder.btnPreviousProcessor.visibility = View.GONE
+                        }
 
-
-                    else -> {
-                        // Default case if there is no specific userType
-                        holder.contractPrice.visibility = View.VISIBLE
-                        holder.downpayment.visibility = View.VISIBLE
-                        holder.labelDown.visibility = View.VISIBLE
-                        holder.labelPrice.visibility = View.VISIBLE
+                        else -> {
+                            // Default case if there is no specific userType
+                            holder.contractPrice.visibility = View.VISIBLE
+                            holder.downpayment.visibility = View.VISIBLE
+                            holder.labelDown.visibility = View.VISIBLE
+                            holder.labelPrice.visibility = View.VISIBLE
+                        }
                     }
                 }
-            }
-            .addOnFailureListener { e ->
-                // Handle the error if the user document can't be fetched
-                Log.e("BookingAdapter", "Error fetching user data: ${e.message}")
-            }
-
+                .addOnFailureListener { e ->
+                    // Handle the error if the user document can't be fetched
+                    Log.e("BookingAdapter", "Error fetching user data: ${e.message}")
+                }
+        } else {
+            // Handle the case where the user is not signed in
+            Log.e("ConfirmBooking", "No user is currently signed in.")
+        }
         if (currentUserId != null) {
             // Proceed with your logic using currentUserId
             //updateButtonsBasedOnStatus(job, position, holder, currentUserId)
@@ -352,11 +393,6 @@ class OnGoingAdapter(private val jobs: MutableList<OnGoingJobs>, private val con
             // Also update the step color immediately for the next status
             updateStepColorProcessor(nextStatus, holder, position)
         }
-
-
-
-
-
     }
 
     override fun getItemCount(): Int = jobs.size

@@ -17,7 +17,7 @@ import com.google.firebase.firestore.Query
 class FragmentBookingHistory : Fragment(), OnPaymentClickListener {
 
     private lateinit var recyclerView: RecyclerView
-    private var pendingAdapter: BookingHistoryAdapter? = null  // Use nullable type initially
+    private var pendingAdapter: BookingHistoryAdapter? = null
     private val firestore = FirebaseFirestore.getInstance()
     private val auth = FirebaseAuth.getInstance()
 
@@ -30,108 +30,82 @@ class FragmentBookingHistory : Fragment(), OnPaymentClickListener {
         recyclerView = view.findViewById(R.id.recyclerView)
         recyclerView.layoutManager = LinearLayoutManager(context)
 
-        // Initialize adapter only once the view is created
         pendingAdapter = BookingHistoryAdapter(mutableListOf(), requireContext(), this, requireActivity())
         recyclerView.adapter = pendingAdapter
 
-        val userId = auth.currentUser?.uid
-        if (userId != null) {
-            loadPendingJobs(userId)
+        auth.currentUser?.uid?.let { userId ->
+            loadCompletedJobs(userId)
         }
 
         return view
     }
-    private fun loadPendingJobs(userId: String) {
-        val pendingJobs = mutableListOf<OnGoingJobs>()
-        var jobCount = 0 // Track completed address conversions
 
+    private fun loadCompletedJobs(userId: String) {
+        val allJobs = mutableListOf<BookingHistory>()
+
+        // First fetch: as booked user
         firestore.collection("bookings")
             .whereEqualTo("bookedUserId", userId)
-            .whereEqualTo("stage", "Completed") // ✅ Only fetch "request" stage
+            .whereEqualTo("stage", "Completed")
             .orderBy("timestamp", Query.Direction.DESCENDING)
-            .addSnapshotListener { bookedUserSnapshots, error ->
-                if (error != null) {
-                    Log.e("RequestTabFragment", "Error listening for artist requests: ${error.message}")
-                    return@addSnapshotListener
-                }
-
-                pendingJobs.clear() // ✅ Clear list before adding new items
-                jobCount = 0 // Reset job count
-
-                bookedUserSnapshots?.let { snapshots ->
-                    if (snapshots.isEmpty) {
-                        fetchBookingUserJobs(userId, pendingJobs) // If no jobs, check for landowner jobs
-                        return@let
-                    }
-
-                    snapshots.documents.forEach { doc ->
-                        val job = createJobFromDocument(doc)
-
-                        // ✅ Ensure job is still in "request" stage before adding
-                        if (job.stage != "Completed") return@forEach
-
-                        val pdfUrl = doc.getString("pdfUrl")
-                        job.pdfFileName = pdfUrl?.let { extractFileNameFromUrl(it) }
-                        job.pdfUrl = pdfUrl ?: ""
-
-                        convertCoordinatesToAddress(job.latitude, job.longitude) { address ->
-                            job.address = address
-                            pendingJobs.add(job)
-                            jobCount++
-
-                            if (jobCount == snapshots.size()) {
-                                fetchBookingUserJobs(userId, pendingJobs)
+            .get()
+            .addOnSuccessListener { bookedUserSnapshots ->
+                processJobDocuments(bookedUserSnapshots.documents, allJobs) {
+                    // Second fetch: as landowner
+                    firestore.collection("bookings")
+                        .whereEqualTo("landOwnerUserId", userId)
+                        .whereEqualTo("stage", "Completed")
+                        .orderBy("timestamp", Query.Direction.DESCENDING)
+                        .get()
+                        .addOnSuccessListener { landOwnerSnapshots ->
+                            processJobDocuments(landOwnerSnapshots.documents, allJobs) {
+                                updateAdapter(allJobs)
                             }
                         }
-                    }
                 }
+            }
+            .addOnFailureListener { e ->
+                Log.e("BookingHistory", "Error fetching bookings: ${e.message}")
             }
     }
 
-    private fun fetchBookingUserJobs(userId: String, pendingJobs: MutableList<OnGoingJobs>) {
-        var jobCount = 0 // Track completed address conversions
+    private fun processJobDocuments(
+        documents: List<DocumentSnapshot>,
+        jobsList: MutableList<BookingHistory>,
+        onComplete: () -> Unit
+    ) {
+        if (documents.isEmpty()) {
+            onComplete()
+            return
+        }
 
-        firestore.collection("bookings")
-            .whereEqualTo("landOwnerUserId", userId)
-            .whereEqualTo("stage", "Completed") // ✅ Only fetch "request" stage
-            .orderBy("timestamp", Query.Direction.DESCENDING)
-            .addSnapshotListener { bookingUserSnapshots, clientError ->
-                if (clientError != null) {
-                    Log.e("RequestTabFragment", "Error listening for client requests: ${clientError.message}")
-                    return@addSnapshotListener
-                }
+        var completedCount = 0
 
-                bookingUserSnapshots?.let { snapshots ->
-                    if (snapshots.isEmpty) {
-                        updateAdapter(pendingJobs) // ✅ No new jobs, update adapter immediately
-                        return@let
-                    }
+        for (doc in documents) {
+            val job = createJobFromDocument(doc)
 
-                    snapshots.documents.forEach { doc ->
-                        val job = createJobFromDocument(doc)
+            val pdfUrl = doc.getString("pdfUrl")
+            job.pdfFileName = pdfUrl?.let { extractFileNameFromUrl(it) }
+            job.pdfUrl = pdfUrl ?: ""
 
-                        // ✅ Ensure job is still in "request" stage before adding
-                        if (job.stage != "Completed") return@forEach
-
-                        val pdfUrl = doc.getString("pdfUrl")
-                        job.pdfFileName = pdfUrl?.let { extractFileNameFromUrl(it) }
-                        job.pdfUrl = pdfUrl ?: ""
-
-                        convertCoordinatesToAddress(job.latitude, job.longitude) { address ->
-                            job.address = address
-                            pendingJobs.add(job)
-                            jobCount++
-
-                            if (jobCount == snapshots.size()) {
-                                updateAdapter(pendingJobs)
-                            }
-                        }
-                    }
+            convertCoordinatesToAddress(job.latitude, job.longitude) { address ->
+                job.address = address
+                jobsList.add(job)
+                completedCount++
+                if (completedCount == documents.size) {
+                    onComplete()
                 }
             }
+        }
     }
-    private fun createJobFromDocument(doc: DocumentSnapshot): OnGoingJobs {
-        return OnGoingJobs(
+
+    private fun updateAdapter(jobs: MutableList<BookingHistory>) {
+        pendingAdapter?.updateJobs(jobs)
+        pendingAdapter?.notifyDataSetChanged()
+    }
+
+    private fun createJobFromDocument(doc: DocumentSnapshot): BookingHistory {
+        return BookingHistory(
             bookingId = doc.id,
             bookedUserId = doc.getString("bookedUserId") ?: "",
             landOwnerUserId = doc.getString("landOwnerUserId") ?: "",
@@ -143,7 +117,7 @@ class FragmentBookingHistory : Fragment(), OnPaymentClickListener {
             stage = doc.getString("stage") ?: "",
             latitude = doc.getDouble("latitude") ?: 0.0,
             longitude = doc.getDouble("longitude") ?: 0.0,
-            address = "", // Address will be updated later
+            address = "",
             tinNumber = doc.getString("tinNumber") ?: "",
             age = doc.getLong("age")?.toInt()?.toString() ?: "",
             propertyType = doc.getString("propertyType") ?: "",
@@ -154,36 +128,26 @@ class FragmentBookingHistory : Fragment(), OnPaymentClickListener {
         )
     }
 
-    private fun updateAdapter(jobs: MutableList<OnGoingJobs>) {
-        pendingAdapter?.updateJobs(jobs)
-        pendingAdapter?.notifyDataSetChanged()
-    }
-
     private fun extractFileNameFromUrl(url: String?): String {
         return Uri.parse(url).lastPathSegment ?: "Unknown File"
     }
 
-
     private fun convertCoordinatesToAddress(lat: Double, lon: Double, callback: (String) -> Unit) {
-        val context = context ?: return // Avoid crash if fragment is not attached
+        val context = context ?: return
 
         val geocoder = OpenStreetMapGeocoder(context)
         geocoder.getAddressFromCoordinates(lat, lon) { address ->
-            Log.d("RequestTabFragment", "Geocoding result: $address for coordinates: ($lat, $lon)")
-
-            // Ensure UI update happens on the main thread and only if fragment is still attached
             activity?.runOnUiThread {
-                if (isAdded) { // Prevent crash if fragment is detached
+                if (isAdded) {
                     callback(address ?: "Unknown Address")
                 } else {
-                    Log.e("convertCoordinatesToAddress", "Fragment not attached, skipping callback")
+                    Log.e("Geocoder", "Fragment not attached, skipping address callback")
                 }
             }
         }
     }
 
     override fun onPayNowClicked(bookingId: String) {
-        // Open the PaymentFragment and pass the bookingId as an argument
         val paymentFragment = PaymentFragment.newInstance(bookingId)
         parentFragmentManager.beginTransaction()
             .replace(R.id.fragment_container, paymentFragment)
@@ -192,12 +156,10 @@ class FragmentBookingHistory : Fragment(), OnPaymentClickListener {
     }
 
     override fun onPayRemaining(bookingId: String) {
-        // Open the PaymentFragment and pass the bookingId as an argument
         val paymentFragment = PaymentRemainingBalance.newInstance(bookingId)
         parentFragmentManager.beginTransaction()
             .replace(R.id.fragment_container, paymentFragment)
             .addToBackStack(null)
             .commit()
     }
-
 }

@@ -432,6 +432,7 @@
                 </LinearLayout>
 
             </LinearLayout>
+
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -439,39 +440,20 @@
                 android:gravity="center"
                 android:layout_marginTop="16dp"
                 android:padding="8dp"
-                android:weightSum="2">
-
-                <!-- Previous Button -->
-                <Button
-                    android:id="@+id/btnPreviousSurveyor"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:text="Previous"
-                    android:textColor="@android:color/white"
-                    android:layout_marginEnd="16dp"
-                    android:backgroundTint="@color/main"
-                    android:paddingHorizontal="24dp"
-                    android:paddingVertical="12dp"
-                    android:layout_gravity="start"
-                    android:layout_weight="1"
-                    android:visibility="gone"/>
+                android:weightSum="1">
 
                 <!-- Next Button -->
                 <Button
-                    android:id="@+id/btnNextSurveyor"
-                    android:layout_width="0dp"
+                    android:id="@+id/btnFeedbackSurveyor"
+                    android:layout_width="150dp"
                     android:layout_height="wrap_content"
-                    android:text="Next"
+                    android:text="Feedback"
                     android:textColor="@android:color/white"
                     android:backgroundTint="@color/main"
                     android:paddingHorizontal="24dp"
                     android:paddingVertical="12dp"
-                    android:layout_gravity="end"
-                    android:layout_weight="1"
                     android:visibility="gone"/>
             </LinearLayout>
-
-
         </LinearLayout>
     </androidx.cardview.widget.CardView>
 
@@ -551,7 +533,6 @@
                         android:id="@+id/step2Processor"
                         android:layout_width="match_parent"
                         android:layout_height="10dp"
-                        android:layout_marginBottom="4dp"
                         android:background="@color/DarkYellow"
                         />
 
@@ -559,9 +540,10 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="approval Deparment Head"
-                        android:textSize="12sp"
+                        android:textSize="11sp"
                         android:textColor="@color/black"
-                        android:gravity="center"/>
+                        android:gravity="center"
+                        android:layout_marginTop="8dp"/>
                 </LinearLayout>
 
                 <!-- Step 3 -->
@@ -613,9 +595,7 @@
                         android:textColor="@color/black"
                         android:gravity="center"/>
                 </LinearLayout>
-
             </LinearLayout>
-
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -623,35 +603,18 @@
                 android:gravity="center"
                 android:layout_marginTop="16dp"
                 android:padding="8dp"
-                android:weightSum="2">
-
-                <!-- Previous Button -->
-                <Button
-                    android:id="@+id/btnPreviousProcessor"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:text="Previous"
-                    android:textColor="@android:color/white"
-                    android:layout_marginEnd="16dp"
-                    android:backgroundTint="@color/main"
-                    android:paddingHorizontal="24dp"
-                    android:paddingVertical="12dp"
-                    android:layout_gravity="start"
-                    android:layout_weight="1"
-                    android:visibility="gone"/>
+                android:weightSum="1">
 
                 <!-- Next Button -->
                 <Button
-                    android:id="@+id/btnNextProcessor"
-                    android:layout_width="0dp"
+                    android:id="@+id/btnFeedbackProcessor"
+                    android:layout_width="150dp"
                     android:layout_height="wrap_content"
-                    android:text="Next"
+                    android:text="Feedback"
                     android:textColor="@android:color/white"
                     android:backgroundTint="@color/main"
                     android:paddingHorizontal="24dp"
                     android:paddingVertical="12dp"
-                    android:layout_gravity="end"
-                    android:layout_weight="1"
                     android:visibility="gone"/>
             </LinearLayout>
         </LinearLayout>

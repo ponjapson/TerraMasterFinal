@@ -55,7 +55,7 @@
             android:layout_height="wrap_content"
             android:text="Great artwork! Loved the colors and composition."
             android:textSize="14sp"
-            android:textColor="@android:color/darker_gray"
+            android:textColor="@android:color/black"
             android:layout_marginTop="4dp"/>
     </LinearLayout>
 </LinearLayout>

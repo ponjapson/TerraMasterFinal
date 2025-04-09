@@ -208,17 +208,17 @@
                 android:text="Upload Front of ID"
                 android:layout_marginTop="8dp"
                 android:backgroundTint="#713D22"
-                android:visibility="gone" />
+                android:visibility="visible" />
 
             <ImageView
                 android:id="@+id/ivFrontID"
                 android:layout_width="match_parent"
                 android:layout_height="200dp"
-                android:src="@drawable/idcard"
+                android:src="@drawable/card"
                 android:layout_marginTop="8dp"
                 android:contentDescription="Front ID Image"
                 android:scaleType="centerCrop"
-                android:visibility="gone" />
+                android:visibility="visible" />
 
             <Button
                 android:id="@+id/btnUploadBack"
@@ -227,17 +227,36 @@
                 android:text="Upload Back of ID"
                 android:layout_marginTop="8dp"
                 android:backgroundTint="#713D22"
-                android:visibility="gone" />
+                android:visibility="visible" />
 
             <ImageView
                 android:id="@+id/ivBackID"
                 android:layout_width="match_parent"
                 android:layout_height="200dp"
-                android:src="@drawable/idcard"
+                android:src="@drawable/card"
                 android:layout_marginTop="8dp"
                 android:contentDescription="Back ID Image"
                 android:scaleType="centerCrop"
+                android:visibility="visible" />
+
+            <Button
+                android:id="@+id/scanButton"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Upload Business Permit"
+                android:layout_marginTop="8dp"
+                android:backgroundTint="#713D22"
                 android:visibility="gone" />
+
+            <ImageView
+                android:id="@+id/scannedImageView"
+                android:layout_width="match_parent"
+                android:layout_height="200dp"
+                android:layout_marginTop="16dp"
+                android:scaleType="centerCrop"
+                android:visibility="gone"
+                android:src="@drawable/image"/>
+
 
             <Button
                 android:id="@+id/btnSignUp"

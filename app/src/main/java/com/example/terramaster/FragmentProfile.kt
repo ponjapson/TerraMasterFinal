@@ -6,6 +6,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
+import android.widget.ImageButton
 import android.widget.RatingBar
 import android.widget.TextView
 import android.widget.Toast
@@ -45,6 +46,11 @@ class FragmentProfile: Fragment() {
 
         var Rating = view.findViewById<RatingBar>(R.id.ratingBar)
         var editProfile = view.findViewById<Button>(R.id.editProfile)
+        val btnShowMenu = view.findViewById<ImageButton>(R.id.menuBurger)
+        btnShowMenu.setOnClickListener {
+            val dialogFragment = FragmentMenu()
+            dialogFragment.show(childFragmentManager, "menu_dialog")
+        }
 
         circleProfile = view.findViewById(R.id.profile)
         firstNameTextView = view.findViewById(R.id.first_name)
@@ -63,9 +69,9 @@ class FragmentProfile: Fragment() {
                     if (document != null && isAdded) {
                         val firstName = document.getString("first_name")
                         val lastName = document.getString("last_name")
-                        val userType = document.getString("userType")
+                        val userType = document.getString("user_type")
                         val profilePictureUrl = document.getString("profile_picture")
-                        val rating = document.getDouble("Rating")?.toFloat() ?: 0f
+                        val rating = document.getDouble("ratings")?.toFloat() ?: 0f
 
                         firstNameTextView.text = firstName
                         lastNameTextView.text = lastName
@@ -123,40 +129,58 @@ class FragmentProfile: Fragment() {
     }
 
     private fun fetchFeedback(professionalId: String?) {
-        if (professionalId == null) return
+        val db = FirebaseFirestore.getInstance()
 
+        if (professionalId.isNullOrEmpty()) {
+            Log.e("Firestore", "Professional ID is null or empty!")
+            return
+        }
+
+        // 🔥 Clear list before fetching to prevent duplicates
         feedbackList.clear()
         feedbackAdapter.notifyDataSetChanged()
 
         db.collection("Feedback")
-            .whereEqualTo("professionalId", professionalId)
+            .whereEqualTo("bookedUserId", professionalId) // Query feedbacks for a particular professional
             .get()
             .addOnSuccessListener { feedbackDocuments ->
                 if (feedbackDocuments.isEmpty) return@addOnSuccessListener
 
                 var remainingTasks = feedbackDocuments.size()
 
-                for (document in feedbackDocuments) {
+                feedbackDocuments.forEach { document ->
                     val feedback = document.toObject(Feedback::class.java)
+                    val landOwnerId = feedback.landOwnerUserId ?: return@forEach // Skip if landOwnerId is missing
 
-                    db.collection("users").document(feedback.landownerId)
-                        .get()
-                        .addOnSuccessListener { userDocument ->
-                            if (userDocument.exists()) {
-                                feedback.first_name = userDocument.getString("first_name") ?: ""
-                                feedback.last_name = userDocument.getString("last_name") ?: ""
-                                feedback.profile_picture = userDocument.getString("profile_picture") ?: ""
-                            }
+                    Log.d("Firestore", "Fetching user details for landOwnerId: $landOwnerId")
 
-                            feedbackList.add(feedback)
-                            remainingTasks--
-                            if (remainingTasks == 0) {
-                                feedbackAdapter.notifyDataSetChanged()
+                    // Correctly format and access Firestore document reference
+                    if (landOwnerId.isNotEmpty()) {
+                        // Correct way to access a specific document in "users" collection
+                        db.collection("users").document(landOwnerId)
+                            .get()
+                            .addOnSuccessListener { userDocument ->
+                                if (userDocument.exists()) {
+                                    feedback.first_name = userDocument.getString("first_name") ?: ""
+                                    feedback.last_name = userDocument.getString("last_name") ?: ""
+                                    feedback.profile_picture = userDocument.getString("profile_picture") ?: ""
+                                    feedback.rating = document.getDouble("rating")?.toFloat() ?: 0f // Use 0f if null
+                                    // assuming 'rating' is a float in Firestore
+                                    feedback.feedback = document.getString("feedback") ?: ""
+
+                                }
+                                feedbackList.add(feedback)
+
+                                if (--remainingTasks == 0) {
+                                    feedbackAdapter.notifyDataSetChanged()
+                                }
                             }
-                        }
-                        .addOnFailureListener { e ->
-                            Log.e("Firestore", "Error fetching user details", e)
-                        }
+                            .addOnFailureListener { e ->
+                                Log.e("Firestore", "Error fetching user details for feedback", e)
+                            }
+                    } else {
+                        Log.e("Firestore", "landOwnerId is empty for feedback document")
+                    }
                 }
             }
             .addOnFailureListener { e ->
