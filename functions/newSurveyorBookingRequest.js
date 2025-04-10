@@ -9,33 +9,33 @@ if (!admin.apps.length) {
 }
 
 // Firestore trigger to listen for new bookings
-exports.newBookingNotification = functions.firestore
+exports.newSurveyorBookingRequest = functions.firestore
     .document('bookings/{bookingId}')
     .onCreate(async (snapshot, context) => {
         const bookingData = snapshot.data();
         const bookingId = context.params.bookingId;
 
         // Check if status is "new"
-        if (bookingData.status === 'new') {
-            const landownerId = bookingData.landOwnerUserId; // Assuming landownerId is stored in the booking data
-            const professionalId = bookingData.bookedUserId; // Assuming professionalId is stored in the booking data
+        if (bookingData.status === 'new surveyor request') {
+            const landOwnerUserId = bookingData.landOwnerUserId;
+            const bookedUserId = bookingData.bookedUserId; 
 
             try {
-                // Retrieve the FCM token of the professional
-                const profesionalDoc = await admin.firestore().collection('users').doc(professionalId).get();
-                const professionalFcmToken = profesionalDoc.data()?.fcmToken;
+                // Retrieve the FCM token of the client
+                const bookedDoc = await admin.firestore().collection('users').doc(bookedUserId).get();
+                const bookedFcmToken = bookedDoc.data()?.fcmToken;
 
-                if (professionalFcmToken) {
+                if (bookedFcmToken) {
                     // Prepare the notification message
                     const title = 'New Booking Request';
                     const message = `You have a new booking request. Please check it out!`;
 
                     // Send the notification
-                    await sendNotification(professionalFcmToken, title, message, professionalId, landownerId, 'booking_request');
+                    await sendNotification(bookedFcmToken, title, message, bookedUserId, landOwnerUserId, 'booking_request');
 
                     
                 } else {
-                    console.error('FCM token not found for professional:', profesionalDoc);
+                    console.error('FCM token not found for bookedUser:', bookedUserId);
                 }
 
             } catch (error) {

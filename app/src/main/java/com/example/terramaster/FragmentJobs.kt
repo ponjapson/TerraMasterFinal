@@ -85,6 +85,18 @@ class FragmentJobs : Fragment() {
 
                 true
             }
+            R.id.action_notification -> {
+                val fragment = FragmentNotification()
+                val transaction = requireActivity().supportFragmentManager.beginTransaction()
+                transaction.replace(R.id.fragment_container, fragment)
+                transaction.addToBackStack(null)
+                transaction.commit()
+
+                // Optionally show bottom navigation bar (if needed)
+                (requireActivity() as MainActivity).showBottomNavigationBar()
+
+                true
+            }
             else -> super.onOptionsItemSelected(item)
         }
     }

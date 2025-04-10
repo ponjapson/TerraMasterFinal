@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:padding="12dp"
+    android:background="?attr/selectableItemBackground"
+    android:layout_marginBottom="4dp"
+    android:elevation="2dp"
+    android:backgroundTint="#FFFFFF"
+    android:clipToPadding="false">
+
+    <!-- Profile picture of the sender -->
+    <ImageView
+        android:id="@+id/senderProfileImageView"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_gravity="center_vertical"
+        android:src="@drawable/profile"
+        android:scaleType="centerCrop"
+        android:background="@drawable/circle_background"
+        android:layout_marginEnd="8dp" />
+
+    <!-- Vertical container for message and timestamp -->
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:orientation="vertical">
+
+        <!-- Notification message -->
+        <TextView
+            android:id="@+id/notificationMessageTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="#333333"
+            android:textSize="16sp"
+            android:fontFamily="@font/poppinsm"
+            android:maxLines="2"
+            android:ellipsize="end"
+            android:text="Sample notification message" />
+
+        <!-- Timestamp -->
+        <TextView
+            android:id="@+id/notificationTimestampTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="12sp"
+            android:textColor="#888888"
+            android:layout_marginTop="4dp"
+            android:fontFamily="@font/poppinsm"
+            android:text="2 hours ago" />
+    </LinearLayout>
+</LinearLayout>

@@ -89,9 +89,6 @@ class MainActivity : AppCompatActivity() {
                         userType.equals("Processor", ignoreCase = true)) {
                         bottomNavigationView.menu.findItem(R.id.nav_chatbot).isVisible = false
                     }
-                    if (userType.equals("Surveyor", ignoreCase = true)) {
-                        bottomNavigationView.menu.findItem(R.id.nav_home).isVisible = false
-                    }
                 }
             }
             .addOnFailureListener { e ->

@@ -145,7 +145,7 @@ class FragmentHome: Fragment() {
                         val userType = document.getString("user_type") ?: ""
 
                         // Ensure menuItem is not null before modifying
-                        menuItem?.isVisible = userType.equals("Processor", ignoreCase = true)
+                        menuItem?.isVisible = userType.equals("Processor", ignoreCase = true) || userType.equals("Surveyor", ignoreCase = true)
                     }
                 }
                 .addOnFailureListener { e ->

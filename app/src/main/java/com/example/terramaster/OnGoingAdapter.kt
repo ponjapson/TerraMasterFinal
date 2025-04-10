@@ -186,7 +186,6 @@ class OnGoingAdapter(private val jobs: MutableList<OnGoingJobs>, private val con
                         holder.cardViewSurveyor.visibility = View.VISIBLE
                         holder.btnPreviousSurveyor.visibility = View.VISIBLE
                         holder.btnNextSurveyor.visibility = View.VISIBLE
-
                     }
 
                     else -> {
