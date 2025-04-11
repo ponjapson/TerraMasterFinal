@@ -393,6 +393,22 @@ class OnGoingAdapter(private val jobs: MutableList<OnGoingJobs>, private val con
             // Also update the step color immediately for the next status
             updateStepColorProcessor(nextStatus, holder, position)
         }
+
+        holder.btnPreviousProcessor.setOnClickListener {
+            val bookingId = jobs[position].bookingId
+            var currentStatus = jobs[position].documentStatus
+
+            val previousStatus = getPreviousStepProcessor(currentStatus)
+
+            // Save to Firestore
+            saveDocumentStatus(bookingId, previousStatus, holder, position)
+
+            // Update local data immediately
+            jobs[position].documentStatus = previousStatus
+
+            // Update UI colors immediately
+            updateStepColor(previousStatus, holder, position)
+        }
     }
 
     override fun getItemCount(): Int = jobs.size
@@ -429,6 +445,14 @@ class OnGoingAdapter(private val jobs: MutableList<OnGoingJobs>, private val con
             "Approval Department Head" -> "Ready to Claim"
             "Ready to Claim" -> "Completed"
             else -> "Prepare the Tax Declaration"
+        }
+    }
+
+    private fun getPreviousStepProcessor(currentStatus: String): String {
+        return when (currentStatus) {
+            "Approval Department Head" -> "Prepare the Tax Declaration"
+            "Ready to Claim" -> "Approval Department Head"
+            else -> "Prepare Blueprint"
         }
     }
 

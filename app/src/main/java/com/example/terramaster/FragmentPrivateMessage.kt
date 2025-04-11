@@ -76,12 +76,7 @@ class FragmentPrivateMessage : Fragment() {
             }
         }
 
-       /* moreImgBtn.setOnClickListener {
-            val intent = Intent(requireContext(), BookingActivity::class.java)
-            intent.putExtra("bookedUserId", otherUserId)
-            startActivity(intent)
-        }*/
-
+        fetchCurrentUserType()
         if (chatRoomId.isEmpty() && otherUserId != null) {
             chatRoomId = generateChatRoomId(currentUser!!.uid, otherUserId!!)
             isFirstMessage = true
@@ -122,6 +117,41 @@ class FragmentPrivateMessage : Fragment() {
         super.onDestroyView()
         messageListener?.remove()
     }
+
+    private fun fetchCurrentUserType() {
+        val otherId = otherUserId // capture in a local val
+        if (otherId != null) {
+            firestore.collection("users").document(otherId)
+                .get()
+                .addOnSuccessListener { documentSnapshot ->
+                    val userType = documentSnapshot.getString("user_type")
+                    handleUserType(userType)
+                }
+                .addOnFailureListener { exception ->
+                    Log.e("FragmentPrivateMessage", "Error fetching current user's type", exception)
+                }
+        } else {
+            Log.e("FragmentPrivateMessage", "User ID is null")
+        }
+    }
+
+
+
+    private fun handleUserType(userType: String?) {
+        when (userType) {
+            "Surveyor", "Processor" -> {
+                bookingButton.visibility = View.VISIBLE
+            }
+            "Landowner" -> {
+                bookingButton.visibility = View.GONE
+            }
+            else -> {
+                bookingButton.visibility = View.GONE
+            }
+        }
+    }
+
+
 
     private fun fetchOtherParticipantInfo(otherUserId: String) {
         firestore.collection("users").document(otherUserId)

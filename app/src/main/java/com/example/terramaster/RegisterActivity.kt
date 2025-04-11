@@ -438,79 +438,125 @@ class RegisterActivity : AppCompatActivity() {
                 val fcmToken = tokenTask.result
                 val storageRef = storage.reference
 
-                val scannedDrawable = scannedImageView.drawable
-                if (scannedDrawable != null && scannedDrawable is BitmapDrawable) {
-                    val scannedBitmap = scannedDrawable.bitmap
-                    val scannedIDRef = storageRef.child("id_images/${UUID.randomUUID()}_scanned.jpg")
+                when (userType) {
+                    "Landowner" -> {
+                        // No uploads needed, just proceed to register
+                        registerUserWithFirebase(
+                            firstName, lastName, email, password,
+                            barangay, StreetAddress, City, Province, PostalCode,
+                            userType, fcmToken,
+                            frontIDUrl = null,
+                            backIDUrl = null,
+                            latitude = latitude,
+                            longitude = longitude,
+                            scannedUrl = null
+                        )
 
-                    val scannedStream = ByteArrayOutputStream()
-                    scannedBitmap.compress(Bitmap.CompressFormat.JPEG, 100, scannedStream)
-                    val scannedData = scannedStream.toByteArray()
+                    }
 
-                    scannedIDRef.putBytes(scannedData)
-                        .addOnSuccessListener {
-                            scannedIDRef.downloadUrl.addOnSuccessListener { scannedUrl ->
+                    "Processor" -> {
+                        // Only front and back ID needed
+                        val frontIDRef = storageRef.child("id_images/${UUID.randomUUID()}_front.jpg")
+                        val backIDRef = storageRef.child("id_images/${UUID.randomUUID()}_back.jpg")
 
-                                // Proceed with front & back ID upload AFTER scanned success
-                                val frontIDRef = storageRef.child("id_images/${UUID.randomUUID()}_front.jpg")
-                                val backIDRef = storageRef.child("id_images/${UUID.randomUUID()}_back.jpg")
+                        val frontIDStream = ByteArrayOutputStream()
+                        frontIDBitmap?.compress(Bitmap.CompressFormat.JPEG, 100, frontIDStream)
+                        val frontIDData = frontIDStream.toByteArray()
 
-                                val frontIDStream = ByteArrayOutputStream()
-                                frontIDBitmap?.compress(Bitmap.CompressFormat.JPEG, 100, frontIDStream)
-                                val frontIDData = frontIDStream.toByteArray()
+                        val backIDStream = ByteArrayOutputStream()
+                        backIDBitmap?.compress(Bitmap.CompressFormat.JPEG, 100, backIDStream)
+                        val backIDData = backIDStream.toByteArray()
 
-                                val backIDStream = ByteArrayOutputStream()
-                                backIDBitmap?.compress(Bitmap.CompressFormat.JPEG, 100, backIDStream)
-                                val backIDData = backIDStream.toByteArray()
+                        frontIDRef.putBytes(frontIDData).addOnSuccessListener {
+                            frontIDRef.downloadUrl.addOnSuccessListener { frontUri ->
+                                backIDRef.putBytes(backIDData).addOnSuccessListener {
+                                    backIDRef.downloadUrl.addOnSuccessListener { backUri ->
+                                        registerUserWithFirebase(
+                                            firstName, lastName, email, password,
+                                            barangay, StreetAddress, City, Province, PostalCode,
+                                            userType, fcmToken,
+                                            frontUri.toString(),
+                                            backUri.toString(),
+                                            latitude,
+                                            longitude,
+                                            scannedUrl = null // Correct name and value
+                                        )
 
-                                frontIDRef.putBytes(frontIDData).addOnSuccessListener {
-                                    frontIDRef.downloadUrl.addOnSuccessListener { frontUri ->
-                                        backIDRef.putBytes(backIDData).addOnSuccessListener {
-                                            backIDRef.downloadUrl.addOnSuccessListener { backUri ->
-
-                                                registerUserWithFirebase(
-                                                    firstName,
-                                                    lastName,
-                                                    email,
-                                                    password,
-                                                    barangay,
-                                                    StreetAddress,
-                                                    City,
-                                                    Province,
-                                                    PostalCode,
-                                                    userType,
-                                                    fcmToken,
-                                                    frontUri.toString(),
-                                                    backUri.toString(),
-                                                    latitude,
-                                                    longitude,
-                                                    scannedUrl.toString()
-                                                )
-
-                                            }
-                                        }.addOnFailureListener { e ->
-                                            handleFailure("Error uploading back ID: ${e.message}")
-                                        }
                                     }
                                 }.addOnFailureListener { e ->
-                                    handleFailure("Error uploading front ID: ${e.message}")
+                                    handleFailure("Error uploading back ID: ${e.message}")
                                 }
-
                             }
+                        }.addOnFailureListener { e ->
+                            handleFailure("Error uploading front ID: ${e.message}")
                         }
-                        .addOnFailureListener { e ->
-                            handleFailure("Error uploading scanned ID: ${e.message}")
-                        }
+                    }
 
-                } else {
-                    handleFailure("Scanned image is missing or not a valid image.")
+                    else -> {
+                        // Default: Upload scanned, front, and back (e.g., Surveyor)
+                        val scannedDrawable = scannedImageView.drawable
+                        if (scannedDrawable != null && scannedDrawable is BitmapDrawable) {
+                            val scannedBitmap = scannedDrawable.bitmap
+                            val scannedIDRef = storageRef.child("id_images/${UUID.randomUUID()}_scanned.jpg")
+
+                            val scannedStream = ByteArrayOutputStream()
+                            scannedBitmap.compress(Bitmap.CompressFormat.JPEG, 100, scannedStream)
+                            val scannedData = scannedStream.toByteArray()
+
+                            scannedIDRef.putBytes(scannedData).addOnSuccessListener {
+                                scannedIDRef.downloadUrl.addOnSuccessListener { scannedUrl ->
+
+                                    val frontIDRef = storageRef.child("id_images/${UUID.randomUUID()}_front.jpg")
+                                    val backIDRef = storageRef.child("id_images/${UUID.randomUUID()}_back.jpg")
+
+                                    val frontIDStream = ByteArrayOutputStream()
+                                    frontIDBitmap?.compress(Bitmap.CompressFormat.JPEG, 100, frontIDStream)
+                                    val frontIDData = frontIDStream.toByteArray()
+
+                                    val backIDStream = ByteArrayOutputStream()
+                                    backIDBitmap?.compress(Bitmap.CompressFormat.JPEG, 100, backIDStream)
+                                    val backIDData = backIDStream.toByteArray()
+
+                                    frontIDRef.putBytes(frontIDData).addOnSuccessListener {
+                                        frontIDRef.downloadUrl.addOnSuccessListener { frontUri ->
+                                            backIDRef.putBytes(backIDData).addOnSuccessListener {
+                                                backIDRef.downloadUrl.addOnSuccessListener { backUri ->
+
+                                                    registerUserWithFirebase(
+                                                        firstName, lastName, email, password,
+                                                        barangay, StreetAddress, City, Province, PostalCode,
+                                                        userType, fcmToken,
+                                                        frontUri.toString(),
+                                                        backUri.toString(),
+                                                        latitude,
+                                                        longitude,
+                                                        scannedUrl.toString()
+                                                    )
+
+                                                }
+                                            }.addOnFailureListener { e ->
+                                                handleFailure("Error uploading back ID: ${e.message}")
+                                            }
+                                        }
+                                    }.addOnFailureListener { e ->
+                                        handleFailure("Error uploading front ID: ${e.message}")
+                                    }
+
+                                }
+                            }.addOnFailureListener { e ->
+                                handleFailure("Error uploading scanned ID: ${e.message}")
+                            }
+                        } else {
+                            handleFailure("Scanned image is missing or not a valid image.")
+                        }
+                    }
                 }
-
             } else {
                 handleFailure("Error fetching FCM token: ${tokenTask.exception?.message}")
             }
         }
     }
+
 
     private fun registerUserWithFirebase(
         firstName: String,
@@ -537,7 +583,7 @@ class RegisterActivity : AppCompatActivity() {
 
                     // Base user data
                     val user = hashMapOf(
-                        "uid" to userId, // Add UID explicitly to the document
+                        "uid" to userId,
                         "first_name" to firstName,
                         "last_name" to lastName,
                         "email" to email,
@@ -549,13 +595,18 @@ class RegisterActivity : AppCompatActivity() {
                         "user_type" to userType,
                         "profile_picture" to DEFAULT_PROFILE_PICTURE_URL,
                         "fcmToken" to fcmToken,
-                        "frontIDUrl" to frontIDUrl,
-                        "backIDUrl" to backIDUrl,
                         "longitude" to longitude,
                         "latitude" to latitude,
                         "status" to "email_not_verified",
-                        "scannedUrl" to scannedUrl,
                     )
+
+                    if (!frontIDUrl.isNullOrEmpty()) user["frontIDUrl"] = frontIDUrl
+                    if (!backIDUrl.isNullOrEmpty()) user["backIDUrl"] = backIDUrl
+                    if (!scannedUrl.isNullOrEmpty()) user["scannedUrl"] = scannedUrl
+
+                    if (userType == "Surveyor" || userType == "Processor") {
+                        user["ratings"] = 0.0
+                    }
 
                     // Add ratings if user type is Surveyor or Processor
                     if (userType == "Surveyor" || userType == "Processor") {

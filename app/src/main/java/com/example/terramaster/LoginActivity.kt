@@ -92,17 +92,32 @@ class LoginActivity : AppCompatActivity() {
                     val userType = document.getString("user_type") ?: ""
                     val currentStatus = document.getString("status") ?: ""
 
-                   if (userType == "Surveyor" || userType == "Processor") {
-                        if (currentStatus == "Verified" || currentStatus == "Active") {
-                            // Update to Active only if already Verified
-                            updateStatusAndToken(userId, "Active")
-                        } else {
-                            // Show waiting message if not Verified
+                    when (userType) {
+                        "Surveyor", "Processor" -> {
+                            if (currentStatus == "Verified" || currentStatus == "Active") {
+                                // Update to Active only if already Verified
+                                updateStatusAndToken(userId, "Active")
+                            } else {
+                                progressBar.visibility = View.GONE
+                                btnSignIn.isEnabled = true
+                                Toast.makeText(this, "Waiting for admin approval.", Toast.LENGTH_SHORT).show()
+                            }
+                        }
+                        "Landowner" -> {
+                            // Set Landowner status to Active directly
+                            if (currentStatus != "Active") {
+                                updateStatusAndToken(userId, "Active")
+                            } else {
+                                navigateToMainActivity()
+                            }
+                        }
+                        else -> {
                             progressBar.visibility = View.GONE
                             btnSignIn.isEnabled = true
-                            Toast.makeText(this, "Waiting for admin approval.", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(this, "Invalid user type.", Toast.LENGTH_SHORT).show()
                         }
                     }
+
                 } else {
                     progressBar.visibility = View.GONE
                     btnSignIn.isEnabled = true
