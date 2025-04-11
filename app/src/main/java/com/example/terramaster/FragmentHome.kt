@@ -28,8 +28,11 @@ import com.google.firebase.firestore.toObjects
 class FragmentHome: Fragment() {
     private lateinit var rvGuide: RecyclerView
     private lateinit var guideAdapter: GuideAdapter
+    private lateinit var guideAdapterProcessor: GuideAdapter
     private val guideList = mutableListOf<Guide>()
+    private val guideListProcessor = mutableListOf<Guide>()
     private lateinit var etSearch: EditText
+    private lateinit var recyclerViewKnowledgeSurveyor: RecyclerView
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -47,15 +50,24 @@ class FragmentHome: Fragment() {
 
         rvGuide = view.findViewById(R.id.recyclerViewKnowledge)
         etSearch = view.findViewById(R.id.etSearch)
+        recyclerViewKnowledgeSurveyor = view.findViewById(R.id.recyclerViewKnowledgeSurveyor)
 
         guideAdapter = GuideAdapter(requireContext(), guideList) { guideId, guideType ->
             navigateToGuide(guideId, guideType)
         }
+        guideAdapterProcessor = GuideAdapter(requireContext(), guideListProcessor) { guideId, guideType ->
+            navigateToGuide(guideId, guideType)
+        }
+
         rvGuide.adapter = guideAdapter
         rvGuide.layoutManager = LinearLayoutManager(requireContext())
 
+        recyclerViewKnowledgeSurveyor.adapter = guideAdapterProcessor
+        recyclerViewKnowledgeSurveyor.layoutManager = LinearLayoutManager(requireContext())
+
 
         loadGuidesFromFirestore()
+        loadGuidesFromFirestoreSurveyor()
 
         etSearch.addTextChangedListener(object : TextWatcher {
             override fun afterTextChanged(s: Editable?) {}
@@ -96,28 +108,52 @@ class FragmentHome: Fragment() {
     private fun loadGuidesFromFirestore() {
         val db = FirebaseFirestore.getInstance()
         db.collection("knowledge_guide")
+            .whereEqualTo("userType", "Processor") // 👈 Filter only Processor guides
             .get()
             .addOnSuccessListener { documents ->
                 guideList.clear()
                 for (document in documents) {
                     val id = document.id
-                    val title = document.getString("title") ?: ""  // Fetch title
-                    val guideType = document.getString("guideType") ?: "" // Fetch guideType
+                    val title = document.getString("title") ?: ""
+                    val guideType = document.getString("guideType") ?: ""
 
-                    // Ensure guideType is not null or empty
                     if (guideType.isNotEmpty()) {
-                        // Add the guide to the list with guideId, title, and guideType
-                        guideList.add(Guide(id, title, mutableListOf() ,guideType)) // Pass guideType here
+                        guideList.add(Guide(id, title, mutableListOf(), guideType))
                     }
                 }
                 guideAdapter.setData(guideList)
                 guideAdapter.notifyDataSetChanged()
             }
             .addOnFailureListener { exception ->
-                // Handle error if needed
                 Log.e("Firestore", "Error loading guides: ", exception)
             }
     }
+
+    private fun loadGuidesFromFirestoreSurveyor() {
+        val db = FirebaseFirestore.getInstance()
+        db.collection("knowledge_guide")
+            .whereEqualTo("userType", "Surveyor") // 👈 Filter only Processor guides
+            .get()
+            .addOnSuccessListener { documents ->
+                guideListProcessor.clear()
+                for (document in documents) {
+                    val id = document.id
+                    val title = document.getString("title") ?: ""
+                    val guideType = document.getString("guideType") ?: ""
+
+                    if (guideType.isNotEmpty()) {
+                        guideListProcessor.add(Guide(id, title, mutableListOf(), guideType))
+                    }
+                }
+                guideAdapterProcessor.setData(guideListProcessor)
+                guideAdapterProcessor.notifyDataSetChanged()
+            }
+            .addOnFailureListener { exception ->
+                Log.e("Firestore", "Error loading guides: ", exception)
+            }
+    }
+
+
 
 
     private var menuItem: MenuItem? = null

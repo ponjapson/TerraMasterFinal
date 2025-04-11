@@ -278,22 +278,29 @@ class SearchFragment : Fragment() {
         return view
     }
 
-    private fun fetchUserTypeAndNavigate(userId: String) {
+    private fun fetchUserTypeAndNavigate(userId: String?) {
+        if (userId.isNullOrBlank()) {
+            Log.e("SearchFragment", "fetchUserTypeAndNavigate: userId is null or empty.")
+            return
+        }
+
         val db = FirebaseFirestore.getInstance()
 
         db.collection("users").document(userId)
             .get()
             .addOnSuccessListener { document ->
-                if (document != null) {
+                if (document != null && document.exists()) {
                     val userType = document.getString("user_type") ?: "defaultType"
                     navigateToProfileFragment(userId, userType)
+                } else {
+                    Log.e("SearchFragment", "User document does not exist for ID: $userId")
                 }
             }
             .addOnFailureListener { exception ->
-                // Handle failure (e.g., show a message or log it)
-                Log.e("Error", "Failed to fetch userType: $exception")
+                Log.e("SearchFragment", "Failed to fetch userType: $exception")
             }
     }
+
 
 
     private fun fetchLandownerLocationAndRecommendSurveyors(selectedSort: String) {
@@ -806,7 +813,7 @@ class SearchFragment : Fragment() {
             val currentUser = FirebaseAuth.getInstance().currentUser
             val fragment = if (currentUser != null && userId == currentUser.uid && userType == "Landowner") {
                 FragmentProfileLandowner()
-            } else if(currentUser != null && userId == currentUser.uid && userType == "Surveyor" || userType == "Processor"){
+            } else if(currentUser != null && userId == currentUser.uid && userType == "Surveyor" || currentUser != null && userId == currentUser.uid &&userType == "Processor"){
                 FragmentProfile()
             } else if(currentUser != null && userId != currentUser.uid && userType == "Landowner"){
                 FragmentUserProfileLandowner()

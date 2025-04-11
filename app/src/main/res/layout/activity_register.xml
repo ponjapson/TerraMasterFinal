@@ -208,7 +208,7 @@
                 android:text="Upload Front of ID"
                 android:layout_marginTop="8dp"
                 android:backgroundTint="#713D22"
-                android:visibility="visible" />
+                android:visibility="gone" />
 
             <ImageView
                 android:id="@+id/ivFrontID"
@@ -218,7 +218,7 @@
                 android:layout_marginTop="8dp"
                 android:contentDescription="Front ID Image"
                 android:scaleType="centerCrop"
-                android:visibility="visible" />
+                android:visibility="gone" />
 
             <Button
                 android:id="@+id/btnUploadBack"
@@ -227,7 +227,7 @@
                 android:text="Upload Back of ID"
                 android:layout_marginTop="8dp"
                 android:backgroundTint="#713D22"
-                android:visibility="visible" />
+                android:visibility="gone" />
 
             <ImageView
                 android:id="@+id/ivBackID"
@@ -237,7 +237,7 @@
                 android:layout_marginTop="8dp"
                 android:contentDescription="Back ID Image"
                 android:scaleType="centerCrop"
-                android:visibility="visible" />
+                android:visibility="gone" />
 
             <Button
                 android:id="@+id/scanButton"

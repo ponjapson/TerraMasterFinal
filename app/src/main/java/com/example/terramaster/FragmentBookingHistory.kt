@@ -46,7 +46,7 @@ class FragmentBookingHistory : Fragment(), OnPaymentClickListener {
         // First fetch: as booked user
         firestore.collection("bookings")
             .whereEqualTo("bookedUserId", userId)
-            .whereEqualTo("stage", "Completed")
+            .whereEqualTo("stage", "completed")
             .orderBy("timestamp", Query.Direction.DESCENDING)
             .get()
             .addOnSuccessListener { bookedUserSnapshots ->
@@ -54,7 +54,7 @@ class FragmentBookingHistory : Fragment(), OnPaymentClickListener {
                     // Second fetch: as landowner
                     firestore.collection("bookings")
                         .whereEqualTo("landOwnerUserId", userId)
-                        .whereEqualTo("stage", "Completed")
+                        .whereEqualTo("stage", "completed")
                         .orderBy("timestamp", Query.Direction.DESCENDING)
                         .get()
                         .addOnSuccessListener { landOwnerSnapshots ->

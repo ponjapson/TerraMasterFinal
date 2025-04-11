@@ -1,6 +1,7 @@
 package com.example.terramaster
 
 import FragmentDisplayPDF
+import FragmentOnGoingPDF
 import android.app.DatePickerDialog
 import android.app.TimePickerDialog
 import android.content.Context
@@ -328,7 +329,7 @@ class OnGoingAdapter(private val jobs: MutableList<OnGoingJobs>, private val con
 
             Log.d("PDF_DEBUG", "Opening PDF with URL: $pdfUrl") // Log valid PDF URL
 
-            val fragment = FragmentDisplayPDF().apply {
+            val fragment = FragmentOnGoingPDF().apply {
                 arguments = Bundle().apply {
                     putString("pdfUrl", pdfUrl)
                     putString("userType", userType)
@@ -502,8 +503,8 @@ class OnGoingAdapter(private val jobs: MutableList<OnGoingJobs>, private val con
                     // Proceed with updating Firestore document
                     val db = FirebaseFirestore.getInstance()
                     val updates = mapOf(
-                        "stage" to "Completed",
-                        "status" to "Completed"
+                        "stage" to "completed",
+                        "status" to "completed"
                     )
 
                     db.collection("bookings")
@@ -573,8 +574,8 @@ class OnGoingAdapter(private val jobs: MutableList<OnGoingJobs>, private val con
                     // Proceed with updating Firestore document
                     val db = FirebaseFirestore.getInstance()
                     val updates = mapOf(
-                        "stage" to "Completed",
-                        "status" to "Completed"
+                        "stage" to "completed",
+                        "status" to "completed"
                     )
 
                     db.collection("bookings")

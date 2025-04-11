@@ -6,6 +6,7 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.WindowManager
 import android.widget.ProgressBar
 import android.widget.ImageView
 import androidx.fragment.app.Fragment
@@ -66,7 +67,10 @@ class FragmentOnGoingPDF : Fragment() {
             Log.e("PDF", "No valid PDF source provided")
             progressBar.visibility = View.GONE
         }
-
+        requireActivity().window.setFlags(
+            WindowManager.LayoutParams.FLAG_SECURE,
+            WindowManager.LayoutParams.FLAG_SECURE
+        )
         return view
     }
 
@@ -212,5 +216,13 @@ class FragmentOnGoingPDF : Fragment() {
         if (::pdfRenderer.isInitialized) {
             pdfRenderer.close()
         }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        requireActivity().window.setFlags(
+            WindowManager.LayoutParams.FLAG_SECURE,
+            WindowManager.LayoutParams.FLAG_SECURE
+        )
     }
 }

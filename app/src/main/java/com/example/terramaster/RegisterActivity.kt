@@ -60,6 +60,7 @@ class RegisterActivity : AppCompatActivity() {
     private lateinit var postalCode: EditText
     private lateinit var storage: FirebaseStorage
     private lateinit var etBarangay: EditText
+    private lateinit var etPhoneNumber: EditText
 
     private var frontIDBitmap: Bitmap? = null
     private var backIDBitmap: Bitmap? = null
@@ -123,18 +124,32 @@ class RegisterActivity : AppCompatActivity() {
 
 
         rgUserType.setOnCheckedChangeListener { _, checkedId ->
-            when (findViewById<RadioButton>(checkedId).text.toString()) {
+            val selectedText = findViewById<RadioButton>(checkedId).text.toString()
 
-                "Surveyor" -> {
-                    scanButton.visibility = View.VISIBLE
-                    scannedImageView.visibility = View.VISIBLE
-                }
-                "Landowner", "Processor" -> {
-                    scanButton.visibility = View.GONE
-                    scannedImageView.visibility = View.GONE
-                }
+            // For scanButton and scannedImageView
+            if (selectedText == "Surveyor") {
+                scanButton.visibility = View.VISIBLE
+                scannedImageView.visibility = View.VISIBLE
+            } else {
+                scanButton.visibility = View.GONE
+                scannedImageView.visibility = View.GONE
+            }
+
+            // For ID upload
+            if (selectedText == "Surveyor" || selectedText == "Processor") {
+                btnUploadFront.visibility = View.VISIBLE
+                btnUploadBack.visibility = View.VISIBLE
+                ivFrontID.visibility = View.VISIBLE
+                ivBackID.visibility = View.VISIBLE
+            } else {
+                btnUploadFront.visibility = View.GONE
+                btnUploadBack.visibility = View.GONE
+                ivFrontID.visibility = View.GONE
+                ivBackID.visibility = View.GONE
             }
         }
+
+
 
         btnSignUp.setOnClickListener {
             validateAndRegisterUser()
@@ -324,6 +339,7 @@ class RegisterActivity : AppCompatActivity() {
         val PostalCode = postalCode.text.toString().trim()
         val Barangay = etBarangay.text.toString().trim()
 
+
         if (firstName.isEmpty()) {
             etFirstName.error = "First Name is required"
             return
@@ -369,6 +385,8 @@ class RegisterActivity : AppCompatActivity() {
             etBarangay.error = "Street Address is required"
         }
 
+
+
         if (selectedUserTypeId == -1) {
             Toast.makeText(this, "Please select a user type", Toast.LENGTH_SHORT).show()
             return
@@ -376,7 +394,7 @@ class RegisterActivity : AppCompatActivity() {
 
         val userType = findViewById<RadioButton>(selectedUserTypeId).text.toString()
 
-        if ((userType == "Processor" || userType == "Surveyor" || userType == "Landowner") && (frontIDBitmap == null || backIDBitmap == null)) {
+        if ((userType == "Processor" || userType == "Surveyor") && (frontIDBitmap == null || backIDBitmap == null)) {
             Toast.makeText(this, "Please upload both front and back ID images", Toast.LENGTH_SHORT).show()
             return
         }
@@ -413,7 +431,7 @@ class RegisterActivity : AppCompatActivity() {
         PostalCode: String,
         userType: String,
         latitude: Double,
-        longitude: Double,
+        longitude: Double
     ) {
         FirebaseMessaging.getInstance().token.addOnCompleteListener { tokenTask ->
             if (tokenTask.isSuccessful) {
@@ -466,7 +484,7 @@ class RegisterActivity : AppCompatActivity() {
                                                     backUri.toString(),
                                                     latitude,
                                                     longitude,
-                                                    scannedUrl.toString() // ➕ add this!
+                                                    scannedUrl.toString()
                                                 )
 
                                             }
@@ -510,7 +528,7 @@ class RegisterActivity : AppCompatActivity() {
         backIDUrl: String?,
         latitude: Double,
         longitude: Double,
-        scannedUrl: String?,
+        scannedUrl: String?
     ) {
         auth.createUserWithEmailAndPassword(email, password)
             .addOnCompleteListener { task ->
@@ -529,7 +547,6 @@ class RegisterActivity : AppCompatActivity() {
                         "Province" to Province,
                         "Postal_Code" to PostalCode,
                         "user_type" to userType,
-                        "status" to "Pending", // Set to Pending initially
                         "profile_picture" to DEFAULT_PROFILE_PICTURE_URL,
                         "fcmToken" to fcmToken,
                         "frontIDUrl" to frontIDUrl,
@@ -537,7 +554,7 @@ class RegisterActivity : AppCompatActivity() {
                         "longitude" to longitude,
                         "latitude" to latitude,
                         "status" to "email_not_verified",
-                        "scannedUrl" to scannedUrl
+                        "scannedUrl" to scannedUrl,
                     )
 
                     // Add ratings if user type is Surveyor or Processor

@@ -20,6 +20,8 @@ class RequestTabFragment : Fragment(), OnPaymentClickListener {
     private var pendingAdapter: JobsAdapter? = null  // Use nullable type initially
     private val firestore = FirebaseFirestore.getInstance()
     private val auth = FirebaseAuth.getInstance()
+    private lateinit var progressBar: View
+
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -33,6 +35,9 @@ class RequestTabFragment : Fragment(), OnPaymentClickListener {
         // Initialize adapter only once the view is created
         pendingAdapter = JobsAdapter(mutableListOf(), requireContext(), this, requireActivity())
         recyclerView.adapter = pendingAdapter
+        progressBar = view.findViewById(R.id.progressBar)
+        progressBar.visibility = View.VISIBLE // Show initially
+
 
         val userId = auth.currentUser?.uid
         if (userId != null) {
@@ -154,6 +159,8 @@ class RequestTabFragment : Fragment(), OnPaymentClickListener {
     }
 
     private fun updateAdapter(jobs: MutableList<Job>) {
+        progressBar.visibility = View.GONE
+        recyclerView.visibility = View.VISIBLE
         pendingAdapter?.updateJobs(jobs)
         pendingAdapter?.notifyDataSetChanged()
     }

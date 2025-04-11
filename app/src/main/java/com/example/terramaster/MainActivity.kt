@@ -74,7 +74,6 @@ class MainActivity : AppCompatActivity() {
                 else -> false
             }
         }
-
     }
     fun fetchUserType(userId: String) {
         val db = FirebaseFirestore.getInstance()

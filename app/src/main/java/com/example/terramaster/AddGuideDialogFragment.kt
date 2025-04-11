@@ -16,6 +16,7 @@ import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.SetOptions
 import com.google.firebase.storage.FirebaseStorage
@@ -59,6 +60,10 @@ class AddGuideDialogFragment : Fragment() {
         btnUploadPdf = view.findViewById(R.id.btnUploadPdf)
         tvPdfFileName = view.findViewById(R.id.tvSelectedPdf)
 
+        var currentUser = FirebaseAuth.getInstance().currentUser
+        var userId = currentUser?.uid
+
+
         // Pass the necessary parameters to the adapter
         val guide = Guide(knowledgeGuideId = "", title = "", steps = stepList, guideType = "StepByStep") // Create a default or valid Guide object
         stepAdapter = StepAdapter(stepList, guide)
@@ -80,10 +85,10 @@ class AddGuideDialogFragment : Fragment() {
 
             if (stepList.isNotEmpty()) {
                 // Save Guide with Steps (if steps exist)
-                saveGuideToFirestore()
+                saveGuideToFirestore(userId)
             } else if (pdfUri != null) {
                 // Save PDF Guide (if only a PDF is selected)
-                saveGuidePDFToFirestore()
+                saveGuidePDFToFirestore(userId)
             } else {
                 // Show error if neither steps nor PDF are provided
                 Toast.makeText(requireContext(), "Please add at least one step or upload a PDF", Toast.LENGTH_SHORT).show()
@@ -105,6 +110,7 @@ class AddGuideDialogFragment : Fragment() {
         return view
     }
 
+
     private fun AddStep() {
         val etStepTitle1 = etStepTitle.text.toString().trim()
         val etStepDescription1 = etStepDescription.text.toString().trim()
@@ -119,35 +125,76 @@ class AddGuideDialogFragment : Fragment() {
         }
     }
 
-    private fun saveGuideToFirestore() {
+
+
+    private fun saveGuideToFirestore(userId: String?) {
         val guideTitle = etGuideTitle.text.toString().trim()
         val guideType = "StepByStep"
 
         if (guideTitle.isNotEmpty() && stepList.isNotEmpty()) {
-            val guide = Guide(knowledgeGuideId = "", title = guideTitle, steps = stepList, guideType = "StepByStep")
 
-            val db = FirebaseFirestore.getInstance()
-            db.collection("knowledge_guide").add(guide).addOnSuccessListener { documentReference ->
-                val guideId = documentReference.id
-                db.collection("knowledge_guide").document(guideId).update("knowledgeGuideId", guideId)
-                    .addOnSuccessListener {
-                        Toast.makeText(requireContext(), "Guide saved successfully!", Toast.LENGTH_SHORT).show()
+            if (userId != null) {
+                val db = FirebaseFirestore.getInstance()
+
+                // Fetch the userType from the Firestore database
+                db.collection("users").document(userId).get()
+                    .addOnSuccessListener { documentSnapshot ->
+                        if (documentSnapshot.exists()) {
+                            val userType = documentSnapshot.getString("user_type") ?: "unknown" // Default to "unknown" if null
+
+                            // Create the Guide object with the fetched userType
+                            val guide = Guide(
+                                knowledgeGuideId = "",
+                                title = guideTitle,
+                                steps = stepList,
+                                guideType = guideType,
+                                userType = userType  // Save the userType
+                            )
+
+                            // Add the guide to the "knowledge_guide" collection
+                            db.collection("knowledge_guide").add(guide)
+                                .addOnSuccessListener { documentReference ->
+                                    val guideId = documentReference.id
+                                    db.collection("knowledge_guide").document(guideId)
+                                        .update("knowledgeGuideId", guideId)
+                                        .addOnSuccessListener {
+                                            Toast.makeText(requireContext(), "Guide saved successfully!", Toast.LENGTH_SHORT).show()
+                                            etGuideTitle.text.clear()
+                                            etStepTitle.text.clear()
+                                            etStepDescription.text.clear()
+                                            stepList.clear()
+                                            rvSteps.adapter?.notifyDataSetChanged()
+                                        }
+                                        .addOnFailureListener {
+                                            Toast.makeText(requireContext(), "Failed to update guide ID", Toast.LENGTH_SHORT).show()
+                                        }
+
+                                    // Upload PDF if available
+                                    if (pdfUri != null) {
+                                        uploadPdfToStorage(guideId, guideTitle)
+                                    }
+                                }
+                                .addOnFailureListener {
+                                    Toast.makeText(requireContext(), "Failed to save guide", Toast.LENGTH_SHORT).show()
+                                }
+                        } else {
+                            // Handle case where user document doesn't exist
+                            Toast.makeText(requireContext(), "User not found", Toast.LENGTH_SHORT).show()
+                        }
                     }
                     .addOnFailureListener {
-                        Toast.makeText(requireContext(), "Failed to update guide ID", Toast.LENGTH_SHORT).show()
+                        // Handle failure fetching user data
+                        Toast.makeText(requireContext(), "Failed to fetch user data", Toast.LENGTH_SHORT).show()
                     }
-
-                // Upload PDF if available
-                if (pdfUri != null) {
-                    uploadPdfToStorage(guideId, guideTitle)
-                }
-            }.addOnFailureListener {
-                Toast.makeText(requireContext(), "Failed to save guide", Toast.LENGTH_SHORT).show()
+            } else {
+                // Handle case where userId is null
+                Toast.makeText(requireContext(), "User ID is null", Toast.LENGTH_SHORT).show()
             }
         } else {
             Toast.makeText(requireContext(), "Please enter a guide title and at least one step", Toast.LENGTH_SHORT).show()
         }
     }
+
 
     private fun selectPdf() {
         val intent = Intent(Intent.ACTION_GET_CONTENT)
@@ -188,40 +235,62 @@ class AddGuideDialogFragment : Fragment() {
         private const val PDF_PICK_CODE = 1001
     }
 
-    private fun saveGuidePDFToFirestore() {
+    private fun saveGuidePDFToFirestore(userId: String?) {
         val guideTitle = etGuideTitle.text.toString().trim()
 
         if (guideTitle.isNotEmpty()) {
             val db = FirebaseFirestore.getInstance()
-            val guideData = hashMapOf(
-                "title" to guideTitle,
-                "pdfUrl" to "",
-                "guideType" to "PDF"
-            )
 
-            db.collection("knowledge_guide").add(guideData)
-                .addOnSuccessListener { documentReference ->
-                    val guideId = documentReference.id
-                    documentReference.update("knowledgeGuideId", guideId)
-                        .addOnSuccessListener {
-                            Toast.makeText(requireContext(), "Guide title saved!", Toast.LENGTH_SHORT).show()
+            // Fetch the userType based on the userId
+            db.collection("users").document(userId!!).get()
+                .addOnSuccessListener { documentSnapshot ->
+                    if (documentSnapshot.exists()) {
+                        // Retrieve the userType from the user document
+                        val userType = documentSnapshot.getString("user_type") ?: "unknown"  // Default to "unknown" if null
 
-                            // Upload PDF if available
-                            if (pdfUri != null) {
-                                uploadPdfToStorage(guideId, guideTitle)
+                        // Create a map for the guide data including userType
+                        val guideData = hashMapOf(
+                            "title" to guideTitle,
+                            "pdfUrl" to "",
+                            "guideType" to "PDF",
+                            "userType" to userType // Add userType to the guide data
+                        )
+
+                        // Save the guide data to Firestore
+                        db.collection("knowledge_guide").add(guideData)
+                            .addOnSuccessListener { documentReference ->
+                                val guideId = documentReference.id
+                                documentReference.update("knowledgeGuideId", guideId)
+                                    .addOnSuccessListener {
+                                        Toast.makeText(requireContext(), "Guide title saved!", Toast.LENGTH_SHORT).show()
+                                        etGuideTitle.text.clear()
+                                        tvPdfFileName.text = ""
+                                        // Upload PDF if available
+                                        if (pdfUri != null) {
+                                            uploadPdfToStorage(guideId, guideTitle)
+                                        }
+                                    }
+                                    .addOnFailureListener {
+                                        Toast.makeText(requireContext(), "Failed to update guide ID", Toast.LENGTH_SHORT).show()
+                                    }
                             }
-                        }
-                        .addOnFailureListener {
-                            Toast.makeText(requireContext(), "Failed to update guide ID", Toast.LENGTH_SHORT).show()
-                        }
+                            .addOnFailureListener {
+                                Toast.makeText(requireContext(), "Failed to save guide", Toast.LENGTH_SHORT).show()
+                            }
+                    } else {
+                        // Handle case where user document doesn't exist
+                        Toast.makeText(requireContext(), "User not found", Toast.LENGTH_SHORT).show()
+                    }
                 }
                 .addOnFailureListener {
-                    Toast.makeText(requireContext(), "Failed to save guide", Toast.LENGTH_SHORT).show()
+                    // Handle failure fetching user data
+                    Toast.makeText(requireContext(), "Failed to fetch user data", Toast.LENGTH_SHORT).show()
                 }
         } else {
             Toast.makeText(requireContext(), "Please enter a guide title", Toast.LENGTH_SHORT).show()
         }
     }
+
 
     private fun uploadPdfToStorage(guideId: String, guideTitle: String) {
         if (pdfUri != null) {
