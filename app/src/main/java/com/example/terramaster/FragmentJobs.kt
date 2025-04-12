@@ -22,13 +22,6 @@ class FragmentJobs : Fragment() {
     ): View? {
         val view = inflater.inflate(R.layout.fragment_jobs, container, false)
 
-        // Set up the toolbar
-        val toolbar = view.findViewById<Toolbar>(R.id.toolbar)
-        (requireActivity() as MainActivity).setSupportActionBar(toolbar)
-
-        // Enable options menu in Fragment
-        setHasOptionsMenu(true)
-
         // Get references to TabLayout and ViewPager2
         val tabLayout = view.findViewById<TabLayout>(R.id.tabLayout)
         viewPager = view.findViewById(R.id.viewPager)
@@ -65,39 +58,5 @@ class FragmentJobs : Fragment() {
         return view
     }
 
-    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
-        inflater.inflate(R.menu.jobs_tool_bar_menu, menu)
-        super.onCreateOptionsMenu(menu, inflater)
-    }
 
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        return when (item.itemId) {
-            R.id.action_search -> {
-                // Navigate to the SearchFragment
-                val fragment = SearchFragment()
-                val transaction = requireActivity().supportFragmentManager.beginTransaction()
-                transaction.replace(R.id.fragment_container, fragment)
-                transaction.addToBackStack(null)
-                transaction.commit()
-
-                // Optionally show bottom navigation bar (if needed)
-                (requireActivity() as MainActivity).showBottomNavigationBar()
-
-                true
-            }
-            R.id.action_notification -> {
-                val fragment = FragmentNotification()
-                val transaction = requireActivity().supportFragmentManager.beginTransaction()
-                transaction.replace(R.id.fragment_container, fragment)
-                transaction.addToBackStack(null)
-                transaction.commit()
-
-                // Optionally show bottom navigation bar (if needed)
-                (requireActivity() as MainActivity).showBottomNavigationBar()
-
-                true
-            }
-            else -> super.onOptionsItemSelected(item)
-        }
-    }
 }

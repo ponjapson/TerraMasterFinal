@@ -10,9 +10,8 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@color/main"
-        app:title="Terra Master"
-        app:titleTextColor="@android:color/white"
-        app:menu="@menu/jobs_tool_bar_menu"/>
+        app:title="Booking"
+        app:titleTextColor="@android:color/white"/>
 
     <LinearLayout
         android:layout_width="match_parent"

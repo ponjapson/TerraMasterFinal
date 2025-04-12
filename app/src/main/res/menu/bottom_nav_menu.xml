@@ -1,14 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
-    <item
-        android:id="@+id/nav_jobs"
-        android:title="Jobs"
-        android:icon="@drawable/briefcase"
-        />
+
     <item
         android:id="@+id/nav_home"
         android:title="Home"
         android:icon="@drawable/round"
+        />
+    <item
+        android:id="@+id/nav_jobs"
+        android:title="Jobs"
+        android:icon="@drawable/briefcase"
         />
 
     <item

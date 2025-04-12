@@ -192,23 +192,81 @@ class BookingHistoryAdapter(private val jobs: MutableList<BookingHistory>, priva
                     }
                 }
             }
-/*
-// Fetch CURRENT user's type to determine if feedback buttons should be visible
         if (currentUserId != null) {
             firestore.collection("users").document(currentUserId)
                 .get()
                 .addOnSuccessListener { userSnapshot ->
-                    val currentUserType = userSnapshot.getString("user_type")
+                    userType = userSnapshot.getString("user_type")
 
-                    if (currentUserType == "Landowner") {
-                        holder.btnFeedbackProcessor.visibility = View.VISIBLE
-                        holder.btnFeedbackSurveyor.visibility = View.VISIBLE
+                    // ✅ Log the user type for debugging
+                    Log.d("BookingAdapter", "Current user type: $userType")
+
+                    // Check the userType and adjust the visibility accordingly
+                    when (userType) {
+                        "Processor" -> {
+                            holder.contractPrice.visibility = View.GONE
+                            holder.downpayment.visibility = View.GONE
+                            holder.labelDown.visibility = View.GONE
+                            holder.labelPrice.visibility = View.GONE
+                            holder.labelAge.visibility = View.VISIBLE
+                            holder.age.visibility = View.VISIBLE
+                            holder.labelTin.visibility = View.VISIBLE
+                            holder.tin.visibility = View.VISIBLE
+                            holder.purposeLabel.visibility = View.GONE
+                            holder.purposeOfSurvey.visibility = View.GONE
+                            holder.propertyTypeLabel.visibility = View.GONE
+                            holder.propertyLabel.visibility = View.GONE
+                            holder.cardViewProcessor.visibility = View.VISIBLE
+                            holder.cardViewSurveyor.visibility = View.GONE
+                            holder.btnFeedbackSurveyor.visibility = View.GONE
+                            holder.btnFeedbackProcessor.visibility = View.GONE
+                        }
+
+                        "Surveyor" -> {
+                            holder.contractPrice.visibility = View.VISIBLE
+                            holder.downpayment.visibility = View.VISIBLE
+                            holder.labelDown.visibility = View.VISIBLE
+                            holder.labelPrice.visibility = View.VISIBLE
+                            holder.labelAge.visibility = View.GONE
+                            holder.age.visibility = View.GONE
+                            holder.labelTin.visibility = View.GONE
+                            holder.tin.visibility = View.GONE
+                            holder.purposeLabel.visibility = View.VISIBLE
+                            holder.purposeOfSurvey.visibility = View.VISIBLE
+                            holder.propertyTypeLabel.visibility = View.VISIBLE
+                            holder.propertyLabel.visibility = View.VISIBLE
+                            holder.cardViewSurveyor.visibility = View.VISIBLE
+                            holder.cardViewProcessor.visibility = View.GONE
+                            holder.btnFeedbackSurveyor.visibility = View.GONE
+                            holder.btnFeedbackProcessor.visibility = View.GONE
+                        }
+
+                        "Landowner" -> {
+                            holder.btnFeedbackSurveyor.visibility = View.VISIBLE
+                            holder.btnFeedbackProcessor.visibility = View.VISIBLE
+                            holder.cardViewProcessor.visibility = View.GONE
+                            holder.cardViewSurveyor.visibility = View.GONE
+                        }
+
+                        else -> {
+                            holder.contractPrice.visibility = View.VISIBLE
+                            holder.downpayment.visibility = View.VISIBLE
+                            holder.labelDown.visibility = View.VISIBLE
+                            holder.labelPrice.visibility = View.VISIBLE
+                            holder.btnFeedbackSurveyor.visibility = View.GONE
+                            holder.btnFeedbackProcessor.visibility = View.GONE
+                            holder.cardViewProcessor.visibility = View.GONE
+                            holder.cardViewSurveyor.visibility = View.GONE
+                        }
                     }
                 }
                 .addOnFailureListener { e ->
-                    Log.e("BookingAdapter", "Error fetching current user data: ${e.message}")
+                    Log.e("BookingAdapter", "Error fetching user data: ${e.message}")
                 }
-        }*/
+        } else {
+            Log.e("ConfirmBooking", "No user is currently signed in.")
+        }
+
 
 
         // Bind job details

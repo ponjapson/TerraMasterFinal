@@ -1289,7 +1289,7 @@ class JobsAdapter(private val jobs: MutableList<Job>, private val context: Conte
     fun updateJobs(newJobs: List<Job>) {
         jobs.clear()
         jobs.addAll(newJobs)
-        notifyDataSetChanged()
+        notifyDataSetChanged()  // Refresh UI
     }
 
     // Utility function to format Timestamp to String

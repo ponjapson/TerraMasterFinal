@@ -32,8 +32,8 @@ class MainActivity : AppCompatActivity() {
         bottomNavigationView.itemIconTintList = null
 
         // Initialize the default fragment (Jobs)
-        replaceFragment(FragmentJobs(), false, true)
-        bottomNavigationView.selectedItemId = R.id.nav_jobs
+        replaceFragment(FragmentDashboard(), false, true)
+        bottomNavigationView.selectedItemId = R.id.nav_home
 
         val user = FirebaseAuth.getInstance().currentUser
         if (user != null) {
@@ -42,15 +42,16 @@ class MainActivity : AppCompatActivity() {
 
         bottomNavigationView.setOnNavigationItemSelectedListener { item ->
             when (item.itemId) {
+                R.id.nav_home -> {
+                    replaceFragment(FragmentDashboard(), true)
+                    true
+                }
+
                 R.id.nav_jobs -> {
                     replaceFragment(FragmentJobs(), false, true)
                     true
                 }
 
-                R.id.nav_home -> {
-                    replaceFragment(FragmentHome(), true)
-                    true
-                }
 
                 R.id.nav_chatbot -> {
                     replaceFragment(FragmentChatbot(), true)
@@ -98,7 +99,7 @@ class MainActivity : AppCompatActivity() {
         val currentFragment = supportFragmentManager.findFragmentById(R.id.fragment_container)
 
         // Handle the back press for FeedHostFragment
-        if (currentFragment is FragmentJobs) {
+        if (currentFragment is FragmentDashboard) {
             finish()  // Close the activity when on FeedHostFragment
         } else {
             val backStackEntryCount = supportFragmentManager.backStackEntryCount
@@ -114,8 +115,8 @@ class MainActivity : AppCompatActivity() {
                 }
             } else {
                 // If only 1 fragment is in the back stack, navigate to FeedHostFragment
-                replaceFragment(FragmentJobs(), false, true)
-                updateBottomNavigationVisibility(FragmentHome())  // Ensure BottomNavigationView is visible
+                replaceFragment(FragmentDashboard(), false, true)
+                updateBottomNavigationVisibility(FragmentDashboard())  // Ensure BottomNavigationView is visible
             }
         }
     }
@@ -147,7 +148,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun updateBottomNavigationVisibility(fragment: Fragment) {
         // Show BottomNavigationView for main fragments
-        if (fragment is FragmentHome || fragment is FragmentChatbot ||
+        if (fragment is FragmentDashboard || fragment is FragmentChatbot ||
             fragment is FragmentMessage || fragment is FragmentProfile || fragment is FragmentJobs || fragment is FragmentProfileLandowner) {
             showBottomNavigationBar()  // Show BottomNavigationView
         } else {

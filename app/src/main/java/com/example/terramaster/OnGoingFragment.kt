@@ -45,18 +45,16 @@ class OnGoingFragment : Fragment(), OnPaymentClickListener {
         val pendingJobs = mutableListOf<OnGoingJobs>()
         var jobCount = 0 // Track completed address conversions
 
+        // Fetch bookings where user is the bookedUserId
         firestore.collection("bookings")
             .whereEqualTo("bookedUserId", userId)
-            .whereEqualTo("stage", "ongoing") // ✅ Only fetch "request" stage
+            .whereEqualTo("stage", "ongoing")
             .orderBy("timestamp", Query.Direction.DESCENDING)
             .addSnapshotListener { bookedUserSnapshots, error ->
                 if (error != null) {
                     Log.e("RequestTabFragment", "Error listening for artist requests: ${error.message}")
                     return@addSnapshotListener
                 }
-
-                pendingJobs.clear() // ✅ Clear list before adding new items
-                jobCount = 0 // Reset job count
 
                 bookedUserSnapshots?.let { snapshots ->
                     if (snapshots.isEmpty) {
@@ -67,7 +65,7 @@ class OnGoingFragment : Fragment(), OnPaymentClickListener {
                     snapshots.documents.forEach { doc ->
                         val job = createJobFromDocument(doc)
 
-                        // ✅ Ensure job is still in "request" stage before adding
+                        // Only process jobs in the "ongoing" stage
                         if (job.stage != "ongoing") return@forEach
 
                         val pdfUrl = doc.getString("pdfUrl")
@@ -91,26 +89,34 @@ class OnGoingFragment : Fragment(), OnPaymentClickListener {
     private fun fetchBookingUserJobs(userId: String, pendingJobs: MutableList<OnGoingJobs>) {
         var jobCount = 0 // Track completed address conversions
 
+        // Fetch bookings where user is the landOwnerUserId
         firestore.collection("bookings")
             .whereEqualTo("landOwnerUserId", userId)
-            .whereEqualTo("stage", "ongoing") // ✅ Only fetch "request" stage
+            .whereEqualTo("stage", "ongoing")
             .orderBy("timestamp", Query.Direction.DESCENDING)
             .addSnapshotListener { bookingUserSnapshots, clientError ->
                 if (clientError != null) {
-                    Log.e("RequestTabFragment", "Error listening for client requests: ${clientError.message}")
+                    Log.e(
+                        "RequestTabFragment",
+                        "Error listening for client requests: ${clientError.message}"
+                    )
                     return@addSnapshotListener
                 }
 
                 bookingUserSnapshots?.let { snapshots ->
                     if (snapshots.isEmpty) {
-                        updateAdapter(pendingJobs) // ✅ No new jobs, update adapter immediately
+                        pendingJobs.clear()
+                        updateAdapter(pendingJobs)
                         return@let
                     }
 
+                    pendingJobs.clear()
+                    jobCount = 0
+
+                    Log.d("Firestore", "Snapshot listener triggered")
+
                     snapshots.documents.forEach { doc ->
                         val job = createJobFromDocument(doc)
-
-                        // ✅ Ensure job is still in "request" stage before adding
                         if (job.stage != "ongoing") return@forEach
 
                         val pdfUrl = doc.getString("pdfUrl")
@@ -123,13 +129,17 @@ class OnGoingFragment : Fragment(), OnPaymentClickListener {
                             jobCount++
 
                             if (jobCount == snapshots.size()) {
-                                updateAdapter(pendingJobs)
+                                activity?.runOnUiThread {
+                                    updateAdapter(pendingJobs)
+                                }
                             }
                         }
                     }
                 }
+
             }
     }
+
     private fun createJobFromDocument(doc: DocumentSnapshot): OnGoingJobs {
         return OnGoingJobs(
             bookingId = doc.id,
@@ -155,9 +165,11 @@ class OnGoingFragment : Fragment(), OnPaymentClickListener {
     }
 
     private fun updateAdapter(jobs: MutableList<OnGoingJobs>) {
+        // Update your adapter with the new data
         pendingAdapter?.updateJobs(jobs)
         pendingAdapter?.notifyDataSetChanged()
     }
+
 
     private fun extractFileNameFromUrl(url: String?): String {
         return Uri.parse(url).lastPathSegment ?: "Unknown File"

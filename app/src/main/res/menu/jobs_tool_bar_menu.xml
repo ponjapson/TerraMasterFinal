@@ -7,10 +7,14 @@
         android:title="Search"
         app:showAsAction="always"/>
     <item
+        android:id="@+id/action_knowledge"
+        android:icon="@drawable/openbook"
+        android:title="Search"
+        app:showAsAction="always"/>
+    <item
         android:id="@+id/action_notification"
         android:icon="@drawable/bell"
         android:title="Search"
         app:showAsAction="always"/>
-
 
 </menu>

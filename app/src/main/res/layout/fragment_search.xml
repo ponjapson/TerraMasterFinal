@@ -80,55 +80,7 @@
             android:visibility="gone"
             android:scrollbars="none"/>
 
-        <!-- Recommendation Section -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="center_vertical"
-            android:paddingTop="16dp"
-            android:layout_marginTop="200dp">
 
-            <TextView
-                android:id="@+id/recommendationTextView"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Recommendations"
-                android:textSize="16sp"
-                android:textColor="@color/black"
-                android:textStyle="bold"
-                android:fontFamily="@font/poppinsreg"/>
-
-            <View
-                android:layout_width="0dp"
-                android:layout_height="1dp"
-                android:layout_weight="1"/>
-
-            <Spinner
-                android:id="@+id/spinnerSort"
-                android:layout_width="150dp"
-                android:layout_height="40dp"
-                android:background="@drawable/custom_edit_text"
-                android:padding="8dp"/>
-        </LinearLayout>
-
-        <!-- RecyclerView (For Search Results) -->
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/recommendationRecyclerView"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:visibility="visible"
-            android:nestedScrollingEnabled="false"
-            android:scrollbars="none"
-            android:layout_marginTop="12dp"/>
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/processorRecyclerView"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:visibility="visible"
-            android:nestedScrollingEnabled="false"
-            android:scrollbars="none"
-            android:layout_marginTop="12dp"/>
 
     </LinearLayout>
 </androidx.core.widget.NestedScrollView>

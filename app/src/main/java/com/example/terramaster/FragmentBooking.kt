@@ -67,10 +67,10 @@ class FragmentBooking : Fragment() {
             requireActivity().onBackPressed()
             return
         }
-        requireActivity().window.setFlags(
+       /* requireActivity().window.setFlags(
             WindowManager.LayoutParams.FLAG_SECURE,
             WindowManager.LayoutParams.FLAG_SECURE
-        )
+        )*/
 
         // Initialize the views
 
@@ -702,8 +702,7 @@ class FragmentBooking : Fragment() {
     // Launch scanner
     private fun launchScanner() {
         val options = GmsDocumentScannerOptions.Builder()
-            .setGalleryImportAllowed(true)  // Allow importing from gallery
-            .setPageLimit(10)               // Max 2 pages
+            .setGalleryImportAllowed(true)
             .setResultFormats(GmsDocumentScannerOptions.RESULT_FORMAT_PDF) // Only PDF format
             .setScannerMode(GmsDocumentScannerOptions.SCANNER_MODE_FULL)
             .build()
@@ -740,12 +739,12 @@ class FragmentBooking : Fragment() {
         return "booking_scan_$timeStamp.pdf"
     }
 
-    override fun onResume() {
+   /* override fun onResume() {
         super.onResume()
         requireActivity().window.setFlags(
             WindowManager.LayoutParams.FLAG_SECURE,
             WindowManager.LayoutParams.FLAG_SECURE
         )
-    }
+    }*/
 
 }

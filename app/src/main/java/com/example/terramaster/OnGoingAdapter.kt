@@ -166,8 +166,6 @@ class OnGoingAdapter(private val jobs: MutableList<OnGoingJobs>, private val con
                         holder.propertyTypeLabel.visibility = View.GONE
                         holder.propertyLabel.visibility = View.GONE
                         holder.cardViewProcessor.visibility = View.VISIBLE
-                        holder.btnNextProcessor.visibility = View.VISIBLE
-                        holder.btnPreviousProcessor.visibility = View.VISIBLE
                     }
 
                     "Surveyor" -> {
@@ -185,8 +183,12 @@ class OnGoingAdapter(private val jobs: MutableList<OnGoingJobs>, private val con
                         holder.propertyTypeLabel.visibility = View.VISIBLE
                         holder.propertyLabel.visibility = View.VISIBLE
                         holder.cardViewSurveyor.visibility = View.VISIBLE
-                        holder.btnPreviousSurveyor.visibility = View.VISIBLE
-                        holder.btnNextSurveyor.visibility = View.VISIBLE
+                    }
+                    "Landowner" -> {
+                        holder.btnPreviousSurveyor.visibility = View.GONE
+                        holder.btnNextSurveyor.visibility = View.GONE
+                        holder.btnNextProcessor.visibility = View.VISIBLE
+                        holder.btnPreviousProcessor.visibility = View.VISIBLE
                     }
 
                     else -> {
