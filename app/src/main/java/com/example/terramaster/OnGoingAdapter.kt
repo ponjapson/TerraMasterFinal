@@ -187,8 +187,8 @@ class OnGoingAdapter(private val jobs: MutableList<OnGoingJobs>, private val con
                     "Landowner" -> {
                         holder.btnPreviousSurveyor.visibility = View.GONE
                         holder.btnNextSurveyor.visibility = View.GONE
-                        holder.btnNextProcessor.visibility = View.VISIBLE
-                        holder.btnPreviousProcessor.visibility = View.VISIBLE
+                        holder.btnNextProcessor.visibility = View.GONE
+                        holder.btnPreviousProcessor.visibility = View.GONE
                     }
 
                     else -> {

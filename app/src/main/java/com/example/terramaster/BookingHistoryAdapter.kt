@@ -417,10 +417,10 @@ class BookingHistoryAdapter(private val jobs: MutableList<BookingHistory>, priva
 
         val bookingId = job.bookingId
 
-        if (currentUserId != null && bookingId.isNotEmpty()) {
+        if (currentUserId == job.bookedUserId && bookingId.isNotEmpty()) {
             FirebaseFirestore.getInstance()
                 .collection("Feedback")
-                .whereEqualTo("landOwnerUserId", currentUserId)
+                .whereEqualTo("landOwnerUserId", job.landOwnerUserId)
                 .whereEqualTo("bookingId", bookingId)
                 .get()
                 .addOnSuccessListener { snapshot ->
@@ -436,10 +436,13 @@ class BookingHistoryAdapter(private val jobs: MutableList<BookingHistory>, priva
                     // Optional: log error
                     holder.btnFeedbackSurveyor.visibility = View.VISIBLE // Default to visible on error
                 }
+        } else {
+            // ❌ Not the booked user — hide the button
+            holder.btnFeedbackSurveyor.visibility = View.GONE
         }
 
 
-        if (currentUserId != null && bookingId.isNotEmpty()) {
+        if (currentUserId == job.landOwnerUserId && bookingId.isNotEmpty()) {
             FirebaseFirestore.getInstance()
                 .collection("Feedback")
                 .whereEqualTo("landOwnerUserId", currentUserId)
@@ -447,18 +450,18 @@ class BookingHistoryAdapter(private val jobs: MutableList<BookingHistory>, priva
                 .get()
                 .addOnSuccessListener { snapshot ->
                     if (!snapshot.isEmpty) {
-                        // ✅ Feedback already exists for this booking — hide button
                         holder.btnFeedbackProcessor.visibility = View.GONE
                     } else {
-                        // ✅ No feedback yet — show button
                         holder.btnFeedbackProcessor.visibility = View.VISIBLE
                     }
                 }
                 .addOnFailureListener {
-                    // Optional: log error
-                    holder.btnFeedbackProcessor.visibility = View.VISIBLE // Default to visible on error
+                    holder.btnFeedbackProcessor.visibility = View.VISIBLE
                 }
+        } else {
+            holder.btnFeedbackProcessor.visibility = View.GONE // Hide for non-landowners
         }
+
 
 
 

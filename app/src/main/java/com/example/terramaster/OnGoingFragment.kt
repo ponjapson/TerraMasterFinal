@@ -45,7 +45,9 @@ class OnGoingFragment : Fragment(), OnPaymentClickListener {
         val pendingJobs = mutableListOf<OnGoingJobs>()
         var jobCount = 0 // Track completed address conversions
 
-        // Fetch bookings where user is the bookedUserId
+        Log.d("RequestTabFragment", "Loading jobs for userId (bookedUser): $userId")
+
+        // First: Fetch jobs where user is the bookedUser (e.g., an artist)
         firestore.collection("bookings")
             .whereEqualTo("bookedUserId", userId)
             .whereEqualTo("stage", "ongoing")
@@ -56,16 +58,19 @@ class OnGoingFragment : Fragment(), OnPaymentClickListener {
                     return@addSnapshotListener
                 }
 
+                Log.d("RequestTabFragment", "Snapshot listener triggered for bookedUserId")
                 bookedUserSnapshots?.let { snapshots ->
+                    Log.d("RequestTabFragment", "BookedUser snapshot size: ${snapshots.size()}")
                     if (snapshots.isEmpty) {
-                        fetchBookingUserJobs(userId, pendingJobs) // If no jobs, check for landowner jobs
+                        // If no jobs found for bookedUser, check for landOwner
+                        fetchBookingUserJobs(userId, pendingJobs)
                         return@let
                     }
 
                     snapshots.documents.forEach { doc ->
                         val job = createJobFromDocument(doc)
 
-                        // Only process jobs in the "ongoing" stage
+                        // Skip if not in the correct stage (safety check)
                         if (job.stage != "ongoing") return@forEach
 
                         val pdfUrl = doc.getString("pdfUrl")
@@ -74,6 +79,7 @@ class OnGoingFragment : Fragment(), OnPaymentClickListener {
 
                         convertCoordinatesToAddress(job.latitude, job.longitude) { address ->
                             job.address = address
+                            Log.d("RequestTabFragment", "Geocoding result: $address for coordinates: (${job.latitude}, ${job.longitude})")
                             pendingJobs.add(job)
                             jobCount++
 
@@ -85,6 +91,7 @@ class OnGoingFragment : Fragment(), OnPaymentClickListener {
                 }
             }
     }
+
 
     private fun fetchBookingUserJobs(userId: String, pendingJobs: MutableList<OnGoingJobs>) {
         var jobCount = 0 // Track completed address conversions
