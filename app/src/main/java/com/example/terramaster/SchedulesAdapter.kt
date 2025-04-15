@@ -18,7 +18,7 @@ import java.text.SimpleDateFormat
 import java.util.Locale
 
 class SchedulesAdapter(
-    private var schedules: List<Schedules>, private val context: Context
+    private var schedules: List<Schedules>, private val context: Context,
 ) : RecyclerView.Adapter<SchedulesAdapter.ScheduleViewHolder>() {
 
     inner class ScheduleViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {

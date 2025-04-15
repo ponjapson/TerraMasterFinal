@@ -154,7 +154,8 @@ class RequestTabFragment : Fragment(), OnPaymentClickListener {
             propertyType = doc.getString("propertyType") ?: "",
             purposeOfSurvey = doc.getString("purposeOfSurvey") ?: "",
             contactNumber = doc.getString("contactNumber") ?: "",
-            emailAddress = doc.getString("emailAddress") ?: ""
+            emailAddress = doc.getString("emailAddress") ?: "",
+            lackingNote = doc.getString("lackingNote") ?: ""
         )
     }
 

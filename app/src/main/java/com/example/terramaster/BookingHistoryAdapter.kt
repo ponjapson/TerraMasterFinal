@@ -167,7 +167,7 @@ class BookingHistoryAdapter(private val jobs: MutableList<BookingHistory>, priva
                         holder.propertyTypeLabel.visibility = View.GONE
                         holder.propertyLabel.visibility = View.GONE
                         holder.cardViewProcessor.visibility = View.VISIBLE
-                        holder.btnFeedbackProcessor.visibility = View.GONE
+                        holder.btnFeedbackProcessor.visibility = View.VISIBLE
                     }
 
                     "Surveyor" -> {
@@ -184,7 +184,7 @@ class BookingHistoryAdapter(private val jobs: MutableList<BookingHistory>, priva
                         holder.propertyTypeLabel.visibility = View.VISIBLE
                         holder.propertyLabel.visibility = View.VISIBLE
                         holder.cardViewSurveyor.visibility = View.VISIBLE
-                        holder.btnFeedbackSurveyor.visibility = View.GONE
+                        holder.btnFeedbackSurveyor.visibility = View.VISIBLE
                     }
 
                     else -> {
@@ -218,7 +218,6 @@ class BookingHistoryAdapter(private val jobs: MutableList<BookingHistory>, priva
                             holder.propertyLabel.visibility = View.GONE
                             holder.cardViewProcessor.visibility = View.VISIBLE
                             holder.cardViewSurveyor.visibility = View.GONE
-                            holder.btnFeedbackSurveyor.visibility = View.GONE
                             holder.btnFeedbackProcessor.visibility = View.GONE
                         }
 
@@ -238,14 +237,10 @@ class BookingHistoryAdapter(private val jobs: MutableList<BookingHistory>, priva
                             holder.cardViewSurveyor.visibility = View.VISIBLE
                             holder.cardViewProcessor.visibility = View.GONE
                             holder.btnFeedbackSurveyor.visibility = View.GONE
-                            holder.btnFeedbackProcessor.visibility = View.GONE
                         }
 
                         "Landowner" -> {
-                            holder.btnFeedbackSurveyor.visibility = View.VISIBLE
-                            holder.btnFeedbackProcessor.visibility = View.VISIBLE
-                            holder.cardViewProcessor.visibility = View.GONE
-                            holder.cardViewSurveyor.visibility = View.GONE
+
                         }
 
                         else -> {

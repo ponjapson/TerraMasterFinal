@@ -1,5 +1,6 @@
 package com.example.terramaster
 
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -26,6 +27,8 @@ class FeedbackAdapter(private val feedbackList: List<Feedback>) : RecyclerView.A
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val feedback = feedbackList[position]
 
+        Log.e("Name", feedback.first_name)
+        Log.e("Name", feedback.last_name)
         // Set name
         holder.textUsername.text = "${feedback.first_name} ${feedback.last_name}"
 

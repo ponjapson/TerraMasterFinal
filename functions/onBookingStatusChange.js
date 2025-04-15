@@ -225,5 +225,25 @@ exports.onBookingStatusChange = functions.firestore
                 console.error('FCM token not found for landowner:', landOwnerUserId);
             }
         }
+        else if (bookingData.status === 'Verified') {
+            const landOwnerUserId = bookingData.landOwnerUserId;
+            const bookedUserId = bookingData.bookedUserId; 
+        
+            
+            const landownerDoc = await db.collection('users').doc(landOwnerUserId).get();
+            const landOwnerFcmToken = landownerDoc.data()?.fcmToken;
+        
+            // Prepare the notification message
+            const title = 'Booking Confirmed';
+            const message = `The processor has verified the document. Please submit it to the office.`;
+        
+            // Send the notification to the client
+            if (landOwnerFcmToken) {
+                await sendNotification(landOwnerFcmToken, title, message, landOwnerUserId, bookedUserId, 'processor edit details');
+            } else {
+                console.error('FCM token not found for landowner:', landOwnerFcmToken);
+            }
+        
+        }
         
     });

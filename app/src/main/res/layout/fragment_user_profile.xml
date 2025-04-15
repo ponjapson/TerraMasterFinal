@@ -72,13 +72,28 @@
         android:isIndicator="true"
         />
 
-    <Button
-        android:id="@+id/Message"
-        android:layout_width="200dp"
-        android:layout_height="40dp"
-        android:text="Message"
-        android:layout_marginTop="20dp"
-        android:layout_gravity="center_horizontal"/>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginTop="10dp">
+            <Button
+                android:id="@+id/Message"
+                android:layout_width="200dp"
+                android:layout_height="40dp"
+                android:text="Message"
+                android:layout_marginTop="20dp"
+                android:layout_weight="1"
+                android:layout_gravity="center_horizontal"/>
+            <Button
+                android:id="@+id/bookNow"
+                android:layout_width="200dp"
+                android:layout_height="40dp"
+                android:text="Book Now"
+                android:layout_marginTop="20dp"
+                android:layout_weight="1"
+                android:layout_gravity="center_horizontal"/>
+    </LinearLayout>
 
     <TextView
         android:id="@+id/reviews"

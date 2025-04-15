@@ -20,13 +20,14 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
+        android:orientation="vertical"
         android:paddingLeft="10dp"
         android:paddingRight="10dp">
 
         <LinearLayout
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
 
             <de.hdodenhof.circleimageview.CircleImageView
                 android:id="@+id/profile_image"
@@ -36,228 +37,346 @@
                 android:scaleType="centerCrop"
                 android:layout_marginEnd="8dp"
                 android:clipToOutline="true" />
-        </LinearLayout>
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:layout_marginLeft="10dp">
 
             <TextView
                 android:id="@+id/user_name"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:fontFamily="@font/poppinsm"
                 android:text="User Name"
-                android:textStyle="bold"
+                android:textColor="@color/black"
                 android:textSize="16sp"
-                android:textColor="@color/black"
-                android:fontFamily="@font/poppinsm" />
+                android:textStyle="bold" />
+        </LinearLayout>
 
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="10dp"
+            android:orientation="vertical">
 
-            <TextView
+            <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Start"
-                android:textSize="12sp"
-                android:layout_marginTop="4dp"
-                android:textColor="@color/black" />
+                android:layout_height="match_parent"
+                android:orientation="horizontal">
 
-            <TextView
-                android:id="@+id/booking_start_date"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Start Date"
-                android:textSize="14sp"
-                android:textColor="@color/black"
-                android:layout_marginTop="4dp" />
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Contact Number"
-                android:textSize="12sp"
-                android:layout_marginTop="4dp"
-                android:textColor="@color/black" />
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:text="Start Date:"
+                    android:textColor="@color/black"
+                    android:textSize="14sp" />
 
-            <TextView
-                android:id="@+id/contactNumber"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Contact Number"
-                android:textSize="14sp"
-                android:textColor="@color/black"
-                android:layout_marginTop="4dp" />
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Email Address"
-                android:textSize="12sp"
-                android:layout_marginTop="4dp"
-                android:textColor="@color/black" />
+                <TextView
+                    android:id="@+id/booking_start_date"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:text="Start Date"
+                    android:textColor="@color/black"
+                    android:textSize="14sp"
+                    android:layout_marginStart="80dp"/>
+            </LinearLayout>
 
-            <TextView
-                android:id="@+id/emailAddress"
+            <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Email Address"
-                android:textSize="14sp"/>
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Address"
-                android:textSize="12sp"
-                android:layout_marginTop="4dp"
-                android:textColor="@color/black" />
+                android:layout_height="match_parent"
+                android:orientation="horizontal">
 
-            <TextView
-                android:id="@+id/address"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Address"
-                android:textSize="14sp"
-                android:textColor="@color/black"
-                android:layout_marginTop="4dp" />
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Documents"
-                android:textSize="12sp"
-                android:layout_marginTop="4dp"
-                android:textColor="@color/black" />
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:text="Contact Number:"
+                    android:textColor="@color/black"
+                    android:textSize="14sp" />
 
-            <TextView
-                android:id="@+id/pdfFileName"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="FileName"
-                android:textSize="14sp"
-                android:textColor="@android:color/holo_blue_light" />
+                <TextView
+                    android:id="@+id/contactNumber"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:text="Contact Number"
+                    android:textColor="@color/black"
+                    android:textSize="14sp"
+                    android:layout_marginStart="40dp"/>
+            </LinearLayout>
 
-            <TextView
+            <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Status"
-                android:textSize="12sp"
-                android:layout_marginTop="4dp"
-                android:textColor="@color/black" />
-            <TextView
-                android:id="@+id/requestStatus"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Status"
-                android:textSize="14sp"
-                android:layout_marginTop="4dp"
-                android:textColor="@color/black" />
-            <TextView
-                android:id="@+id/labelAge"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Age"
-                android:textSize="12sp"
-                android:layout_marginTop="4dp"
-                android:textColor="@color/black" />
+                android:layout_height="match_parent"
+                android:orientation="horizontal">
 
-            <TextView
-                android:id="@+id/age"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Age"
-                android:textSize="14sp"
-                android:layout_marginTop="4dp"
-                android:textColor="@color/black" />
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:text="Email Address: "
+                    android:textColor="@color/black"
+                    android:textSize="14sp" />
 
-            <TextView
-                android:id="@+id/labelTin"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Tax Identification Number"
-                android:textSize="12sp"
-                android:layout_marginTop="4dp"
-                android:textColor="@color/black" />
+                <TextView
+                    android:id="@+id/emailAddress"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:text="Email Address"
+                    android:textSize="14sp"
+                    android:layout_marginStart="49dp"/>
+            </LinearLayout>
 
-            <TextView
-                android:id="@+id/Tin"
+            <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Tax Identification Number"
-                android:textSize="14sp"
-                android:layout_marginTop="4dp"
-                android:textColor="@color/black" />
+                android:layout_height="match_parent"
+                android:orientation="horizontal">
 
-            <TextView
-                android:id="@+id/purposeLabel"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Purpose of survey"
-                android:textSize="12sp"
-                android:layout_marginTop="4dp"
-                android:textColor="@color/black" />
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:text="Address: "
+                    android:textColor="@color/black"
+                    android:textSize="14sp" />
 
-            <TextView
-                android:id="@+id/purposeOfSuurvey"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Purpose of survey"
-                android:textSize="14sp"
-                android:layout_marginTop="4dp"
-                android:textColor="@color/black" />
+                <TextView
+                    android:id="@+id/address"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:text="Address"
+                    android:textColor="@color/black"
+                    android:textSize="14sp"
+                    android:layout_marginStart="88dp"/>
+            </LinearLayout>
 
-            <TextView
-                android:id="@+id/propertyLabel"
+            <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Property Type"
-                android:textSize="12sp"
-                android:layout_marginTop="4dp"
-                android:textColor="@color/black" />
+                android:layout_height="match_parent"
+                android:orientation="horizontal">
 
-            <TextView
-                android:id="@+id/propertyTypeLabel"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Property Type"
-                android:textSize="14sp"
-                android:layout_marginTop="4dp"
-                android:textColor="@color/black" />
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:text="Documents: "
+                    android:textColor="@color/black"
+                    android:textSize="14sp" />
 
-            <TextView
-                android:id="@+id/labeldown"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Downpayment"
-                android:textSize="12sp"
-                android:layout_marginTop="4dp"
-                android:textColor="@color/black"
-                android:visibility="gone"/>
+                <TextView
+                    android:id="@+id/pdfFileName"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:text="FileName"
+                    android:textColor="@android:color/holo_blue_light"
+                    android:textSize="14sp"
+                    android:layout_marginStart="69dp"/>
+            </LinearLayout>
 
-            <TextView
-                android:id="@+id/booking_downpayment"
+            <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Amount"
-                android:textSize="14sp"
-                android:layout_marginTop="4dp"
-                android:textColor="@color/black"
-                android:visibility="gone"/>
-            <TextView
-                android:id="@+id/labelPrice"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Contract Price"
-                android:textSize="12sp"
-                android:layout_marginTop="4dp"
-                android:textColor="@color/black"
-                android:visibility="gone"/>
+                android:layout_height="match_parent"
+                android:orientation="horizontal">
 
-            <TextView
-                android:id="@+id/contractPrice"
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:text="Status: "
+                    android:textColor="@color/black"
+                    android:textSize="14sp" />
+
+                <TextView
+                    android:id="@+id/requestStatus"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:text="Status"
+                    android:textColor="@color/black"
+                    android:textSize="14sp"
+                    android:layout_marginStart="100dp"/>
+            </LinearLayout>
+
+            <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Contract Price"
-                android:textSize="14sp"
-                android:layout_marginTop="4dp"
-                android:textColor="@color/black"
-                android:visibility="gone"/>
+                android:layout_height="match_parent"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:id="@+id/labelAge"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:text="Age: "
+                    android:textColor="@color/black"
+                    android:textSize="14sp" />
+
+                <TextView
+                    android:id="@+id/age"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:text="Age"
+                    android:textColor="@color/black"
+                    android:textSize="14sp"
+                    android:layout_marginStart="117dp"/>
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:id="@+id/labelTin"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:text="Tax Identification Number: "
+                    android:textColor="@color/black"
+                    android:textSize="12sp" />
+
+                <TextView
+                    android:id="@+id/Tin"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:text="Tax Ide"
+                    android:textColor="@color/black"
+                    android:textSize="14sp" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:id="@+id/purposeLabel"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:text="Purpose of survey: "
+                    android:textColor="@color/black"
+                    android:textSize="14sp" />
+
+                <TextView
+                    android:id="@+id/purposeOfSuurvey"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:text="Purpose of survey"
+                    android:textColor="@color/black"
+                    android:textSize="14sp"
+                    android:layout_marginStart="28dp"/>
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:id="@+id/propertyLabel"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:text="Property Type: "
+                    android:textColor="@color/black"
+                    android:textSize="14sp" />
+
+                <TextView
+                    android:id="@+id/propertyTypeLabel"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:text="Property Type"
+                    android:textColor="@color/black"
+                    android:textSize="14sp"
+                    android:layout_marginStart="53dp"/>
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:id="@+id/labeldown"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:text="Downpayment: "
+                    android:textColor="@color/black"
+                    android:textSize="14sp"
+                    android:visibility="gone" />
+
+                <TextView
+                    android:id="@+id/booking_downpayment"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:text="Amount"
+                    android:textColor="@color/black"
+                    android:textSize="14sp"
+                    android:visibility="gone"
+                    android:layout_marginStart="48dp"/>
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:id="@+id/labelPrice"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:text="Contract Price: "
+                    android:textColor="@color/black"
+                    android:textSize="14sp"
+                    android:visibility="gone" />
+
+                <TextView
+                    android:id="@+id/contractPrice"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:text="Contract Price"
+                    android:textColor="@color/black"
+                    android:textSize="14sp"
+                    android:visibility="gone"
+                    android:layout_marginStart="51dp"/>
+            </LinearLayout>
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:id="@+id/labelLackingNote"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:text="Note:"
+                    android:textColor="@color/black"
+                    android:textSize="14sp"
+                    android:visibility="gone" />
+
+                <TextView
+                    android:id="@+id/lackingNote"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:text="Contract Price"
+                    android:textColor="#FF0000"
+                    android:textSize="14sp"
+                    android:visibility="gone"
+                    android:layout_marginStart="113dp"
+                     />
+            </LinearLayout>
         </LinearLayout>
     </LinearLayout>
     <LinearLayout

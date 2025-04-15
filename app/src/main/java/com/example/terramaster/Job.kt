@@ -22,6 +22,6 @@ data class Job(
     var propertyType: String = "",
     var purposeOfSurvey: String = "",
     var contactNumber: String = "",
-    var emailAddress: String = ""
-
+    var emailAddress: String = "",
+    var lackingNote: String? = null
 )

@@ -83,8 +83,9 @@ class JobsAdapter(private val jobs: MutableList<Job>, private val context: Conte
         val btn_confirm_processor: Button = view.findViewById(R.id.btn_confirm_processor)
         val btn_revise_processor: Button = view.findViewById(R.id.btn_revise_processor)
         val btn_quotation: Button = view.findViewById(R.id.btn_quotation)
+        val lackingNote: TextView = view.findViewById(R.id.lackingNote)
+        val labelLackingNote: TextView = view.findViewById(R.id.labelLackingNote)
     }
-
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): JobsViewHolder {
         val view = LayoutInflater.from(parent.context)
             .inflate(R.layout.request_booking_item, parent, false)
@@ -99,6 +100,7 @@ class JobsAdapter(private val jobs: MutableList<Job>, private val context: Conte
         val bookingUserId = job.landOwnerUserId // ID of the user who booked
         val bookedUserId = job.bookedUserId // ID of the user who is booked
         val bookingStatus = job.status
+
 
         // Determine the other user's ID based on the logged-in user's role
         val otherUserId =
@@ -205,6 +207,7 @@ class JobsAdapter(private val jobs: MutableList<Job>, private val context: Conte
         holder.propertyTypeLabel.text = job.propertyType
         holder.emailAddress.text = job.emailAddress
         holder.contactNumber.text = job.contactNumber
+
         holder.address.text = job.address
         holder.address.setOnClickListener {
             val fragment = FragmentMap()
@@ -363,6 +366,7 @@ class JobsAdapter(private val jobs: MutableList<Job>, private val context: Conte
                     val purposeOfSurvey = document.getString("purposeOfSurvey") ?: ""
                     val emailAddress = document.getString("emailAddress")
                     val contactNumber = document.getString("contactNumber")
+                    val addNote = document.getString("lackingNote")
 
                     val dialogView = LayoutInflater.from(context).inflate(R.layout.dialog_edit_booking, null)
 
@@ -399,6 +403,9 @@ class JobsAdapter(private val jobs: MutableList<Job>, private val context: Conte
                     val contractLabel: TextView = dialogView.findViewById(R.id.contractLabel)
                     val labelDown: TextView = dialogView.findViewById(R.id.labelDown)
 
+                    val addNoteEditText: EditText = dialogView.findViewById(R.id.addNote)
+                    val labelNote: TextView = dialogView.findViewById(R.id.labelNote)
+
 
                     convertCoordinatesToAddress(context, lat, lon) { address ->
                         addressEditText.setText(address)
@@ -420,6 +427,7 @@ class JobsAdapter(private val jobs: MutableList<Job>, private val context: Conte
                     ageEditText.setText(age.toString())
                     tinNumberEditText.setText(tinNumber.toString())
                     emailAddressEditText.setText(emailAddress.toString())
+                    addNoteEditText.setText(addNote.toString())
 
                     when (propertyType) {
                         "Residential" -> residentialRadioButton.isChecked = true
@@ -508,11 +516,21 @@ class JobsAdapter(private val jobs: MutableList<Job>, private val context: Conte
                             addressEditText.isFocusable = !isSurveyor
                             addressEditText.isFocusableInTouchMode = !isSurveyor
 
+                            if (userType.equals("Landowner", ignoreCase = true)) {
+                                addNoteEditText.visibility = View.GONE
+                                labelNote.visibility = View.GONE
+                            } else {
+                                addNoteEditText.visibility = View.VISIBLE
+                                labelNote.visibility = View.VISIBLE
+                            }
+
+
                             val dialog = AlertDialog.Builder(context)
                                 .setTitle("Edit Booking Details")
                                 .setView(dialogView)
                                 .setPositiveButton("Save") { _, _ ->
                                     val newAddress = addressEditText.text.toString()
+                                    val newNote = addNoteEditText.text.toString()
                                     val newDownpayment = downpaymentEditText.text.toString().toDoubleOrNull() ?: 0.0
                                     val newContractPrice = contractPriceEditText.text.toString().toDoubleOrNull() ?: 0.0
                                     val newStartDateTime = selectedStartDateTimeTextView.text.toString()
@@ -548,7 +566,8 @@ class JobsAdapter(private val jobs: MutableList<Job>, private val context: Conte
                                         holder,
                                         currentUserId,
                                         contactNumber,
-                                        emailAddressEditText
+                                        emailAddressEditText,
+                                        newNote
 
                                     )
 
@@ -592,6 +611,7 @@ class JobsAdapter(private val jobs: MutableList<Job>, private val context: Conte
                     val purposeOfSurvey = document.getString("purposeOfSurvey") ?: ""
                     val emailAddress = document.getString("emailAddress")
                     val contactNumber = document.getString("contactNumber")
+                    val addNote = document.getString("lackingNote")
 
                     val dialogView = LayoutInflater.from(context).inflate(R.layout.dialog_edit_booking, null)
 
@@ -628,6 +648,9 @@ class JobsAdapter(private val jobs: MutableList<Job>, private val context: Conte
                     val contractLabel: TextView = dialogView.findViewById(R.id.contractLabel)
                     val labelDown: TextView = dialogView.findViewById(R.id.labelDown)
 
+                    val addNoteEditText: TextView = dialogView.findViewById(R.id.addNote)
+                    val labelNote:TextView = dialogView.findViewById(R.id.labelNote)
+
 
                     convertCoordinatesToAddress(context, lat, lon) { address ->
                         addressEditText.setText(address)
@@ -649,6 +672,7 @@ class JobsAdapter(private val jobs: MutableList<Job>, private val context: Conte
                     ageEditText.setText(age.toString())
                     tinNumberEditText.setText(tinNumber.toString())
                     emailAddressEditText.setText(emailAddress.toString())
+                    addNoteEditText.setText(addNote.toString())
 
                     when (propertyType) {
                         "Residential" -> residentialRadioButton.isChecked = true
@@ -673,7 +697,6 @@ class JobsAdapter(private val jobs: MutableList<Job>, private val context: Conte
                             // Handle if purposeOfSurvey doesn't match any known value
                         }
                     }
-
                     firestore.collection("users").document(bookedUserId)
                         .get()
                         .addOnSuccessListener { userSnapshot ->
@@ -732,18 +755,27 @@ class JobsAdapter(private val jobs: MutableList<Job>, private val context: Conte
                             val userType = userDoc.getString("user_type") ?: ""
                             val isSurveyor = userType.equals("Surveyor", ignoreCase = true)
 
+
                             // Disable address editing if user is Surveyor
                             addressEditText.isEnabled = !isSurveyor
                             addressEditText.isFocusable = !isSurveyor
                             addressEditText.isFocusableInTouchMode = !isSurveyor
+
+                            if (userType.equals("Landowner", ignoreCase = true)) {
+                                addNoteEditText.visibility = View.GONE
+                                labelNote.visibility = View.GONE
+                            } else {
+                                addNoteEditText.visibility = View.VISIBLE
+                                labelNote.visibility = View.VISIBLE
+                            }
+
+
 
                             val dialog = AlertDialog.Builder(context)
                                 .setTitle("Edit Booking Details")
                                 .setView(dialogView)
                                 .setPositiveButton("Save") { _, _ ->
                                     val newAddress = addressEditText.text.toString()
-                                    val newDownpayment = downpaymentEditText.text.toString().toDoubleOrNull() ?: 0.0
-                                    val newContractPrice = contractPriceEditText.text.toString().toDoubleOrNull() ?: 0.0
                                     val newStartDateTime = selectedStartDateTimeTextView.text.toString()
                                         .replace("Start Date and Time: ", "")
 
@@ -767,6 +799,7 @@ class JobsAdapter(private val jobs: MutableList<Job>, private val context: Conte
                                     val emailAddressEditText = emailAddressEditText.text.toString()
                                     val newTinNumber = tinNumberEditText.text.toString()
                                     val newAge = ageEditText.text.toString()
+                                    val newNote = addNoteEditText.text.toString()
 
                                     val ageInt = if (newAge.isNotBlank()) newAge.toIntOrNull() ?: 0 else 0
                                     Log.d("Debug", "Age input: $newAge")
@@ -781,7 +814,8 @@ class JobsAdapter(private val jobs: MutableList<Job>, private val context: Conte
                                         holder,
                                         currentUserId,
                                         contactNumber,
-                                        emailAddressEditText
+                                        emailAddressEditText,
+                                        newNote
 
                                     )
 
@@ -913,6 +947,17 @@ class JobsAdapter(private val jobs: MutableList<Job>, private val context: Conte
                 }
             }
         }
+
+
+
+        if(job.lackingNote == null){
+            holder.lackingNote.visibility = View.GONE
+            holder.labelLackingNote.visibility = View.GONE
+        }else{
+            holder.lackingNote.visibility = View.VISIBLE
+            holder.labelLackingNote.visibility = View.VISIBLE
+        }
+        holder.lackingNote.text = job.lackingNote
 
     }
 
@@ -1052,6 +1097,8 @@ class JobsAdapter(private val jobs: MutableList<Job>, private val context: Conte
 
 
 
+
+
     // Function to display a DateTimePicker and return the selected date and time
     private fun showDateTimePicker(onDateTimeSelected: (String) -> Unit) {
         val currentDate = Calendar.getInstance()
@@ -1112,7 +1159,8 @@ class JobsAdapter(private val jobs: MutableList<Job>, private val context: Conte
         holder: JobsViewHolder,
         currentUserId: String,
         contactNumber: String,
-        emailAddress: String
+        emailAddress: String,
+        newNote: String
     ) {
 
         val bookingRef = firestore.collection("bookings").document(bookingId)
@@ -1156,7 +1204,8 @@ class JobsAdapter(private val jobs: MutableList<Job>, private val context: Conte
                         "propertyType" to selectedPropertyType,
                         "purposeOfSurvey" to selectedPurposeOfSurvey,
                         "contactNumber" to contactNumber,
-                        "emailAddress" to emailAddress
+                        "emailAddress" to emailAddress,
+                        "lackingNote" to newNote
                     )
 
                     bookingRef.update(updatedBookingData)
@@ -1173,6 +1222,7 @@ class JobsAdapter(private val jobs: MutableList<Job>, private val context: Conte
                             job.purposeOfSurvey = selectedPurposeOfSurvey
                             job.contactNumber = contactNumber
                             job.emailAddress = emailAddress
+                            job.lackingNote = newNote
 
                             Toast.makeText(context, "Booking updated successfully.", Toast.LENGTH_SHORT).show()
                             updateButtonsBasedOnStatus(job, position, holder, currentUserId)
@@ -1201,7 +1251,8 @@ class JobsAdapter(private val jobs: MutableList<Job>, private val context: Conte
         holder: JobsViewHolder,
         currentUserId: String,
         contactNumber: String,
-        emailAddress: String
+        emailAddress: String,
+        newNote: String
     ) {
 
         val bookingRef = firestore.collection("bookings").document(bookingId)
@@ -1243,7 +1294,8 @@ class JobsAdapter(private val jobs: MutableList<Job>, private val context: Conte
                         "contactNumber" to contactNumber,
                         "emailAddress" to emailAddress,
                         "age" to age,
-                        "tinNumber" to tinNumber
+                        "tinNumber" to tinNumber,
+                        "lackingNote" to newNote
                     )
 
                     bookingRef.update(updatedBookingData)
@@ -1258,6 +1310,7 @@ class JobsAdapter(private val jobs: MutableList<Job>, private val context: Conte
                             job.emailAddress = emailAddress
                             job.age = age.toString()
                             job.tinNumber = tinNumber
+                            job.lackingNote = newNote
 
                             Toast.makeText(context, "Booking updated successfully.", Toast.LENGTH_SHORT).show()
                             updateButtonsBasedOnStatus(job, position, holder, currentUserId)
@@ -1681,7 +1734,8 @@ class JobsAdapter(private val jobs: MutableList<Job>, private val context: Conte
                     holder.reviseButton.visibility = View.VISIBLE  // Artist can revise the booking
                     holder.declinedButton.visibility = View.VISIBLE  // Artist can decline the booking
                     // Pay Now button is hidden for the artist
-                    holder.confirmButton.visibility = View.GONE  // No confirm button for the artist
+                    holder.confirmButton.visibility = View.GONE // No confirm button for the artist
+
                 } else {
                     // Hide all buttons if current user is neither the artist nor client
                     holder.reviseButton.visibility = View.GONE

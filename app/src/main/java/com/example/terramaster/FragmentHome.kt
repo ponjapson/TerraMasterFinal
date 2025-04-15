@@ -28,7 +28,7 @@ import com.google.firebase.firestore.toObjects
 class FragmentHome: Fragment() {
     private lateinit var rvGuide: RecyclerView
     private lateinit var guideAdapter: GuideAdapter
-    private lateinit var guideAdapterProcessor: GuideAdapter
+    private lateinit var guideAdapterSurveyor: GuideAdapter
     private val guideList = mutableListOf<Guide>()
     private val guideListProcessor = mutableListOf<Guide>()
     private lateinit var etSearch: EditText
@@ -55,14 +55,14 @@ class FragmentHome: Fragment() {
         guideAdapter = GuideAdapter(requireContext(), guideList) { guideId, guideType ->
             navigateToGuide(guideId, guideType)
         }
-        guideAdapterProcessor = GuideAdapter(requireContext(), guideListProcessor) { guideId, guideType ->
+        guideAdapterSurveyor = GuideAdapter(requireContext(), guideListProcessor) { guideId, guideType ->
             navigateToGuide(guideId, guideType)
         }
 
         rvGuide.adapter = guideAdapter
         rvGuide.layoutManager = LinearLayoutManager(requireContext())
 
-        recyclerViewKnowledgeSurveyor.adapter = guideAdapterProcessor
+        recyclerViewKnowledgeSurveyor.adapter = guideAdapterSurveyor
         recyclerViewKnowledgeSurveyor.layoutManager = LinearLayoutManager(requireContext())
 
 
@@ -76,6 +76,7 @@ class FragmentHome: Fragment() {
 
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
                 guideAdapter.filter(s.toString())
+                guideAdapterSurveyor.filter(s.toString())
             }
         })
 
@@ -145,8 +146,8 @@ class FragmentHome: Fragment() {
                         guideListProcessor.add(Guide(id, title, mutableListOf(), guideType))
                     }
                 }
-                guideAdapterProcessor.setData(guideListProcessor)
-                guideAdapterProcessor.notifyDataSetChanged()
+                guideAdapterSurveyor.setData(guideListProcessor)
+                guideAdapterSurveyor.notifyDataSetChanged()
             }
             .addOnFailureListener { exception ->
                 Log.e("Firestore", "Error loading guides: ", exception)

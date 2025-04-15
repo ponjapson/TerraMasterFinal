@@ -50,6 +50,7 @@ class FragmentUserProfile: Fragment() {
         recyclerView.adapter = feedbackAdapter
 
         var message = view.findViewById<Button>(R.id.Message)
+        var bookNow = view.findViewById<Button>(R.id.bookNow)
 
         userId = arguments?.getString("userId")?: ""
         fetchUserProfile(userId)
@@ -57,11 +58,25 @@ class FragmentUserProfile: Fragment() {
         message.setOnClickListener {
             navigateToPrivateMessage(userId)
         }
+        bookNow.setOnClickListener {
+            navigateToFragmentBooking(userId)
+        }
 
         fetchFeedback(userId)
         return view
     }
 
+    private fun navigateToFragmentBooking(otherUserId: String){
+        val fragmentTransaction = requireActivity().supportFragmentManager.beginTransaction()
+        val fragment = FragmentBooking() // Replace with your target fragment
+        val bundle = Bundle()
+        bundle.putString("bookedUserId", otherUserId)
+        fragment.arguments = bundle
+
+        fragmentTransaction.replace(R.id.fragment_container, fragment) // Replace `R.id.fragment_container` with your actual container ID
+        fragmentTransaction.addToBackStack(null) // Optional: if you want the user to be able to navigate back
+        fragmentTransaction.commit()
+    }
     private fun navigateToPrivateMessage(otherUserId: String){
         var currentUserId = FirebaseAuth.getInstance().currentUser?.uid.orEmpty()
           if(userId != null){

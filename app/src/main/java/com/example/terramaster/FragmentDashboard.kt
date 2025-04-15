@@ -348,7 +348,7 @@ class FragmentDashboard: Fragment() {
                 transaction.commit()
 
                 // Optionally show bottom navigation bar (if needed)
-                (requireActivity() as MainActivity).showBottomNavigationBar()
+                (requireActivity() as MainActivity).hideBottomNavigationBar()
 
                 true
             }
@@ -560,10 +560,7 @@ class FragmentDashboard: Fragment() {
     private fun getMunicipality(address: String, callback: (String?) -> Unit) {
         val client = OkHttpClient()
         val url = "https://nominatim.openstreetmap.org/search?q=${
-            URLEncoder.encode(
-                address,
-                "UTF-8"
-            )
+            URLEncoder.encode(address, "UTF-8")
         }&format=json&addressdetails=1"
 
         val request = Request.Builder().url(url).build()
@@ -571,9 +568,13 @@ class FragmentDashboard: Fragment() {
         client.newCall(request).enqueue(object : Callback {
             override fun onFailure(call: Call, e: IOException) {
                 Log.e("GetMunicipality", "Failed to fetch municipality: ${e.message}", e)
-                requireActivity().runOnUiThread {
-                    Log.e("GetMunicipality", "Failed to fetch municipality",)
+
+                activity?.runOnUiThread {
+                    if (isAdded) {
+                        Log.e("GetMunicipality", "Fragment is still active during error handling")
+                    }
                 }
+
                 callback(null) // Return null
             }
 
@@ -583,9 +584,13 @@ class FragmentDashboard: Fragment() {
 
                     if (responseBody.isNullOrEmpty()) {
                         Log.w("GetMunicipality", "No municipality found")
-                        requireActivity().runOnUiThread {
-                            Log.e("No municipality", "No municipality found")
+
+                        activity?.runOnUiThread {
+                            if (isAdded) {
+                                Log.e("No municipality", "No municipality found")
+                            }
                         }
+
                         callback(null)
                         return
                     }
@@ -596,46 +601,30 @@ class FragmentDashboard: Fragment() {
                             val firstResult = json.getJSONObject(0)
                             val addressDetails = firstResult.optJSONObject("address")
 
-                            // Extract City → Town → County in order of priority
                             val municipality = when {
-                                !addressDetails?.optString("city")
-                                    .isNullOrEmpty() -> addressDetails?.optString("city")
-
-                                !addressDetails?.optString("town")
-                                    .isNullOrEmpty() -> addressDetails?.optString("town")
-
-                                !addressDetails?.optString("county")
-                                    .isNullOrEmpty() -> addressDetails?.optString("county")
-
+                                !addressDetails?.optString("city").isNullOrEmpty() -> addressDetails?.optString("city")
+                                !addressDetails?.optString("town").isNullOrEmpty() -> addressDetails?.optString("town")
+                                !addressDetails?.optString("county").isNullOrEmpty() -> addressDetails?.optString("county")
                                 else -> "Unknown Municipality"
                             }
 
-                            // Log extracted values
-                            Log.i(
-                                "GetMunicipality",
-                                "Extracted - City: ${addressDetails?.optString("city")}, Town: ${
-                                    addressDetails?.optString("town")
-                                }, County: ${addressDetails?.optString("county")}"
-                            )
+                            Log.i("GetMunicipality", "Extracted - City: ${addressDetails?.optString("city")}, Town: ${addressDetails?.optString("town")}, County: ${addressDetails?.optString("county")}")
                             Log.i("GetMunicipality", "Final Municipality: $municipality")
-
-
 
                             callback(municipality)
                         } else {
                             Log.w("GetMunicipality", "Empty JSON response")
-
                             callback(null)
                         }
                     } catch (e: Exception) {
                         Log.e("GetMunicipality", "Error parsing response: ${e.message}", e)
-
                         callback(null)
                     }
                 }
             }
         })
     }
+
 
     private fun fetchHighRatingsSurveyors(landownerLat: Double, landownerLon: Double) {
         firestore.collection("users")
@@ -761,7 +750,6 @@ class FragmentDashboard: Fragment() {
             callback(address ?: "Unknown Address")
         }
     }
-
 
     private fun updateAdapter(sortedList: List<Recommendation>) {
         // Check if fragment is still attached to its activity
