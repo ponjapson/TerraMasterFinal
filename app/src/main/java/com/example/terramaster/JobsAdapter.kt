@@ -530,7 +530,7 @@ class JobsAdapter(private val jobs: MutableList<Job>, private val context: Conte
                                 .setView(dialogView)
                                 .setPositiveButton("Save") { _, _ ->
                                     val newAddress = addressEditText.text.toString()
-                                    val newNote = addNoteEditText.text.toString()
+                                    val newNote = addNoteEditText.text.toString() ?: ""
                                     val newDownpayment = downpaymentEditText.text.toString().toDoubleOrNull() ?: 0.0
                                     val newContractPrice = contractPriceEditText.text.toString().toDoubleOrNull() ?: 0.0
                                     val newStartDateTime = selectedStartDateTimeTextView.text.toString()
