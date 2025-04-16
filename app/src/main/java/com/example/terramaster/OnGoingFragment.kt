@@ -112,10 +112,12 @@ class OnGoingFragment : Fragment(), OnPaymentClickListener {
 
                 bookingUserSnapshots?.let { snapshots ->
                     if (snapshots.isEmpty) {
-                        pendingJobs.clear()
-                        updateAdapter(pendingJobs)
+                        activity?.runOnUiThread {
+                            updateAdapter(pendingJobs)
+                        }
                         return@let
                     }
+
 
                     pendingJobs.clear()
                     jobCount = 0

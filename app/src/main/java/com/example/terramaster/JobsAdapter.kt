@@ -1344,6 +1344,9 @@ class JobsAdapter(private val jobs: MutableList<Job>, private val context: Conte
         jobs.addAll(newJobs)
         notifyDataSetChanged()  // Refresh UI
     }
+    fun clearJobs() {
+        jobs.clear()  // Clear the list
+    }
 
     // Utility function to format Timestamp to String
     private fun formatTimestamp(timestamp: Timestamp?): String {

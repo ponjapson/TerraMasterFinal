@@ -49,6 +49,9 @@ class FragmentNotification : Fragment(), NotificationAdapter.OnNotificationClick
             "message" -> {
                 navigateToPrivateMessage(notification.senderId!!)
             }
+            "Surveyor_Confirmed_Waiting_for_quotation" -> {
+                navigateToRequestTabFragment()
+            }
 
 
 

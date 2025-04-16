@@ -105,7 +105,7 @@ class LoginActivity : AppCompatActivity() {
                         }
                         "Landowner" -> {
                             // Set Landowner status to Active directly
-                            if (currentStatus != "Active") {
+                            if (currentStatus == "Active") {
                                 updateStatusAndToken(userId, "Active")
                             } else {
                                 navigateToMainActivity()
@@ -134,37 +134,53 @@ class LoginActivity : AppCompatActivity() {
 
     // Function to update status and FCM token
     private fun updateStatusAndToken(userId: String, newStatus: String) {
-        FirebaseMessaging.getInstance().token.addOnCompleteListener { tokenTask ->
-            if (tokenTask.isSuccessful) {
-                val fcmToken = tokenTask.result
-                db.collection("users").document(userId)
-                    .update(mapOf("status" to newStatus, "fcmToken" to fcmToken))
-                    .addOnSuccessListener {
+        Log.d("FCM_DEBUG", "Updating status and token for user: $userId")
+        // Delete any old token to force fresh one
+        FirebaseMessaging.getInstance().deleteToken().addOnCompleteListener { deleteTask ->
+            if (deleteTask.isSuccessful) {
+                FirebaseMessaging.getInstance().token.addOnCompleteListener { tokenTask ->
+                    if (tokenTask.isSuccessful) {
+                        val fcmToken = tokenTask.result
+
+                        db.collection("users").document(userId)
+                            .update(mapOf(
+                                "status" to newStatus,
+                                "fcmToken" to fcmToken
+                            ))
+                            .addOnSuccessListener {
+                                runOnUiThread {
+                                    progressBar.visibility = View.GONE
+                                    btnSignIn.isEnabled = true
+                                    Toast.makeText(this, "Login successful!", Toast.LENGTH_SHORT).show()
+                                    navigateToMainActivity()
+                                }
+                            }
+                            .addOnFailureListener { e ->
+                                runOnUiThread {
+                                    progressBar.visibility = View.GONE
+                                    btnSignIn.isEnabled = true
+                                    Log.e("LoginActivity", "Error updating user status/token: ${e.message}")
+                                    Toast.makeText(this, "Error updating user data.", Toast.LENGTH_SHORT).show()
+                                }
+                            }
+                    } else {
                         runOnUiThread {
                             progressBar.visibility = View.GONE
                             btnSignIn.isEnabled = true
-                            Toast.makeText(this, "Login successful!", Toast.LENGTH_SHORT).show()
-                            navigateToMainActivity()
+                            Log.e("LoginActivity", "Error fetching FCM token: ${tokenTask.exception?.message}")
+                            Toast.makeText(this, "Error fetching FCM token.", Toast.LENGTH_SHORT).show()
                         }
                     }
-                    .addOnFailureListener { e ->
-                        runOnUiThread {
-                            progressBar.visibility = View.GONE
-                            btnSignIn.isEnabled = true
-                            Log.e("LoginActivity", "Error updating user status/token: ${e.message}")
-                            Toast.makeText(this, "Error updating user data.", Toast.LENGTH_SHORT).show()
-                        }
-                    }
+                }
             } else {
                 runOnUiThread {
                     progressBar.visibility = View.GONE
                     btnSignIn.isEnabled = true
-                    Log.e("LoginActivity", "Error fetching FCM token: ${tokenTask.exception?.message}")
-                    Toast.makeText(this, "Error fetching FCM token.", Toast.LENGTH_SHORT).show()
+                    Log.e("LoginActivity", "Failed to delete old token: ${deleteTask.exception?.message}")
+                    Toast.makeText(this, "Failed to refresh token.", Toast.LENGTH_SHORT).show()
                 }
             }
         }
-
     }
 
     private fun navigateToMainActivity() {

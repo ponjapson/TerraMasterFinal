@@ -210,7 +210,8 @@
                     android:layout_marginTop="4dp"
                     android:text="Age: "
                     android:textColor="@color/black"
-                    android:textSize="14sp" />
+                    android:textSize="14sp"
+                    android:visibility="gone"/>
 
                 <TextView
                     android:id="@+id/age"
@@ -220,7 +221,8 @@
                     android:text="Age"
                     android:textColor="@color/black"
                     android:textSize="14sp"
-                    android:layout_marginStart="117dp"/>
+                    android:layout_marginStart="117dp"
+                    android:visibility="gone"/>
             </LinearLayout>
 
             <LinearLayout
@@ -235,7 +237,8 @@
                     android:layout_marginTop="4dp"
                     android:text="Tax Identification Number: "
                     android:textColor="@color/black"
-                    android:textSize="12sp" />
+                    android:textSize="12sp"
+                    android:visibility="gone"/>
 
                 <TextView
                     android:id="@+id/Tin"
@@ -244,7 +247,8 @@
                     android:layout_marginTop="4dp"
                     android:text="Tax Ide"
                     android:textColor="@color/black"
-                    android:textSize="14sp" />
+                    android:textSize="14sp"
+                    android:visibility="gone"/>
             </LinearLayout>
 
             <LinearLayout
@@ -259,7 +263,8 @@
                     android:layout_marginTop="4dp"
                     android:text="Purpose of survey: "
                     android:textColor="@color/black"
-                    android:textSize="14sp" />
+                    android:textSize="14sp"
+                    android:visibility="gone"/>
 
                 <TextView
                     android:id="@+id/purposeOfSuurvey"
@@ -269,7 +274,8 @@
                     android:text="Purpose of survey"
                     android:textColor="@color/black"
                     android:textSize="14sp"
-                    android:layout_marginStart="28dp"/>
+                    android:layout_marginStart="28dp"
+                    android:visibility="gone"/>
             </LinearLayout>
 
             <LinearLayout
@@ -284,7 +290,8 @@
                     android:layout_marginTop="4dp"
                     android:text="Property Type: "
                     android:textColor="@color/black"
-                    android:textSize="14sp" />
+                    android:textSize="14sp"
+                    android:visibility="gone"/>
 
                 <TextView
                     android:id="@+id/propertyTypeLabel"
@@ -294,7 +301,8 @@
                     android:text="Property Type"
                     android:textColor="@color/black"
                     android:textSize="14sp"
-                    android:layout_marginStart="53dp"/>
+                    android:layout_marginStart="53dp"
+                    android:visibility="gone"/>
             </LinearLayout>
 
             <LinearLayout
