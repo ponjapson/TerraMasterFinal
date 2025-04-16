@@ -17,6 +17,7 @@ exports.onBookingStatusChange = functions.firestore
         const bookingData = change.after.data();
         const bookingId = context.params.bookingId;
 
+        //okay nani
         // Check if the status has changed to 'Confirmed'
         if (bookingData.status === 'Surveyor Confirmed Waiting for quotation') {
             const landOwnerUserId = bookingData.landOwnerUserId;
@@ -36,7 +37,7 @@ exports.onBookingStatusChange = functions.firestore
             } else {
                 console.error('FCM token not found for landowner:', landOwnerFcmToken);
             }
-        
+        //mana ni
         } else if (bookingData.status === 'Waiting for landowners confirmation') {
             const landOwnerUserId = bookingData.landOwnerUserId;
             const bookedUserId = bookingData.bookedUserId; 
@@ -239,7 +240,7 @@ exports.onBookingStatusChange = functions.firestore
         
             // Send the notification to the client
             if (landOwnerFcmToken) {
-                await sendNotification(landOwnerFcmToken, title, message, landOwnerUserId, bookedUserId, 'processor edit details');
+                await sendNotification(landOwnerFcmToken, title, message, landOwnerUserId, bookedUserId, 'Verified');
             } else {
                 console.error('FCM token not found for landowner:', landOwnerFcmToken);
             }

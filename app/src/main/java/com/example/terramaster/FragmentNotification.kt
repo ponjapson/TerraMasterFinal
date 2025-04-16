@@ -52,9 +52,33 @@ class FragmentNotification : Fragment(), NotificationAdapter.OnNotificationClick
             "Surveyor_Confirmed_Waiting_for_quotation" -> {
                 navigateToRequestTabFragment()
             }
-
-
-
+            "Waiting_for_landowners_confirmation" -> {
+                navigateToRequestTabFragment()
+            }
+            "pending_payment" -> {
+                navigateToRequestTabFragment()
+            }
+            "payment_submitted" -> {
+                navigateToRequestTabFragment()
+            }
+            "professional edit details" -> {
+                navigateToRequestTabFragment()
+            }
+            "landowner edit details" -> {
+                navigateToRequestTabFragment()
+            }
+            "processor edit details" -> {
+                navigateToRequestTabFragment()
+            }
+            "landowner edit detail" -> {
+                navigateToRequestTabFragment()
+            }
+            "verification" ->{
+                navigateToRequestTabFragment()
+            }
+            "Verified" -> {
+                navigateToOnGoingTabFragment()
+            }
             else -> {
                 Log.d("FragmentNotification", "Unhandled notification type: ${notification.type}")
             }
