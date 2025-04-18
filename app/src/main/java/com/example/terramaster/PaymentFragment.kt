@@ -153,7 +153,7 @@ class PaymentFragment : Fragment() {
     }
 
     private fun navigateToPendingTabFragment() {
-        val jobsFragment = FragmentJobs()
+        val jobsFragment = FragmentBookingManagement()
         val bundle = Bundle().apply {
             putInt("selectedTab", 1)
         }

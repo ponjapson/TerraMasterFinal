@@ -102,6 +102,7 @@ class RegisterActivity : AppCompatActivity() {
 
         scanButton = findViewById(R.id.scanButton)
         scannedImageView = findViewById(R.id.scannedImageView)
+
         scanButton.setOnClickListener {
             launchScanner()
         }

@@ -1,50 +1,27 @@
 package com.example.terramaster
 
-import FragmentDisplayPDF
 import FragmentOnGoingPDF
-import android.app.DatePickerDialog
-import android.app.TimePickerDialog
 import android.content.Context
-import android.content.Intent
-import android.graphics.Bitmap
 import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
-import android.widget.EditText
 import android.widget.ImageView
 import android.widget.LinearLayout
-import android.widget.ProgressBar
-import android.widget.RadioButton
-import android.widget.RadioGroup
 import android.widget.TextView
 import android.widget.Toast
-import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.cardview.widget.CardView
-import androidx.core.content.ContentProviderCompat.requireContext
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.FragmentActivity
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
-import com.github.gcacace.signaturepad.views.SignaturePad
 import com.google.firebase.Timestamp
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.storage.FirebaseStorage
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.tasks.await
-import kotlinx.coroutines.withContext
-import java.io.ByteArrayOutputStream
 import java.text.SimpleDateFormat
-import java.util.Calendar
-import java.util.Date
 import java.util.Locale
 
 class OnGoingAdapter(private val jobs: MutableList<OnGoingJobs>, private val context: Context,    private val listener: OnPaymentClickListener, private val fragmentActivity: FragmentActivity) :
@@ -626,13 +603,13 @@ class OnGoingAdapter(private val jobs: MutableList<OnGoingJobs>, private val con
         val fragmentTransaction = (context as? AppCompatActivity)?.supportFragmentManager?.beginTransaction()
 
         // Switch to Ongoing tab in FragmentJobs
-        val fragmentJobs = FragmentJobs().apply {
+        val fragmentBookingManagement = FragmentBookingManagement().apply {
             arguments = Bundle().apply {
                 putInt("selectedTab", 2) // Ongoing tab index
             }
         }
 
-        fragmentTransaction?.replace(R.id.fragment_container, fragmentJobs)
+        fragmentTransaction?.replace(R.id.fragment_container, fragmentBookingManagement)
         fragmentTransaction?.addToBackStack(null)
         fragmentTransaction?.commit()
     }

@@ -69,6 +69,7 @@ dependencies {
     implementation ("com.google.firebase:firebase-storage-ktx:20.0.0")
     implementation ("org.osmdroid:osmdroid-android:6.1.14")
     implementation ("androidx.preference:preference-ktx:1.2.1")
+    //scanner
     implementation ("com.google.android.gms:play-services-mlkit-document-scanner:16.0.0-beta1")
     implementation ("com.google.android.material:material:1.10.0")
     implementation("com.stripe:stripe-android:21.0.1")

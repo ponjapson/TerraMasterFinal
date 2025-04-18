@@ -1,13 +1,9 @@
 package com.example.terramaster
 
-import android.content.Context
-import android.content.Intent
-import android.content.SharedPreferences
 import android.os.Bundle
 import android.util.Log
 import android.view.View
 import android.widget.FrameLayout
-import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
@@ -48,7 +44,7 @@ class MainActivity : AppCompatActivity() {
                 }
 
                 R.id.nav_jobs -> {
-                    replaceFragment(FragmentJobs(), false, true)
+                    replaceFragment(FragmentBookingManagement(), false, true)
                     true
                 }
 
@@ -149,7 +145,7 @@ class MainActivity : AppCompatActivity() {
     private fun updateBottomNavigationVisibility(fragment: Fragment) {
         // Show BottomNavigationView for main fragments
         if (fragment is FragmentDashboard || fragment is FragmentChatbot ||
-            fragment is FragmentMessage || fragment is FragmentProfile || fragment is FragmentJobs || fragment is FragmentProfileLandowner) {
+            fragment is FragmentMessage || fragment is FragmentProfile || fragment is FragmentBookingManagement || fragment is FragmentProfileLandowner) {
             showBottomNavigationBar()  // Show BottomNavigationView
         } else {
             hideBottomNavigationBar()  // Hide BottomNavigationView

@@ -7,18 +7,13 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.WindowManager
-import android.widget.Button
-import android.widget.ImageView
 import android.widget.ProgressBar
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import androidx.viewpager.widget.ViewPager
-import com.example.terramaster.FragmentJobs
+import com.example.terramaster.FragmentBookingManagement
 import com.example.terramaster.MainActivity
 import com.example.terramaster.R
-import com.example.terramaster.RequestTabFragment
-import com.github.gcacace.signaturepad.views.SignaturePad
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
 import kotlinx.coroutines.Dispatchers
@@ -216,7 +211,7 @@ class FragmentDisplayPDF : Fragment() {
 
     // Method to navigate to RequestTabFragment
     private fun navigateToRequestTabFragment() {
-        val fragment = FragmentJobs().apply {
+        val fragment = FragmentBookingManagement().apply {
             arguments = Bundle().apply {
                 putInt("selectedTab", 1)  // Pass tab index (0 for RequestTab)
             }

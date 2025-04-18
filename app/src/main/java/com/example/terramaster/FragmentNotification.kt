@@ -91,7 +91,7 @@ class FragmentNotification : Fragment(), NotificationAdapter.OnNotificationClick
         }
     }
     private fun navigateToJobsRevisionFragment() {
-        val jobsFragment = FragmentJobs()
+        val jobsFragment = FragmentBookingManagement()
         val bundle = Bundle().apply {
             putInt("selectedTab", 3)
         }
@@ -112,7 +112,7 @@ class FragmentNotification : Fragment(), NotificationAdapter.OnNotificationClick
     }
 
     private fun navigateToRequestTabFragment() {
-        val jobsFragment = FragmentJobs()
+        val jobsFragment = FragmentBookingManagement()
         val bundle = Bundle().apply {
             putInt("selectedTab", 0)
         }
@@ -123,7 +123,7 @@ class FragmentNotification : Fragment(), NotificationAdapter.OnNotificationClick
             .commit()
     }
     private fun navigateToOnGoingTabFragment() {
-        val jobsFragment = FragmentJobs()
+        val jobsFragment = FragmentBookingManagement()
         val bundle = Bundle().apply {
             putInt("selectedTab", 1)
         }
@@ -136,7 +136,7 @@ class FragmentNotification : Fragment(), NotificationAdapter.OnNotificationClick
 
 
     private fun navigateToPendingTabFragment() {
-        val jobsFragment = FragmentJobs()
+        val jobsFragment = FragmentBookingManagement()
         val bundle = Bundle().apply {
             putInt("selectedTab", 1)
         }

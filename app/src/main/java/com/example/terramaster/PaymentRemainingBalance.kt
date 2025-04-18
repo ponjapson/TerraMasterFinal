@@ -14,8 +14,6 @@ import com.google.firebase.functions.FirebaseFunctions
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetResult
-import java.text.SimpleDateFormat
-import java.util.Locale
 
 class PaymentRemainingBalance : Fragment() {
 
@@ -143,7 +141,7 @@ class PaymentRemainingBalance : Fragment() {
     }
 
     private fun navigateToPendingTabFragment() {
-        val jobsFragment = FragmentJobs()
+        val jobsFragment = FragmentBookingManagement()
         val bundle = Bundle().apply {
             putInt("selectedTab", 2)
         }

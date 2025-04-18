@@ -4,7 +4,6 @@ import FragmentDisplayPDF
 import android.app.DatePickerDialog
 import android.app.TimePickerDialog
 import android.content.Context
-import android.content.Intent
 import android.graphics.Bitmap
 import android.os.Bundle
 import android.os.Handler
@@ -23,7 +22,6 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.content.ContentProviderCompat.requireContext
 import androidx.fragment.app.FragmentActivity
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
@@ -1051,7 +1049,7 @@ class JobsAdapter(private val jobs: MutableList<Job>, private val context: Conte
 
     // Navigate to the "Request" tab (Tab 1)
     private fun navigateToRequestTabFragment() {
-        val fragment = FragmentJobs().apply {
+        val fragment = FragmentBookingManagement().apply {
             arguments = Bundle().apply {
                 putInt("selectedTab", 1) // Pass tab index for "Request" tab
             }
@@ -1446,13 +1444,13 @@ class JobsAdapter(private val jobs: MutableList<Job>, private val context: Conte
                         val fragmentTransaction = (context as? AppCompatActivity)?.supportFragmentManager?.beginTransaction()
 
                         // Switch to Ongoing tab in FragmentJobs
-                        val fragmentJobs = FragmentJobs().apply {
+                        val fragmentBookingManagement = FragmentBookingManagement().apply {
                             arguments = Bundle().apply {
                                 putInt("selectedTab", 1) // Ongoing tab index
                             }
                         }
 
-                        fragmentTransaction?.replace(R.id.fragment_container, fragmentJobs)
+                        fragmentTransaction?.replace(R.id.fragment_container, fragmentBookingManagement)
                         fragmentTransaction?.addToBackStack(null)
                         fragmentTransaction?.commit()
                     } else {
