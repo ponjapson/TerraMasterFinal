@@ -1,6 +1,7 @@
 package com.example.terramaster
 
 import android.content.Context
+import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -8,6 +9,7 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
+import androidx.appcompat.app.AppCompatActivity
 import androidx.cardview.widget.CardView
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
@@ -70,6 +72,22 @@ class SchedulesAdapter(
         } else {
             holder.stepProgressLayout.visibility = View.VISIBLE
             holder.stepProgressLayoutProcessor.visibility = View.GONE
+        }
+
+        holder.itemView.setOnClickListener {
+            val schedules = schedules[position]
+            val fragmentTransaction = (context as? AppCompatActivity)?.supportFragmentManager?.beginTransaction()
+            val bookingId = schedules.bookingId
+            // Switch to Ongoing tab in FragmentJobs
+            val fragmentJobs = FragmentJobs().apply {
+                arguments = Bundle().apply {
+                    putInt("selectedTab", 1) // Ongoing tab index
+
+                }
+            }
+            fragmentTransaction?.replace(R.id.fragment_container, fragmentJobs)
+            fragmentTransaction?.addToBackStack(null)
+            fragmentTransaction?.commit()
         }
     }
 

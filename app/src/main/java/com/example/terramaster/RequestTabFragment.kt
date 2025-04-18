@@ -50,9 +50,12 @@ class RequestTabFragment : Fragment(), OnPaymentClickListener {
         val pendingJobs = mutableListOf<Job>()
         var jobCount = 0 // Track completed address conversions
 
+        Log.d("RequestTabFragment", "Loading jobs for userId (bookedUser): $userId")
+
+        // First: Fetch jobs where user is the bookedUser (e.g., an artist)
         firestore.collection("bookings")
             .whereEqualTo("bookedUserId", userId)
-            .whereEqualTo("stage", "request") // ✅ Only fetch "request" stage
+            .whereEqualTo("stage", "request")
             .orderBy("timestamp", Query.Direction.DESCENDING)
             .addSnapshotListener { bookedUserSnapshots, error ->
                 if (error != null) {
@@ -60,19 +63,19 @@ class RequestTabFragment : Fragment(), OnPaymentClickListener {
                     return@addSnapshotListener
                 }
 
-                pendingJobs.clear() // ✅ Clear list before adding new items
-                jobCount = 0 // Reset job count
-
+                Log.d("RequestTabFragment", "Snapshot listener triggered for bookedUserId")
                 bookedUserSnapshots?.let { snapshots ->
+                    Log.d("RequestTabFragment", "BookedUser snapshot size: ${snapshots.size()}")
                     if (snapshots.isEmpty) {
-                        fetchBookingUserJobs(userId, pendingJobs) // If no jobs, check for landowner jobs
+                        // If no jobs found for bookedUser, check for landOwner
+                        fetchBookingUserJobs(userId, pendingJobs)
                         return@let
                     }
 
                     snapshots.documents.forEach { doc ->
                         val job = createJobFromDocument(doc)
 
-                        // ✅ Ensure job is still in "request" stage before adding
+                        // Skip if not in the correct stage (safety check)
                         if (job.stage != "request") return@forEach
 
                         val pdfUrl = doc.getString("pdfUrl")
@@ -81,6 +84,7 @@ class RequestTabFragment : Fragment(), OnPaymentClickListener {
 
                         convertCoordinatesToAddress(job.latitude, job.longitude) { address ->
                             job.address = address
+                            Log.d("RequestTabFragment", "Geocoding result: $address for coordinates: (${job.latitude}, ${job.longitude})")
                             pendingJobs.add(job)
                             jobCount++
 
@@ -93,29 +97,40 @@ class RequestTabFragment : Fragment(), OnPaymentClickListener {
             }
     }
 
+
     private fun fetchBookingUserJobs(userId: String, pendingJobs: MutableList<Job>) {
         var jobCount = 0 // Track completed address conversions
 
+        // Fetch bookings where user is the landOwnerUserId
         firestore.collection("bookings")
             .whereEqualTo("landOwnerUserId", userId)
-            .whereEqualTo("stage", "request") // ✅ Only fetch "request" stage
+            .whereEqualTo("stage", "request")
             .orderBy("timestamp", Query.Direction.DESCENDING)
             .addSnapshotListener { bookingUserSnapshots, clientError ->
                 if (clientError != null) {
-                    Log.e("RequestTabFragment", "Error listening for client requests: ${clientError.message}")
+                    Log.e(
+                        "RequestTabFragment",
+                        "Error listening for client requests: ${clientError.message}"
+                    )
                     return@addSnapshotListener
                 }
 
                 bookingUserSnapshots?.let { snapshots ->
                     if (snapshots.isEmpty) {
-                        updateAdapter(pendingJobs) // ✅ No new jobs, update adapter immediately
+                        activity?.runOnUiThread {
+                            updateAdapter(pendingJobs)
+                        }
                         return@let
                     }
 
+
+                    pendingJobs.clear()
+                    jobCount = 0
+
+                    Log.d("Firestore", "Snapshot listener triggered")
+
                     snapshots.documents.forEach { doc ->
                         val job = createJobFromDocument(doc)
-
-                        // ✅ Ensure job is still in "request" stage before adding
                         if (job.stage != "request") return@forEach
 
                         val pdfUrl = doc.getString("pdfUrl")
@@ -128,13 +143,18 @@ class RequestTabFragment : Fragment(), OnPaymentClickListener {
                             jobCount++
 
                             if (jobCount == snapshots.size()) {
-                                updateAdapter(pendingJobs)
+                                activity?.runOnUiThread {
+                                    updateAdapter(pendingJobs)
+                                }
                             }
                         }
                     }
                 }
+
             }
     }
+
+
     private fun createJobFromDocument(doc: DocumentSnapshot): Job {
         return Job(
             bookingId = doc.id,

@@ -38,7 +38,7 @@ class FragmentBookingManagement : Fragment() {
         }.attach()
 
         // Get the selected tab index passed from the parent fragment
-        val selectedTab = arguments?.getInt("selectedTab", 0) // Default to 0 if not passed
+        val selectedTab = arguments?.getInt("selectedTab", 0)
 
         // If a valid tab index is passed, set the current tab in the ViewPager
 
