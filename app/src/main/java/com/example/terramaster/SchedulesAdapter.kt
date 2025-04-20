@@ -79,7 +79,7 @@ class SchedulesAdapter(
             val fragmentTransaction = (context as? AppCompatActivity)?.supportFragmentManager?.beginTransaction()
             val bookingId = schedules.bookingId
             // Switch to Ongoing tab in FragmentJobs
-            val fragmentJobs = FragmentJobs().apply {
+            val fragmentJobs = FragmentBookingManagement().apply {
                 arguments = Bundle().apply {
                     putInt("selectedTab", 1) // Ongoing tab index
 
