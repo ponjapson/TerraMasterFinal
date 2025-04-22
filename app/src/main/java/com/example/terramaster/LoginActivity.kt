@@ -21,6 +21,7 @@ class LoginActivity : AppCompatActivity() {
     private lateinit var btnSignIn: Button
     private lateinit var tvSignUp: TextView
     private lateinit var progressBar: ProgressBar
+    private lateinit var tvForgetPasswrd: TextView
 
     private lateinit var auth: FirebaseAuth
     private lateinit var db: FirebaseFirestore
@@ -37,6 +38,7 @@ class LoginActivity : AppCompatActivity() {
         btnSignIn = findViewById(R.id.btnSignIn)
         tvSignUp = findViewById(R.id.tvSignUp)
         progressBar = findViewById(R.id.progressBar)
+        tvForgetPasswrd = findViewById(R.id.forgotPassword)
 
         tvSignUp.setOnClickListener {
             val intent = Intent(this, RegisterActivity::class.java)
@@ -46,6 +48,10 @@ class LoginActivity : AppCompatActivity() {
 
         btnSignIn.setOnClickListener {
             validateAndLoginUser()
+        }
+        tvForgetPasswrd.setOnClickListener{
+            val intent = Intent(this, ForgotPasswordActivity::class.java)
+            startActivity(intent)
         }
     }
 

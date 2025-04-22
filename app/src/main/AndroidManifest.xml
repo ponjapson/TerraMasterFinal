@@ -25,6 +25,9 @@
         android:theme="@style/Theme.TerraMaster"
         tools:targetApi="31">
         <activity
+            android:name=".ForgotPasswordActivity"
+            android:exported="false" />
+        <activity
             android:name=".OTPVerificationActivity"
             android:exported="false" />
         <activity
@@ -52,6 +55,7 @@
             android:name=".MainActivity"
             android:exported="false"
             android:windowSoftInputMode="adjustPan" />
+
         <service
             android:name=".MyFirebaseMessagingService"
             android:exported="false">
@@ -60,4 +64,5 @@
             </intent-filter>
         </service>
     </application>
+
 </manifest>
