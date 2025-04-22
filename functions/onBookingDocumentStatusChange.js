@@ -95,4 +95,43 @@ exports.onBookingDocumentStatusChange = functions.firestore
                 console.error('FCM token not found for landowner:', landOwnerFcmToken);
             }
         }
+
+        if (bookingData.documentStatus === 'Prepare the Tax Declaration') {
+            const landOwnerUserId = bookingData.landOwnerUserId;
+            const bookedUserId = bookingData.bookedUserId; 
+        
+            // Retrieve the client's FCM token (since client needs to be notified)
+            const landownerDoc = await db.collection('users').doc(landOwnerUserId).get();
+            const landOwnerFcmToken = landownerDoc.data()?.fcmToken;
+        
+            // Prepare the notification message
+            const title = 'Document Progress';
+            const message = `Preparing the tax declaration.`;
+        
+            // Send the notification to the client
+            if (landOwnerFcmToken) {
+                await sendNotification(landOwnerFcmToken, title, message, landOwnerUserId, bookedUserId, 'Ready to Claim');
+            } else {
+                console.error('FCM token not found for landowner:', landOwnerFcmToken);
+            }
+        }
+        if (bookingData.documentStatus === 'Approval Department Head') {
+            const landOwnerUserId = bookingData.landOwnerUserId;
+            const bookedUserId = bookingData.bookedUserId; 
+        
+            // Retrieve the client's FCM token (since client needs to be notified)
+            const landownerDoc = await db.collection('users').doc(landOwnerUserId).get();
+            const landOwnerFcmToken = landownerDoc.data()?.fcmToken;
+        
+            // Prepare the notification message
+            const title = 'Document Progress';
+            const message = `The document has been approved by the department head.`;
+        
+            // Send the notification to the client
+            if (landOwnerFcmToken) {
+                await sendNotification(landOwnerFcmToken, title, message, landOwnerUserId, bookedUserId, 'Ready to Claim');
+            } else {
+                console.error('FCM token not found for landowner:', landOwnerFcmToken);
+            }
+        }
     });
