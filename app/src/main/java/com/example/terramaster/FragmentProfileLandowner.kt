@@ -38,6 +38,9 @@ class FragmentProfileLandowner: Fragment() {
         lastNameTextView = view.findViewById(R.id.last_name)
         usertypeTextView = view.findViewById(R.id.userType)
 
+            (requireActivity() as MainActivity).showBottomNavigationBar()
+
+
         val btnShowMenu = view.findViewById<ImageButton>(R.id.menuBurger)
         btnShowMenu.setOnClickListener {
             val dialogFragment = FragmentMenu()

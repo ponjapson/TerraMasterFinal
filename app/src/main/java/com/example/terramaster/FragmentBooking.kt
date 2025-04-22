@@ -61,16 +61,18 @@ class FragmentBooking : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        (requireActivity() as MainActivity).hideBottomNavigationBar()
+
         val bookedUserId = arguments?.getString("bookedUserId")
         if (bookedUserId.isNullOrEmpty()) {
             showToast("No professional or service provider selected.")
             requireActivity().onBackPressed()
             return
         }
-       /* requireActivity().window.setFlags(
+        requireActivity().window.setFlags(
             WindowManager.LayoutParams.FLAG_SECURE,
             WindowManager.LayoutParams.FLAG_SECURE
-        )*/
+        )
 
         // Initialize the views
 
@@ -739,12 +741,15 @@ class FragmentBooking : Fragment() {
         return "booking_scan_$timeStamp.pdf"
     }
 
-   /* override fun onResume() {
+    override fun onResume() {
         super.onResume()
         requireActivity().window.setFlags(
             WindowManager.LayoutParams.FLAG_SECURE,
             WindowManager.LayoutParams.FLAG_SECURE
         )
-    }*/
+        (requireActivity() as MainActivity).hideBottomNavigationBar()
+    }
+
+
 
 }

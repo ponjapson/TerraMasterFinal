@@ -48,6 +48,8 @@ class FragmentUserProfileLandowner: Fragment() {
             navigateToPrivateMessage(userId)
         }
 
+        (requireActivity() as MainActivity).showBottomNavigationBar()
+
 
         return view
     }
@@ -110,6 +112,11 @@ class FragmentUserProfileLandowner: Fragment() {
 
             }
 
+    }
+
+    override fun onResume() {
+        super.onResume()
+        (requireActivity() as MainActivity).showBottomNavigationBar()
     }
 
 

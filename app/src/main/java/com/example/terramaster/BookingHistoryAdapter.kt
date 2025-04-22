@@ -417,10 +417,10 @@ class BookingHistoryAdapter(private val jobs: MutableList<BookingHistory>, priva
 
         val bookingId = job.bookingId
 
-        if (currentUserId == job.bookedUserId && bookingId.isNotEmpty()) {
+        if (currentUserId == job.landOwnerUserId && bookingId.isNotEmpty()) {
             FirebaseFirestore.getInstance()
                 .collection("Feedback")
-                .whereEqualTo("landOwnerUserId", job.landOwnerUserId)
+                .whereEqualTo("landOwnerUserId", currentUserId)
                 .whereEqualTo("bookingId", bookingId)
                 .get()
                 .addOnSuccessListener { snapshot ->

@@ -33,6 +33,8 @@ class EditGuideFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+
+
         // Initialize UI elements
         etGuideTitle = view.findViewById(R.id.etGuideTitle)
         etStepTitle = view.findViewById(R.id.etStepTitle)

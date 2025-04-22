@@ -48,6 +48,7 @@ class FragmentUserProfile: Fragment() {
         recyclerView = view.findViewById(R.id.recyclerView)
         recyclerView.layoutManager = LinearLayoutManager(requireContext())
         recyclerView.adapter = feedbackAdapter
+        (requireActivity() as MainActivity).showBottomNavigationBar()
 
         var message = view.findViewById<Button>(R.id.Message)
         var bookNow = view.findViewById<Button>(R.id.bookNow)
@@ -204,6 +205,11 @@ class FragmentUserProfile: Fragment() {
             .addOnFailureListener { e ->
                 Log.e("Firestore", "Error fetching feedback", e)
             }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        (requireActivity() as MainActivity).showBottomNavigationBar()
     }
 
 

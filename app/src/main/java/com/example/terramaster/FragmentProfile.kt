@@ -5,6 +5,7 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.WindowManager
 import android.widget.Button
 import android.widget.ImageButton
 import android.widget.RatingBar
@@ -41,6 +42,7 @@ class FragmentProfile: Fragment() {
     ): View? {
         val view = inflater.inflate(R.layout.fragment_profile, container, false)
 
+
         db = FirebaseFirestore.getInstance()
         userId = FirebaseAuth.getInstance().currentUser?.uid  // 🔹 Now accessible in onViewCreated
 
@@ -61,6 +63,7 @@ class FragmentProfile: Fragment() {
         recyclerView = view.findViewById(R.id.recyclerView)
         recyclerView.layoutManager = LinearLayoutManager(requireContext())
         recyclerView.adapter = feedbackAdapter
+        (requireActivity() as MainActivity).showBottomNavigationBar()
 
         if (userId != null) {
             db.collection("users").document(userId!!)
@@ -186,5 +189,10 @@ class FragmentProfile: Fragment() {
             .addOnFailureListener { e ->
                 Log.e("Firestore", "Error fetching feedback", e)
             }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        (requireActivity() as MainActivity).showBottomNavigationBar()
     }
 }

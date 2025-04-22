@@ -145,7 +145,8 @@ class MainActivity : AppCompatActivity() {
     private fun updateBottomNavigationVisibility(fragment: Fragment) {
         // Show BottomNavigationView for main fragments
         if (fragment is FragmentDashboard || fragment is FragmentChatbot ||
-            fragment is FragmentMessage || fragment is FragmentProfile || fragment is FragmentBookingManagement || fragment is FragmentProfileLandowner) {
+            fragment is FragmentMessage || fragment is FragmentProfile || fragment is FragmentBookingManagement || fragment is FragmentProfileLandowner ||
+            fragment is FragmentUserProfile || fragment is FragmentUserProfileLandowner) {
             showBottomNavigationBar()  // Show BottomNavigationView
         } else {
             hideBottomNavigationBar()  // Hide BottomNavigationView

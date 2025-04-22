@@ -350,8 +350,8 @@ class JobsAdapter(private val jobs: MutableList<Job>, private val context: Conte
 
             bookingRef.get().addOnSuccessListener { document ->
                 if (document.exists()) {
-                    val currentDownpayment = document.getDouble("downPayment") ?: 0.0
-                    val currentContractPrice = document.getDouble("contractPrice") ?: 0.0
+                    val currentDownpayment = document.getDouble("downPayment")
+                    val currentContractPrice = document.getDouble("contractPrice")
                     val currentStartDateTimeTimestamp = document.getTimestamp("startDateTime")
                     val currentStartDateTime = currentStartDateTimeTimestamp?.toDate()?.let {
                         SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault()).format(it)
@@ -364,7 +364,7 @@ class JobsAdapter(private val jobs: MutableList<Job>, private val context: Conte
                     val purposeOfSurvey = document.getString("purposeOfSurvey") ?: ""
                     val emailAddress = document.getString("emailAddress")
                     val contactNumber = document.getString("contactNumber")
-                    val addNote = document.getString("lackingNote")
+                    val addNote = document.getString("lackingNote") ?: ""
 
                     val dialogView = LayoutInflater.from(context).inflate(R.layout.dialog_edit_booking, null)
 
@@ -472,13 +472,14 @@ class JobsAdapter(private val jobs: MutableList<Job>, private val context: Conte
                                     purposeOfSurveyGroup.visibility = View.GONE
                                     propertyTypeGroup.visibility = View.GONE
                                     propertyLabel.visibility = View.GONE
+
                                 }
                                 "Surveyor" -> {
                                     // If the user is a "Surveyor", show contract price and downpayment
                                     contactNumberEditText.visibility = View.VISIBLE
-                                    downpaymentEditText.visibility = View.VISIBLE
-                                    labelDown.visibility = View.VISIBLE
-                                    contractLabel.visibility = View.VISIBLE
+                                    downpaymentEditText.visibility = View.GONE
+                                    labelDown.visibility = View.GONE
+                                    contractLabel.visibility = View.GONE
                                     ageLabel.visibility = View.GONE
                                     ageEditText.visibility = View.GONE
                                     tinLabel.visibility = View.GONE
@@ -487,14 +488,10 @@ class JobsAdapter(private val jobs: MutableList<Job>, private val context: Conte
                                     purposeOfSurveyGroup.visibility = View.VISIBLE
                                     propertyTypeGroup.visibility = View.VISIBLE
                                     propertyLabel.visibility = View.VISIBLE
-                                    contractPriceEditText.visibility = View.VISIBLE
+                                    contractPriceEditText.visibility = View.GONE
                                 }
                                 else -> {
-                                    // Default case if there is no specific userType
-                                   /* contractPrice.visibility = View.VISIBLE
-                                    downpayment.visibility = View.VISIBLE
-                                    labelDown.visibility = View.VISIBLE
-                                    labelPrice.visibility = View.VISIBLE*/
+
                                 }
                             }
                         }
@@ -502,6 +499,7 @@ class JobsAdapter(private val jobs: MutableList<Job>, private val context: Conte
                             // Handle the error if the user document can't be fetched
                             Log.e("BookingAdapter", "Error fetching user data: ${e.message}")
                         }
+
                     // 🔥 Check current user's type from Firestore
                     val currentUserId = FirebaseAuth.getInstance().currentUser?.uid ?: return@addOnSuccessListener
                     firestore.collection("users").document(currentUserId).get()
@@ -509,17 +507,104 @@ class JobsAdapter(private val jobs: MutableList<Job>, private val context: Conte
                             val userType = userDoc.getString("user_type") ?: ""
                             val isSurveyor = userType.equals("Surveyor", ignoreCase = true)
 
+                            Log.e("User Type", userType )
+                            Log.e("isSurveyor", isSurveyor.toString())
+
                             // Disable address editing if user is Surveyor
                             addressEditText.isEnabled = !isSurveyor
                             addressEditText.isFocusable = !isSurveyor
                             addressEditText.isFocusableInTouchMode = !isSurveyor
+                            contactNumberEditText.isEnabled = !isSurveyor
+                            contactNumberEditText.isFocusable = !isSurveyor
+                            contactNumberEditText.isFocusableInTouchMode = !isSurveyor
+                            emailAddressEditText.isEnabled = !isSurveyor
+                            emailAddressEditText.isFocusable = !isSurveyor
+                            if (isSurveyor) {
+                                residentialRadioButton.isEnabled = false
+                                commercialRadioButton.isEnabled = false
+                                agriculturalRadioButton.isEnabled = false
+                                vacantLandRadioButton.isEnabled = false
+                                otherPropertyRadioButton.isEnabled = false
 
-                            if (userType.equals("Landowner", ignoreCase = true)) {
+                                propertySaleRadioButton.isEnabled = false
+                                legalDisputeRadioButton.isEnabled = false
+                                propertyDevelopmentRadioButton.isEnabled = false
+                                landSubdivisionRadioButton.isEnabled = false
+                                environmentalAssessmentRadioButton.isEnabled = false
+                                otherPurposeRadioButton.isEnabled = false
+                            } else {
+                                // Enable RadioButtons if the user is not a Surveyor
+                                residentialRadioButton.isEnabled = true
+                                commercialRadioButton.isEnabled = true
+                                agriculturalRadioButton.isEnabled = true
+                                vacantLandRadioButton.isEnabled = true
+                                otherPropertyRadioButton.isEnabled = true
+
+                                propertySaleRadioButton.isEnabled = true
+                                legalDisputeRadioButton.isEnabled = true
+                                propertyDevelopmentRadioButton.isEnabled = true
+                                landSubdivisionRadioButton.isEnabled = true
+                                environmentalAssessmentRadioButton.isEnabled = true
+                                otherPurposeRadioButton.isEnabled = true
+                            }
+
+
+
+                            /*if (userType.equals("Landowner", ignoreCase = true)) {
                                 addNoteEditText.visibility = View.GONE
                                 labelNote.visibility = View.GONE
                             } else {
                                 addNoteEditText.visibility = View.VISIBLE
                                 labelNote.visibility = View.VISIBLE
+                            }*/
+
+
+
+                            when(userType){
+                                "Landowner" -> {
+                                    Log.e("User Type", userType )
+                                    Log.e("User Type", currentDownpayment.toString())
+                                    Log.e("User Type", currentContractPrice.toString())
+                                    if (currentDownpayment != null && currentContractPrice != null) {
+                                        Handler(Looper.getMainLooper()).post {
+                                            // Update your UI elements here
+                                            downpaymentEditText.visibility = View.VISIBLE
+                                            labelDown.visibility = View.VISIBLE
+                                            contractLabel.visibility = View.VISIBLE
+                                            contractPriceEditText.visibility = View.VISIBLE
+                                        }
+
+
+
+                                        // Optionally set the values if you want to show them
+                                        downpaymentEditText.setText(currentDownpayment.toString())
+                                        contractPriceEditText.setText(currentContractPrice.toString())
+                                        Log.e("User Type", userType )
+                                    }
+                                    addNoteEditText.visibility = View.GONE
+                                    labelNote.visibility = View.GONE
+                                }
+                                "Surveyor" -> {
+                                    Log.e("User Type", userType )
+                                    if (currentDownpayment != null && currentContractPrice != null) {
+                                        Handler(Looper.getMainLooper()).post {
+                                            // Update your UI elements here
+                                            downpaymentEditText.visibility = View.VISIBLE
+                                            labelDown.visibility = View.VISIBLE
+                                            contractLabel.visibility = View.VISIBLE
+                                            contractPriceEditText.visibility = View.VISIBLE
+                                        }
+
+
+
+                                        // Optionally set the values if you want to show them
+                                        downpaymentEditText.setText(currentDownpayment.toString())
+                                        contractPriceEditText.setText(currentContractPrice.toString())
+                                        Log.e("User Type", userType )
+                                    }
+                                    addNoteEditText.visibility = View.VISIBLE
+                                    labelNote.visibility = View.VISIBLE
+                                }
                             }
 
 
@@ -609,7 +694,7 @@ class JobsAdapter(private val jobs: MutableList<Job>, private val context: Conte
                     val purposeOfSurvey = document.getString("purposeOfSurvey") ?: ""
                     val emailAddress = document.getString("emailAddress")
                     val contactNumber = document.getString("contactNumber")
-                    val addNote = document.getString("lackingNote")
+                    val addNote = document.getString("lackingNote") ?: ""
 
                     val dialogView = LayoutInflater.from(context).inflate(R.layout.dialog_edit_booking, null)
 
@@ -624,20 +709,6 @@ class JobsAdapter(private val jobs: MutableList<Job>, private val context: Conte
                     val propertyTypeGroup = dialogView.findViewById<RadioGroup>(R.id.propertyTypeGroup)
                     val purposeOfSurveyGroup = dialogView.findViewById<RadioGroup>(R.id.purposeOfSurveyGroup)
                     val addressEditText = dialogView.findViewById<EditText>(R.id.Address)
-
-                    val residentialRadioButton = dialogView.findViewById<RadioButton>(R.id.residential)
-                    val commercialRadioButton = dialogView.findViewById<RadioButton>(R.id.commercial)
-                    val agriculturalRadioButton = dialogView.findViewById<RadioButton>(R.id.agricultural)
-                    val vacantLandRadioButton = dialogView.findViewById<RadioButton>(R.id.vacantLand)
-                    val otherPropertyRadioButton = dialogView.findViewById<RadioButton>(R.id.otherProperty)
-
-// Purpose of Survey RadioButtons
-                    val propertySaleRadioButton = dialogView.findViewById<RadioButton>(R.id.propertySale)
-                    val legalDisputeRadioButton = dialogView.findViewById<RadioButton>(R.id.legalDispute)
-                    val propertyDevelopmentRadioButton = dialogView.findViewById<RadioButton>(R.id.propertyDevelopment)
-                    val landSubdivisionRadioButton = dialogView.findViewById<RadioButton>(R.id.landSubdivision)
-                    val environmentalAssessmentRadioButton = dialogView.findViewById<RadioButton>(R.id.environmentalAssessment)
-                    val otherPurposeRadioButton = dialogView.findViewById<RadioButton>(R.id.otherPurpose)
 
                     val ageLabel: TextView = dialogView.findViewById(R.id.ageLabel)
                     val tinLabel: TextView = dialogView.findViewById(R.id.tinLabel)
@@ -672,29 +743,6 @@ class JobsAdapter(private val jobs: MutableList<Job>, private val context: Conte
                     emailAddressEditText.setText(emailAddress.toString())
                     addNoteEditText.setText(addNote.toString())
 
-                    when (propertyType) {
-                        "Residential" -> residentialRadioButton.isChecked = true
-                        "Commercial" -> commercialRadioButton.isChecked = true
-                        "Agricultural" -> agriculturalRadioButton.isChecked = true
-                        "Vacant Land" -> vacantLandRadioButton.isChecked = true
-                        "Other" -> otherPropertyRadioButton.isChecked = true
-                        else -> {
-                            // Handle if propertyType doesn't match any known value
-                        }
-                    }
-
-
-                    when (purposeOfSurvey) {
-                        "Property sale or purchase" -> propertySaleRadioButton.isChecked = true
-                        "Legal dispute or boundary issue" -> legalDisputeRadioButton.isChecked = true
-                        "Property development or construction" -> propertyDevelopmentRadioButton.isChecked = true
-                        "Land subdivision" -> landSubdivisionRadioButton.isChecked = true
-                        "Environmental or flood assessment" -> environmentalAssessmentRadioButton.isChecked = true
-                        "Other" -> otherPurposeRadioButton.isChecked = true
-                        else -> {
-                            // Handle if purposeOfSurvey doesn't match any known value
-                        }
-                    }
                     firestore.collection("users").document(bookedUserId)
                         .get()
                         .addOnSuccessListener { userSnapshot ->
@@ -716,6 +764,7 @@ class JobsAdapter(private val jobs: MutableList<Job>, private val context: Conte
                                     purposeOfSurveyGroup.visibility = View.GONE
                                     propertyTypeGroup.visibility = View.GONE
                                     propertyLabel.visibility = View.GONE
+                                    contractPriceEditText.visibility = View.GONE
                                 }
                                 "Surveyor" -> {
                                     // If the user is a "Surveyor", show contract price and downpayment
@@ -746,27 +795,43 @@ class JobsAdapter(private val jobs: MutableList<Job>, private val context: Conte
                             // Handle the error if the user document can't be fetched
                             Log.e("BookingAdapter", "Error fetching user data: ${e.message}")
                         }
+
+
                     // 🔥 Check current user's type from Firestore
                     val currentUserId = FirebaseAuth.getInstance().currentUser?.uid ?: return@addOnSuccessListener
                     firestore.collection("users").document(currentUserId).get()
                         .addOnSuccessListener { userDoc ->
                             val userType = userDoc.getString("user_type") ?: ""
-                            val isSurveyor = userType.equals("Surveyor", ignoreCase = true)
+                            val isSurveyor = userType.equals("Processor", ignoreCase = true)
 
 
                             // Disable address editing if user is Surveyor
                             addressEditText.isEnabled = !isSurveyor
                             addressEditText.isFocusable = !isSurveyor
                             addressEditText.isFocusableInTouchMode = !isSurveyor
+                            contactNumberEditText.isEnabled = !isSurveyor
+                            contactNumberEditText.isFocusable = !isSurveyor
+                            contactNumberEditText.isFocusableInTouchMode = !isSurveyor
+                            emailAddressEditText.isEnabled = !isSurveyor
+                            emailAddressEditText.isFocusable = !isSurveyor
+                            ageEditText.isEnabled = !isSurveyor
+                            ageEditText.isFocusable = !isSurveyor
+                            ageEditText.isFocusableInTouchMode = !isSurveyor
+                            tinNumberEditText.isEnabled = !isSurveyor
+                            tinNumberEditText.isFocusable = !isSurveyor
+                            tinNumberEditText.isFocusableInTouchMode = !isSurveyor
 
-                            if (userType.equals("Landowner", ignoreCase = true)) {
-                                addNoteEditText.visibility = View.GONE
-                                labelNote.visibility = View.GONE
-                            } else {
-                                addNoteEditText.visibility = View.VISIBLE
-                                labelNote.visibility = View.VISIBLE
+                            when(userType){
+                                "Landowner" -> {
+                                    addNoteEditText.visibility = View.GONE
+                                    labelNote.visibility = View.GONE
+                                }
+                                "Processor" -> {
+
+                                    addNoteEditText.visibility = View.VISIBLE
+                                    labelNote.visibility = View.VISIBLE
+                                }
                             }
-
 
 
                             val dialog = AlertDialog.Builder(context)

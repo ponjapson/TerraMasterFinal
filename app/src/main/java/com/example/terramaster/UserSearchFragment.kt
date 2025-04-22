@@ -129,9 +129,7 @@ class UserSearchFragment : Fragment() {
 
                     // Check if the user is banned or suspended
                     val status = document.getString("status") ?: "active" // Default to "active"
-                    if (status == "Banned" || status == "Suspended") {
-                        continue // Skip this user
-                    }
+
 
                     // Check if the full name matches the search text
                     if (fullName.toLowerCase().startsWith(searchText.toLowerCase())) {
