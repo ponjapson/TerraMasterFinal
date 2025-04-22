@@ -16,7 +16,8 @@ exports.onBookingDocumentStatusChange = functions.firestore
     .onUpdate(async (change, context) => {
         const bookingData = change.after.data();
         const bookingId = context.params.bookingId;
-
+        // mana
+        
         // Check if the status has changed to 'Confirmed'
         if (bookingData.documentStatus === 'Prepare Blueprint') {
             const landOwnerUserId = bookingData.landOwnerUserId;
@@ -110,7 +111,7 @@ exports.onBookingDocumentStatusChange = functions.firestore
         
             // Send the notification to the client
             if (landOwnerFcmToken) {
-                await sendNotification(landOwnerFcmToken, title, message, landOwnerUserId, bookedUserId, 'Ready to Claim');
+                await sendNotification(landOwnerFcmToken, title, message, landOwnerUserId, bookedUserId, 'Prepare the Tax Declaration');
             } else {
                 console.error('FCM token not found for landowner:', landOwnerFcmToken);
             }
@@ -129,7 +130,7 @@ exports.onBookingDocumentStatusChange = functions.firestore
         
             // Send the notification to the client
             if (landOwnerFcmToken) {
-                await sendNotification(landOwnerFcmToken, title, message, landOwnerUserId, bookedUserId, 'Ready to Claim');
+                await sendNotification(landOwnerFcmToken, title, message, landOwnerUserId, bookedUserId, 'Approval Department Head');
             } else {
                 console.error('FCM token not found for landowner:', landOwnerFcmToken);
             }

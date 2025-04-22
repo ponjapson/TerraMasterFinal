@@ -56,7 +56,7 @@ exports.onBookingStatusChange = functions.firestore
             } else {
                 console.error('FCM token not found for landowner:', landOwnerFcmToken);
             }
-        
+        //mana
         } else if (bookingData.status === 'pending_payment') {
             const landOwnerUserId = bookingData.landOwnerUserId;
             const bookedUserId = bookingData.bookedUserId; 
@@ -75,7 +75,7 @@ exports.onBookingStatusChange = functions.firestore
             } else {
                 console.error('FCM token not found for landowner:', landOwnerFcmToken);
             }
-        
+        //mana ni
         } else if (bookingData.status === 'payment_submitted') {
             const landOwnerUserId = bookingData.landOwnerUserId;
             const bookedUserId = bookingData.bookedUserId; 
@@ -96,6 +96,7 @@ exports.onBookingStatusChange = functions.firestore
             }
         
         }
+        //mana ni
         else if (bookingData.status === 'professional edit details') {
             const landOwnerUserId = bookingData.landOwnerUserId;
             const bookedUserId = bookingData.bookedUserId; 
@@ -116,6 +117,7 @@ exports.onBookingStatusChange = functions.firestore
             }
         
         } 
+        //mana ni
         else if (bookingData.status === 'landowner edit details') {
             const landOwnerUserId = bookingData.landOwnerUserId;
             const bookedUserId = bookingData.bookedUserId; 
