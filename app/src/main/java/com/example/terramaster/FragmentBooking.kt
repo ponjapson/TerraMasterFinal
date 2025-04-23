@@ -4,6 +4,7 @@ import android.app.Activity
 import android.app.AlertDialog
 import android.app.DatePickerDialog
 import android.app.TimePickerDialog
+import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
@@ -397,9 +398,14 @@ class FragmentBooking : Fragment() {
                 showToast("Please select a purpose of survey.")
                 false
             }
+            !isUriValid(requireContext(), scannedPdfUri) -> {
+                showToast("Please attach a valid scanned document.")
+                false
+            }
             else -> true
         }
     }
+
 
     private fun validateInputProcessor(
         fullName: String,
@@ -450,9 +456,23 @@ class FragmentBooking : Fragment() {
                 showToast("You must be at least 18 years old.")
                 false
             }
+            !isUriValid(requireContext(), scannedPdfUri) -> {
+                showToast("Please attach a valid scanned document.")
+                false
+            }
             else -> true
         }
     }
+
+    private fun isUriValid(context: Context, uri: Uri?): Boolean {
+        return try {
+            if (uri == null) return false
+            context.contentResolver.openInputStream(uri)?.use { true } ?: false
+        } catch (e: Exception) {
+            false
+        }
+    }
+
 
 
 
