@@ -6,6 +6,15 @@
     android:orientation="vertical"
     android:layout_marginBottom="10dp">
 
+    <androidx.cardview.widget.CardView
+        xmlns:card_view="http://schemas.android.com/apk/res-auto"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        card_view:cardCornerRadius="16dp"
+        card_view:cardElevation="8dp"
+        android:layout_gravity="center"
+        android:layout_margin="1dp"
+        android:background="@android:color/white">
     <TextView
         android:id="@+id/booking_date"
         android:layout_width="match_parent"
@@ -33,6 +42,7 @@
                 android:id="@+id/profile_image"
                 android:layout_width="40dp"
                 android:layout_height="40dp"
+                android:layout_marginTop="35dp"
                 android:src="@drawable/profile_pic"
                 android:scaleType="centerCrop"
                 android:layout_marginEnd="8dp"
@@ -44,6 +54,7 @@
                 android:layout_height="wrap_content"
                 android:fontFamily="@font/poppinsm"
                 android:text="User Name"
+                android:layout_marginTop="35dp"
                 android:textColor="@color/black"
                 android:textSize="16sp"
                 android:textStyle="bold" />
@@ -55,11 +66,17 @@
             android:layout_marginLeft="10dp"
             android:orientation="vertical">
 
+
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:orientation="horizontal">
-
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:padding="1dp"
+                    android:orientation="vertical">
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -67,7 +84,13 @@
                     android:text="Start Date:"
                     android:textColor="@color/black"
                     android:textSize="14sp" />
-
+                </LinearLayout>
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:padding="1dp"
+                    android:orientation="vertical">
                 <TextView
                     android:id="@+id/booking_start_date"
                     android:layout_width="wrap_content"
@@ -76,14 +99,20 @@
                     android:text="Start Date"
                     android:textColor="@color/black"
                     android:textSize="14sp"
-                    android:layout_marginStart="80dp"/>
+                    android:layout_marginStart="1dp"/>
+            </LinearLayout>
             </LinearLayout>
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:orientation="horizontal">
-
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:padding="1dp"
+                    android:orientation="vertical">
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -91,7 +120,13 @@
                     android:text="Contact Number:"
                     android:textColor="@color/black"
                     android:textSize="14sp" />
-
+                </LinearLayout>
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:padding="1dp"
+                    android:orientation="vertical">
                 <TextView
                     android:id="@+id/contactNumber"
                     android:layout_width="wrap_content"
@@ -100,13 +135,20 @@
                     android:text="Contact Number"
                     android:textColor="@color/black"
                     android:textSize="14sp"
-                    android:layout_marginStart="40dp"/>
+                    android:layout_marginStart="1dp"/>
             </LinearLayout>
+        </LinearLayout>
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:orientation="horizontal">
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:padding="1dp"
+                    android:orientation="vertical">
 
                 <TextView
                     android:layout_width="wrap_content"
@@ -115,7 +157,13 @@
                     android:text="Email Address: "
                     android:textColor="@color/black"
                     android:textSize="14sp" />
-
+            </LinearLayout>
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:padding="1dp"
+                    android:orientation="vertical">
                 <TextView
                     android:id="@+id/emailAddress"
                     android:layout_width="wrap_content"
@@ -123,13 +171,20 @@
                     android:layout_marginTop="4dp"
                     android:text="Email Address"
                     android:textSize="14sp"
-                    android:layout_marginStart="49dp"/>
+                    android:layout_marginStart="1dp"/>
+            </LinearLayout>
             </LinearLayout>
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:orientation="horizontal">
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:padding="1dp"
+                    android:orientation="vertical">
 
                 <TextView
                     android:layout_width="wrap_content"
@@ -138,7 +193,13 @@
                     android:text="Address: "
                     android:textColor="@color/black"
                     android:textSize="14sp" />
-
+                </LinearLayout>
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:padding="1dp"
+                    android:orientation="vertical">
                 <TextView
                     android:id="@+id/address"
                     android:layout_width="wrap_content"
@@ -147,14 +208,19 @@
                     android:text="Address"
                     android:textColor="@color/black"
                     android:textSize="14sp"
-                    android:layout_marginStart="88dp"/>
+                    android:layout_marginStart="1dp"/>
             </LinearLayout>
-
+            </LinearLayout>
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:orientation="horizontal">
-
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:padding="1dp"
+                    android:orientation="vertical">
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -162,7 +228,13 @@
                     android:text="Documents: "
                     android:textColor="@color/black"
                     android:textSize="14sp" />
-
+                </LinearLayout>
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:padding="1dp"
+                    android:orientation="vertical">
                 <TextView
                     android:id="@+id/pdfFileName"
                     android:layout_width="wrap_content"
@@ -171,14 +243,19 @@
                     android:text="FileName"
                     android:textColor="@android:color/holo_blue_light"
                     android:textSize="14sp"
-                    android:layout_marginStart="69dp"/>
+                    android:layout_marginStart="1dp"/>
             </LinearLayout>
-
+        </LinearLayout>
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:orientation="horizontal">
-
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:padding="1dp"
+                    android:orientation="vertical">
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -186,7 +263,13 @@
                     android:text="Status: "
                     android:textColor="@color/black"
                     android:textSize="14sp" />
-
+            </LinearLayout>
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:padding="1dp"
+                    android:orientation="vertical">
                 <TextView
                     android:id="@+id/requestStatus"
                     android:layout_width="wrap_content"
@@ -195,13 +278,19 @@
                     android:text="Status"
                     android:textColor="@color/black"
                     android:textSize="14sp"
-                    android:layout_marginStart="100dp"/>
+                    android:layout_marginStart="1dp"/>
             </LinearLayout>
-
+    </LinearLayout>
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:orientation="horizontal">
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:padding="1dp"
+                    android:orientation="vertical">
 
                 <TextView
                     android:id="@+id/labelAge"
@@ -212,7 +301,13 @@
                     android:textColor="@color/black"
                     android:textSize="14sp"
                     android:visibility="gone"/>
-
+            </LinearLayout>
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:padding="1dp"
+                    android:orientation="vertical">
                 <TextView
                     android:id="@+id/age"
                     android:layout_width="wrap_content"
@@ -221,41 +316,58 @@
                     android:text="Age"
                     android:textColor="@color/black"
                     android:textSize="14sp"
-                    android:layout_marginStart="117dp"
+                    android:layout_marginStart="1dp"
                     android:visibility="gone"/>
             </LinearLayout>
-
+    </LinearLayout>
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:orientation="horizontal">
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:padding="1dp"
+                    android:orientation="vertical">
 
                 <TextView
                     android:id="@+id/labelTin"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="4dp"
-                    android:text="Tax Identification Number: "
+                    android:text="TIN: "
                     android:textColor="@color/black"
                     android:textSize="12sp"
                     android:visibility="gone"/>
-
+                </LinearLayout>
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:padding="1dp"
+                        android:orientation="vertical">
                 <TextView
                     android:id="@+id/Tin"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="4dp"
-                    android:text="Tax Ide"
+                    android:text="Tax Identification Number"
                     android:textColor="@color/black"
                     android:textSize="14sp"
                     android:visibility="gone"/>
             </LinearLayout>
-
+                </LinearLayout>
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:orientation="horizontal">
-
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:padding="1dp"
+                    android:orientation="vertical">
                 <TextView
                     android:id="@+id/purposeLabel"
                     android:layout_width="wrap_content"
@@ -265,7 +377,13 @@
                     android:textColor="@color/black"
                     android:textSize="14sp"
                     android:visibility="gone"/>
-
+                </LinearLayout>
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:padding="1dp"
+                        android:orientation="vertical">
                 <TextView
                     android:id="@+id/purposeOfSuurvey"
                     android:layout_width="wrap_content"
@@ -274,15 +392,20 @@
                     android:text="Purpose of survey"
                     android:textColor="@color/black"
                     android:textSize="14sp"
-                    android:layout_marginStart="28dp"
+                    android:layout_marginStart="1dp"
                     android:visibility="gone"/>
             </LinearLayout>
-
+                </LinearLayout>
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:orientation="horizontal">
-
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:padding="1dp"
+                    android:orientation="vertical">
                 <TextView
                     android:id="@+id/propertyLabel"
                     android:layout_width="wrap_content"
@@ -292,7 +415,13 @@
                     android:textColor="@color/black"
                     android:textSize="14sp"
                     android:visibility="gone"/>
-
+                </LinearLayout>
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:padding="1dp"
+                        android:orientation="vertical">
                 <TextView
                     android:id="@+id/propertyTypeLabel"
                     android:layout_width="wrap_content"
@@ -304,12 +433,17 @@
                     android:layout_marginStart="53dp"
                     android:visibility="gone"/>
             </LinearLayout>
-
+                </LinearLayout>
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:orientation="horizontal">
-
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:padding="1dp"
+                    android:orientation="vertical">
                 <TextView
                     android:id="@+id/labeldown"
                     android:layout_width="wrap_content"
@@ -319,7 +453,13 @@
                     android:textColor="@color/black"
                     android:textSize="14sp"
                     android:visibility="gone" />
-
+                </LinearLayout>
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:padding="1dp"
+                        android:orientation="vertical">
                 <TextView
                     android:id="@+id/booking_downpayment"
                     android:layout_width="wrap_content"
@@ -329,14 +469,19 @@
                     android:textColor="@color/black"
                     android:textSize="14sp"
                     android:visibility="gone"
-                    android:layout_marginStart="48dp"/>
+                    android:layout_marginStart="1dp"/>
             </LinearLayout>
-
+                </LinearLayout>
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:orientation="horizontal">
-
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:padding="1dp"
+                    android:orientation="vertical">
                 <TextView
                     android:id="@+id/labelPrice"
                     android:layout_width="wrap_content"
@@ -346,7 +491,13 @@
                     android:textColor="@color/black"
                     android:textSize="14sp"
                     android:visibility="gone" />
-
+                </LinearLayout>
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:padding="1dp"
+                        android:orientation="vertical">
                 <TextView
                     android:id="@+id/contractPrice"
                     android:layout_width="wrap_content"
@@ -356,8 +507,9 @@
                     android:textColor="@color/black"
                     android:textSize="14sp"
                     android:visibility="gone"
-                    android:layout_marginStart="51dp"/>
+                    android:layout_marginStart="1dp"/>
             </LinearLayout>
+                </LinearLayout>
         </LinearLayout>
     </LinearLayout>
 
@@ -368,7 +520,7 @@
         app:cardCornerRadius="12dp"
         app:cardElevation="4dp"
         android:padding="16dp"
-        android:layout_marginTop="10dp"
+        android:layout_marginTop="530dp"
         android:visibility="gone">
 
         <LinearLayout
@@ -582,7 +734,7 @@
         app:cardCornerRadius="12dp"
         app:cardElevation="4dp"
         android:padding="16dp"
-        android:layout_marginTop="10dp"
+        android:layout_marginTop="460dp"
         android:visibility="gone">
 
         <LinearLayout
@@ -754,7 +906,10 @@
                     android:layout_weight="1"
                     android:visibility="gone"/>
             </LinearLayout>
+
         </LinearLayout>
+
+    </androidx.cardview.widget.CardView>
     </androidx.cardview.widget.CardView>
 
 
