@@ -386,8 +386,9 @@ class OnGoingAdapter(private val jobs: MutableList<OnGoingJobs>, private val con
             jobs[position].documentStatus = previousStatus
 
             // Update UI colors immediately
-            updateStepColor(previousStatus, holder, position)
+            updateStepColorProcessor(previousStatus, holder, position)
         }
+        updateStepColorProcessor(job.documentStatus, holder, position)
     }
 
     override fun getItemCount(): Int = jobs.size

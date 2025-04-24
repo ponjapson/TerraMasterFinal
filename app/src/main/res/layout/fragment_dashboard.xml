@@ -47,7 +47,7 @@
                     <androidx.recyclerview.widget.RecyclerView
                         android:id="@+id/schedulesRecyclerView"
                         android:layout_width="match_parent"
-                        android:layout_height="200dp"
+                        android:layout_height="250dp"
                         android:minHeight="100dp"
                         android:nestedScrollingEnabled="false"
                         android:scrollbars="none"
@@ -62,7 +62,7 @@
                 android:orientation="horizontal"
                 android:gravity="center_vertical"
                 android:paddingTop="16dp"
-                android:layout_marginTop="20dp">
+                android:layout_marginTop="50dp">
 
                 <TextView
                     android:id="@+id/recommendationTextView"
