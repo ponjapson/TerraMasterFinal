@@ -583,7 +583,7 @@
         app:cardElevation="4dp"
         android:padding="16dp"
         android:layout_marginTop="10dp"
-        android:visibility="gone">
+        android:visibility="visible">
 
         <LinearLayout
             android:layout_width="match_parent"
