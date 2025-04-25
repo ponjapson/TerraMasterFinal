@@ -157,6 +157,28 @@ exports.onBookingStatusChange = functions.firestore
             }
         
         } 
+
+        else if (bookingData.status === 'pending') {
+            const landOwnerUserId = bookingData.landOwnerUserId;
+            const bookedUserId = bookingData.bookedUserId; 
+        
+            
+            const landownerDoc = await db.collection('users').doc(landOwnerUserId).get();
+            const landOwnerFcmToken = landownerDoc.data()?.fcmToken;
+        
+            // Prepare the notification message
+            const title = 'Booking Confirmed';
+            const message = `The booking has been confirmed. Kindly provide the necessary documents for the surveyor.`;
+        
+            // Send the notification to the client
+            if (landOwnerFcmToken) {
+                await sendNotification(landOwnerFcmToken, title, message, landOwnerUserId, bookedUserId, 'processor edit details');
+            } else {
+                console.error('FCM token not found for landowner:', landOwnerFcmToken);
+            }
+        
+        } 
+        //goods ani
         else if (bookingData.status === 'processor edit details') {
             const landOwnerUserId = bookingData.landOwnerUserId;
             const bookedUserId = bookingData.bookedUserId; 
@@ -177,6 +199,7 @@ exports.onBookingStatusChange = functions.firestore
             }
         
         } 
+        //goods nani
         else if (bookingData.status === 'landowner edit detail') {
             const landOwnerUserId = bookingData.landOwnerUserId;
             const bookedUserId = bookingData.bookedUserId; 
@@ -197,7 +220,7 @@ exports.onBookingStatusChange = functions.firestore
             }
         
         }
-
+        //goods nani
         else if (bookingData.status === 'Waiting for processor document verification') {
             const landOwnerUserId = bookingData.landOwnerUserId;
             const bookedUserId = bookingData.bookedUserId; 

@@ -285,6 +285,21 @@
                 android:layout_height="wrap_content"
                 android:text="Other (please specify)"/>
         </RadioGroup>
+        <EditText
+            android:id="@+id/propertyTypeOthers"
+            android:layout_width="match_parent"
+            android:layout_height="42dp"
+            android:layout_marginStart="10dp"
+            android:layout_marginEnd="10dp"
+            android:background="@drawable/custom_edit_text"
+            android:fontFamily="@font/poppinsreg"
+            android:gravity="center_vertical"
+            android:hint="Enter PropertyType"
+            android:paddingStart="15dp"
+            android:textColor="@android:color/black"
+            android:textColorHint="@color/black"
+            android:textSize="14sp"
+            android:visibility="gone"/>
 
         <TextView
             android:id="@+id/purposeLabel"
@@ -341,6 +356,21 @@
                 android:layout_height="wrap_content"
                 android:text="Other (please explain)"/>
         </RadioGroup>
+        <EditText
+            android:id="@+id/purposeOthers"
+            android:layout_width="match_parent"
+            android:layout_height="42dp"
+            android:layout_marginStart="10dp"
+            android:layout_marginEnd="10dp"
+            android:background="@drawable/custom_edit_text"
+            android:fontFamily="@font/poppinsreg"
+            android:gravity="center_vertical"
+            android:hint="Enter Purpose"
+            android:paddingStart="15dp"
+            android:textColor="@android:color/black"
+            android:textColorHint="@color/black"
+            android:textSize="14sp"
+            android:visibility="gone"/>
 
         <TextView
             android:id="@+id/notes"

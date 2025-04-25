@@ -93,6 +93,7 @@ class FragmentBooking : Fragment() {
         val agriculturalRadioButton = view.findViewById<RadioButton>(R.id.agricultural)
         val vacantLandRadioButton = view.findViewById<RadioButton>(R.id.vacantLand)
         val otherPropertyRadioButton = view.findViewById<RadioButton>(R.id.otherProperty)
+        val otherPropertyEditText = view.findViewById<EditText>(R.id.propertyTypeOthers)
         val purposeLabel = view.findViewById<TextView>(R.id.purposeLabel)
         val propertyLabel = view.findViewById<TextView>(R.id.propertyLabel)
 
@@ -102,6 +103,7 @@ class FragmentBooking : Fragment() {
         val landSubdivisionRadioButton = view.findViewById<RadioButton>(R.id.landSubdivision)
         val environmentalAssessmentRadioButton = view.findViewById<RadioButton>(R.id.environmentalAssessment)
         val otherPurposeRadioButton = view.findViewById<RadioButton>(R.id.otherPurpose)
+        val otherPurposeEditText = view.findViewById<EditText>(R.id.purposeOthers)
         val ageLabel = view.findViewById<TextView>(R.id.ageLabel)
         val tinLabel = view.findViewById<TextView>(R.id.tinLabel)
         val notice = view.findViewById<TextView>(R.id.notice)
@@ -110,6 +112,23 @@ class FragmentBooking : Fragment() {
         val firestore = FirebaseFirestore.getInstance()
         val notesRef = firestore.collection("notes") // Replace "notes" with your collection name
         val noteId = "q3liLgg9khwBKjTdcN6q" // Replace this with the actual document ID you want to fetch
+
+        propertyTypeGroup.setOnCheckedChangeListener { _, checkedId ->
+            if(checkedId == R.id.otherProperty){
+                otherPropertyEditText.visibility = View.VISIBLE
+            }else{
+                otherPropertyEditText.visibility = View.GONE
+                otherPropertyEditText.text.clear()
+            }
+        }
+        purposeOfSurveyGroup.setOnCheckedChangeListener { _, checkedId ->
+            if(checkedId == R.id.otherPurpose){
+                otherPurposeEditText.visibility = View.VISIBLE
+            }else{
+                otherPurposeEditText.visibility = View.GONE
+                otherPurposeEditText.text.clear()
+            }
+        }
 
 
 
@@ -194,7 +213,9 @@ class FragmentBooking : Fragment() {
                     propertyTypeGroup,  // RadioGroup for Property Type
                     purposeOfSurveyGroup,  // RadioGroup for Purpose of Survey
                     bookedUserId,
-                    "new surveyor request"
+                    "new surveyor request",
+                    otherPropertyEditText,
+                    otherPurposeEditText
                 )
             } else if (userType == "Processor") {
                 // For Processor, include tinNumber as well
@@ -283,7 +304,9 @@ class FragmentBooking : Fragment() {
         propertyTypeGroup: RadioGroup,
         purposeOfSurveyGroup: RadioGroup,
         bookedUserId: String,
-        status: String
+        status: String,
+        otherPropertyEditText: EditText,
+        otherPurposeEditText: EditText
     ) {
         submitBookingButton.setOnClickListener {
             // Extract values directly from EditText views
@@ -295,12 +318,20 @@ class FragmentBooking : Fragment() {
             // Get selected property type from RadioGroup
             val selectedPropertyTypeId = propertyTypeGroup.checkedRadioButtonId
             val propertyTypeRadioButton = propertyTypeGroup.findViewById<RadioButton>(selectedPropertyTypeId)
-            val propertyType = propertyTypeRadioButton?.text.toString()
+            val propertyType = if(selectedPropertyTypeId == R.id.otherProperty){
+                otherPropertyEditText.text.toString()
+            }else {
+                propertyTypeRadioButton?.text.toString()
+            }
 
             // Get selected purpose of survey from RadioGroup
             val selectedPurposeOfSurveyId = purposeOfSurveyGroup.checkedRadioButtonId
             val purposeOfSurveyRadioButton = purposeOfSurveyGroup.findViewById<RadioButton>(selectedPurposeOfSurveyId)
-            val purposeOfSurvey = purposeOfSurveyRadioButton?.text.toString()
+            val purposeOfSurvey = if(selectedPurposeOfSurveyId == R.id.otherPurpose){
+                otherPurposeEditText.text.toString()
+            }else{
+                purposeOfSurveyRadioButton?.text.toString()
+            }
 
             // Validate input and convert address to coordinates
             if (validateInput(fullName, contactNumber, emailAddress, address, propertyType, purposeOfSurvey)) {

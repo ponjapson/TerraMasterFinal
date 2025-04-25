@@ -1095,7 +1095,7 @@ class JobsAdapter(private val jobs: MutableList<Job>, private val context: Conte
         val updates = mutableMapOf<String, Any>(
             "signatureUrl" to signatureUrl,
             "signatureTimestamp" to System.currentTimeMillis(), // Optionally add a timestamp
-            "status" to "verified",
+            "status" to "Verified",
             "stage" to "ongoing"
         )
 
