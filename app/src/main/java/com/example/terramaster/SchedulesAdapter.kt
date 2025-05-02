@@ -82,7 +82,6 @@ class SchedulesAdapter(
             val fragmentJobs = FragmentBookingManagement().apply {
                 arguments = Bundle().apply {
                     putInt("selectedTab", 1) // Ongoing tab index
-
                 }
             }
             fragmentTransaction?.replace(R.id.fragment_container, fragmentJobs)

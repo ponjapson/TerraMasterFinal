@@ -70,10 +70,10 @@ class FragmentBooking : Fragment() {
             requireActivity().onBackPressed()
             return
         }
-        requireActivity().window.setFlags(
+       /* requireActivity().window.setFlags(
             WindowManager.LayoutParams.FLAG_SECURE,
             WindowManager.LayoutParams.FLAG_SECURE
-        )
+        )*/
 
         // Initialize the views
 
@@ -794,10 +794,10 @@ class FragmentBooking : Fragment() {
 
     override fun onResume() {
         super.onResume()
-        requireActivity().window.setFlags(
+        /*requireActivity().window.setFlags(
             WindowManager.LayoutParams.FLAG_SECURE,
             WindowManager.LayoutParams.FLAG_SECURE
-        )
+        )*/
         (requireActivity() as MainActivity).hideBottomNavigationBar()
     }
 

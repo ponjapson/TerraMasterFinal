@@ -26,6 +26,7 @@
             android:layout_margin="10dp"/>
 
         <TextView
+            android:id="@+id/ProcessorLabel"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:textSize="20sp"
@@ -39,6 +40,7 @@
             android:layout_marginBottom="20dp"/>
 
         <TextView
+            android:id="@+id/SurveyorLabel"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:textSize="20sp"

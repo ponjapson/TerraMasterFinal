@@ -2,5 +2,5 @@
     android:id="@+id/pdfPageImage"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:scaleType="fitCenter"
+    android:scaleType="fitXY"
     android:layout_marginBottom="10dp"/>

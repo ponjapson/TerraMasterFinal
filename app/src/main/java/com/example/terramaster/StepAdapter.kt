@@ -2,12 +2,16 @@ package com.example.terramaster
 
 import android.app.AlertDialog
 import android.content.Context
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.FirebaseUser
+import com.google.firebase.firestore.FirebaseFirestore
 
 class StepAdapter(
     private val steps: MutableList<Step>,  private val guide: Guide, private val onEditClick: ((Step, String) -> Unit)? = null
@@ -27,11 +31,33 @@ class StepAdapter(
         val step = steps[position]
         holder.tvStepTitle.text = step.title
         holder.tvStepDescription.text = step.description
+        val firebaseAuth = FirebaseAuth.getInstance()
+        val currentUser: FirebaseUser? = firebaseAuth.currentUser
 
-        holder.itemView.setOnLongClickListener{
-            showEditDialog(holder.itemView.context, step)
-            true
+        if (currentUser != null) {
+            val userId = currentUser.uid
+            val firestore = FirebaseFirestore.getInstance()
+
+            // Reference to the user's document in the 'users' collection
+            val userRef = firestore.collection("users").document(userId)
+
+            // Fetch the user data
+            userRef.get().addOnSuccessListener { document ->
+                if (document.exists()) {
+                    val userType = document.getString("user_type") // Get the userType field
+
+                    // Check if the userType is not "landowner"
+                    if (userType != "Landowner") {
+                        // Perform the long click action
+                        holder.itemView.setOnLongClickListener {
+                            showEditDialog(holder.itemView.context, step)
+                            true
+                        }
+                    }
+                }
+            }
         }
+
     }
 
     override fun getItemCount(): Int = steps.size
@@ -57,5 +83,7 @@ class StepAdapter(
         }
         showDialog.show()
     }
+
+
 
 }

@@ -13,6 +13,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.EditText
+import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import androidx.core.widget.addTextChangedListener
@@ -22,6 +23,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.terramaster.databinding.ActivityBookingBinding.inflate
 import com.google.android.play.integrity.internal.s
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.toObjects
 
@@ -33,6 +35,9 @@ class FragmentHome: Fragment() {
     private val guideListProcessor = mutableListOf<Guide>()
     private lateinit var etSearch: EditText
     private lateinit var recyclerViewKnowledgeSurveyor: RecyclerView
+    private lateinit var SurveyorLabel: TextView
+    private lateinit var ProcessorLabel: TextView
+
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -46,6 +51,46 @@ class FragmentHome: Fragment() {
 
         // Enable options menu in Fragment
         setHasOptionsMenu(true)
+
+        ProcessorLabel = view.findViewById(R.id.ProcessorLabel)
+        SurveyorLabel = view.findViewById(R.id.SurveyorLabel)
+
+        val firebaseAuth = FirebaseAuth.getInstance()
+        val currentUser: FirebaseUser? = firebaseAuth.currentUser
+
+        if (currentUser != null) {
+            val userId = currentUser.uid
+            val firestore = FirebaseFirestore.getInstance()
+
+            // Reference to the user's document in the 'users' collection
+            val userRef = firestore.collection("users").document(userId)
+
+            // Fetch the user data
+            userRef.get().addOnSuccessListener { document ->
+                if (document.exists()) {
+                    val userType = document.getString("user_type") // Get the userType field
+
+                    // Check if the userType is not "landowner"
+                    if (userType == "Landowner") {
+                        rvGuide.visibility = View.VISIBLE
+                        recyclerViewKnowledgeSurveyor.visibility = View.VISIBLE
+                        ProcessorLabel.visibility = View.VISIBLE
+                        SurveyorLabel.visibility = View.VISIBLE
+                    }else if(userType == "Surveyor"){
+                        rvGuide.visibility = View.GONE
+                        recyclerViewKnowledgeSurveyor.visibility = View.VISIBLE
+                        ProcessorLabel.visibility = View.GONE
+                        SurveyorLabel.visibility = View.VISIBLE
+                    }
+                    else{
+                        rvGuide.visibility = View.VISIBLE
+                        recyclerViewKnowledgeSurveyor.visibility = View.GONE
+                        ProcessorLabel.visibility = View.VISIBLE
+                        SurveyorLabel.visibility = View.GONE
+                    }
+                }
+            }
+        }
 
 
         rvGuide = view.findViewById(R.id.recyclerViewKnowledge)

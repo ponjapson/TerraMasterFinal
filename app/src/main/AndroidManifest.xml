@@ -34,9 +34,6 @@
             android:name=".ChangePassword"
             android:exported="false" />
         <activity
-            android:name=".PDFViewerActivity"
-            android:exported="false" />
-        <activity
             android:name=".BookingActivity"
             android:exported="false" />
         <activity
